@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+:root {
+  --page: #f7f4ee;
+  --ink: #1f2937;
+  --teal: #0f766e;
+}
+
+@theme inline {
+  --font-sans: var(--font-noto-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  font-size: 18px; /* Body text at least 18 px */
+}
+
+body {
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-noto-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer components {
+  .btn-main {
+    @apply inline-flex min-h-14 min-w-28 items-center justify-center gap-2 rounded-2xl bg-teal-700 px-5 text-xl sm:min-w-36 sm:px-7 font-semibold text-white shadow-md transition hover:bg-teal-800 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-400 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .btn-primary {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-teal-700 px-5 text-lg font-semibold text-white transition hover:bg-teal-800 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-400 disabled:opacity-50;
+  }
+  .btn-secondary {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-5 text-lg font-semibold text-teal-800 ring-2 ring-teal-700/30 transition hover:bg-teal-50 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-400 disabled:opacity-50;
+  }
+  .btn-answer {
+    @apply flex min-h-16 w-full items-center gap-3 rounded-2xl bg-white px-5 py-3 text-left text-xl text-slate-900 ring-2 ring-slate-200 transition hover:ring-teal-600 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-400 disabled:cursor-default;
+  }
+  .card {
+    @apply rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200;
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.9; }
+  100% { transform: scale(1.45); opacity: 0; }
+}
+@keyframes wave {
+  from { transform: translateX(0); }
+  to { transform: translateX(-30px); }
+}
+@keyframes pop-in {
+  from { transform: scale(0.4); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+@keyframes fly-to-notebook {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--fly-x), var(--fly-y)) scale(0.12); opacity: 0.2; }
+}
+@keyframes slide-back {
+  0% { transform: translateY(0); }
+  30% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}
