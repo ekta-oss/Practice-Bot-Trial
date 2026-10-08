@@ -116,3 +116,51 @@ export const COLOUR_OF: Record<string, string> = {
   "wear-gloves": "blue", "wash-hands": "blue", "keep-fire-door-shut": "blue",
   "assembly-point": "green", "first-aid": "green", "fire-exit": "green",
 };
+
+/**
+ * Stand-in for the browser's speech service (automated browsers cannot reach it).
+ * Each start() "hears" window.__fakeSpeech word by word, like the real service.
+ * Pass null to simulate a browser with no speech recognition (e.g. Firefox).
+ */
+export async function fakeSpeech(page: Page, text: string | null) {
+  await page.addInitScript((initial) => {
+    const w = window as unknown as Record<string, unknown>;
+    if (initial === null) {
+      delete w.SpeechRecognition;
+      delete w.webkitSpeechRecognition;
+      Object.defineProperty(window, "webkitSpeechRecognition", { value: undefined, configurable: true });
+      return;
+    }
+    w.__fakeSpeech = initial;
+    class FakeRecognition {
+      lang = "";
+      continuous = false;
+      interimResults = false;
+      onresult: ((e: unknown) => void) | null = null;
+      onerror: ((e: unknown) => void) | null = null;
+      onend: (() => void) | null = null;
+      private timers: number[] = [];
+      start() {
+        const words = String(w.__fakeSpeech).split(" ");
+        words.forEach((_, i) =>
+          this.timers.push(
+            window.setTimeout(() => {
+              const isFinal = i === words.length - 1;
+              const res = { isFinal, 0: { transcript: words.slice(0, i + 1).join(" ") }, length: 1 };
+              this.onresult?.({ resultIndex: 0, results: [res] });
+            }, 80 * (i + 1)),
+          ),
+        );
+      }
+      stop() {
+        this.timers.forEach((t) => clearTimeout(t));
+        setTimeout(() => this.onend?.(), 50);
+      }
+      abort() {
+        this.stop();
+      }
+    }
+    w.SpeechRecognition = FakeRecognition;
+    w.webkitSpeechRecognition = FakeRecognition;
+  }, text);
+}

@@ -26,6 +26,10 @@ Open **http://localhost:3100**, press **Start**, and allow the microphone when t
 ## Tests
 
 ```bash
+npm run test:unit
+```
+
+```bash
 npx playwright test
 ```
 

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { UI } from "@/content/segment1";
 import { saveRecording } from "@/lib/recordings";
 import { useRuntime } from "@/lib/runtime";
+import { listen, speechCheckAvailable, type Listener } from "@/lib/speech";
 
 /**
  * Real microphone recording (getUserMedia + MediaRecorder).
@@ -17,14 +18,23 @@ import { useRuntime } from "@/lib/runtime";
  */
 
 type Mode = "practice" | "assessment";
-type Phase = "idle" | "requesting" | "recording" | "review" | "kept" | "error";
+type Phase = "idle" | "requesting" | "recording" | "checking" | "review" | "kept" | "error";
+
+export interface KeptRecording {
+  durationMs: number;
+  blob: Blob;
+  /** What the browser's speech service heard; null when no check was possible. */
+  transcript: string | null;
+}
 
 interface Props {
   stageId: string;
   slot: string;
   maxSeconds: number;
   mode?: Mode;
-  onKeep: (info: { durationMs: number }) => void;
+  onKeep: (info: KeptRecording) => void;
+  /** Also listen with the browser's speech recognition and show what it heard. */
+  recognize?: boolean;
   /** Accessible name for the mic button. */
   label?: string;
 }
@@ -40,7 +50,7 @@ const fmt = (ms: number) => {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 };
 
-export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep, label }: Props) {
+export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep, label, recognize = false }: Props) {
   const { paused } = useRuntime();
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +58,10 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
   const [blob, setBlob] = useState<Blob | null>(null);
   const [playing, setPlaying] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [liveText, setLiveText] = useState("");
+  const [transcript, setTranscript] = useState<string | null>(null);
+  const [speechOk, setSpeechOk] = useState(true);
+  const listenerRef = useRef<Listener | null>(null);
 
   const streamRef = useRef<MediaStream | null>(null);
   const recRef = useRef<MediaRecorder | null>(null);
@@ -140,26 +154,42 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
     rec.ondataavailable = (ev) => {
       if (ev.data.size > 0) chunks.current.push(ev.data);
     };
-    rec.onstop = () => {
+    rec.onstop = async () => {
       durationRef.current = Date.now() - startedAt.current;
       const b = new Blob(chunks.current, { type: rec.mimeType || mime || "audio/webm" });
       releaseStream();
       if (urlRef.current) URL.revokeObjectURL(urlRef.current);
       urlRef.current = URL.createObjectURL(b);
       setBlob(b);
+      const l = listenerRef.current;
+      listenerRef.current = null;
+      if (l) {
+        setPhase("checking");
+        setTranscript(await l.stop());
+      }
       setPhase("review");
     };
     rec.start(250);
     startedAt.current = Date.now();
     setElapsed(0);
+    setLiveText("");
+    setTranscript(null);
     setPhase("recording");
     drawWave(stream);
+    if (recognize) {
+      listenerRef.current = listen(setLiveText, () => {
+        setSpeechOk(false);
+        listenerRef.current?.abort();
+        listenerRef.current = null;
+      });
+      if (!listenerRef.current) setSpeechOk(false);
+    }
     tick.current = window.setInterval(() => {
       const e = Date.now() - startedAt.current;
       setElapsed(e);
       if (e >= maxSeconds * 1000) stop();
     }, 200);
-  }, [drawWave, maxSeconds, releaseStream, stop]);
+  }, [drawWave, maxSeconds, releaseStream, stop, recognize]);
 
   // Pausing the stage stops a recording in progress (it goes to review).
   useEffect(() => {
@@ -176,6 +206,7 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
         r.stop();
       }
       releaseStream();
+      listenerRef.current?.abort();
       if (urlRef.current) URL.revokeObjectURL(urlRef.current);
     },
     [releaseStream],
@@ -196,6 +227,7 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
   const recordAgain = () => {
     audioRef.current?.pause();
     setBlob(null);
+    setTranscript(null);
     void start();
   };
 
@@ -210,7 +242,7 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
     }
     setSaving(false);
     setPhase("kept");
-    onKeep({ durationMs: durationRef.current });
+    onKeep({ durationMs: durationRef.current, blob, transcript: recognize && speechOk ? (transcript ?? "") : null });
   };
 
   const badge =
@@ -229,6 +261,13 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
   return (
     <div className="flex flex-col items-center gap-4" data-testid="recorder" data-phase={phase}>
       {badge}
+      {recognize && (
+        <p className="max-w-md text-center text-sm text-slate-600" data-testid="speech-note">
+          {speechOk && speechCheckAvailable()
+            ? "To check your words, your speech is sent to your browser's speech service. Your recording stays on this device."
+            : "The automatic check does not work in this browser. Your recording still works — check it yourself with the boxes."}
+        </p>
+      )}
 
       {(phase === "idle" || phase === "requesting" || phase === "error") && (
         <button
@@ -255,12 +294,33 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
           </button>
           <canvas ref={canvasRef} width={240} height={36} className="h-9 w-60" aria-hidden />
           <p className="text-xl font-semibold tabular-nums text-teal-800" aria-live="off" data-testid="rec-time">
-            {fmt(elapsed)}
+            {fmt(elapsed)} <span className="text-base font-normal text-slate-600">/ {fmt(maxSeconds * 1000)}</span>
           </p>
+          {recognize && speechOk && (
+            <p className="min-h-7 max-w-xl text-center text-lg text-slate-700" data-testid="live-transcript">
+              <span className="mr-2 inline-block h-2 w-2 animate-pulse rounded-full bg-teal-600 align-middle" aria-hidden />
+              {liveText || "Listening to you…"}
+            </p>
+          )}
           <p className="sr-only" role="status">
             Recording. Tap the button again to stop.
           </p>
         </>
+      )}
+
+      {phase === "checking" && (
+        <p className="text-lg text-slate-700" role="status" data-testid="checking">
+          Checking what you said…
+        </p>
+      )}
+
+      {phase === "review" && recognize && transcript !== null && (
+        <div className="w-full max-w-xl rounded-2xl bg-white p-4 ring-1 ring-slate-200" data-testid="heard-box">
+          <p className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-600">What the system heard</p>
+          <p className="text-xl text-slate-900" data-testid="heard-text">
+            {transcript.trim() ? transcript : <span className="text-amber-900">No words were heard. Speak a little louder and closer to the microphone, then record again.</span>}
+          </p>
+        </div>
       )}
 
       {phase === "review" && (
@@ -320,5 +380,34 @@ export function ReplayIcon() {
       <path d="M4 12a8 8 0 1 0 2.3-5.7" />
       <path d="M4 4v4h4" />
     </svg>
+  );
+}
+
+/**
+ * A kept practice recording, still on screen where it was made:
+ * play it back or save it ('Your recording · 0:09').
+ */
+export function KeptRecordingPlayer({ rec, label = "Your recording" }: { rec: KeptRecording; label?: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    const u = URL.createObjectURL(rec.blob);
+    // An object URL must be created and revoked together, so it lives in this effect.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setUrl(u);
+    return () => URL.revokeObjectURL(u);
+  }, [rec.blob]);
+  const ext = rec.blob.type.includes("mp4") ? "m4a" : rec.blob.type.includes("ogg") ? "ogg" : "webm";
+  return (
+    <div className="flex w-full max-w-xl flex-wrap items-center gap-3 rounded-2xl bg-white p-3 ring-1 ring-slate-200" data-testid="kept-recording">
+      <span className="text-base text-slate-700">
+        {label} · {fmt(Math.max(1000, Math.round(rec.durationMs / 1000) * 1000))}
+      </span>
+      {url && <audio controls src={url} className="h-10 min-w-0 flex-1" data-testid="kept-audio" />}
+      {url && (
+        <a href={url} download={`my-recording.${ext}`} className="text-base text-teal-800 underline underline-offset-4">
+          Download
+        </a>
+      )}
+    </div>
   );
 }

@@ -39,6 +39,13 @@ Places where the script is silent or ambiguous. The build made the smallest reas
 22. Build wording not in the script: “Question N of M”, “OK”, “Course menu”, “Start over”, “Continue: 1.x”, the notebook tabs “My notes (n)” and “My recordings”, the microphone error messages, and the end-of-scope screen (“End of Stage 1.6”).
 23. App-drawn subtitles are split into lines of at most 12 words and timed at 110 wpm, so they stay in the lower part of the picture and cover no more than 20% of it. For real video, deliver `.vtt` captions to meet the “within 1 second” rule exactly.
 
+## Speech check in 1.1 (added after the demo review)
+
+26. **Automatic rating is an addition to the script.** The script makes 1.1 an ungraded self-check. The build now also listens with the browser's speech recognition and shows: “What the system heard”, a rating of the three self-check cues (“2 of 3 heard”, each cue ✓ or ?), and the boxes **pre-ticked** from that rating. The learner can still change any box before “Check”, and the script's feedback lines and second-prompt rule are unchanged. It stays a practice: nothing is scored or stored. All of this wording is build wording.
+27. **Privacy.** In Chrome and Edge, the speech used for the check is sent to the browser maker's speech service; the recording itself stays on the device. This sits uneasily with the Practice badge line “Only you can hear this.” The build adds a line under the badge saying so. Decide whether that is acceptable, or whether the check should run on our own server instead (needs an approved speech-to-text service and credentials).
+28. **Where the check cannot run.** Firefox has no speech recognition, and Chrome/Edge refuse it to automated browsers. In those cases the app says “The automatic check does not work in this browser…” and the learner ticks the boxes themselves, exactly as the script describes. **The real service has not been verified with a human voice;** please try it once in normal Chrome and Edge, and on a phone.
+29. The cue detection (`src/lib/introCheck.ts`) is forgiving and English-only: greetings such as hello / hi / good morning / namaste; names via “my name is”, “I'm X”, “myself X”; jobs via “I work as”, “I am a…”, common job words, intern / trainee. Unit tests cover typical Level 1 answers. Tell us about phrasings your learners use that it misses.
+
 ## Backend (Supabase)
 
 24. The script keeps everything on the device: recordings (“stored locally for self-review only”), ‘My signs’ (“Stored locally for this module only”), and answers (“not stored”). So Stages 1.1–1.6 need **no** server storage. The build:

@@ -46,6 +46,10 @@
 | Self-check with 3 boxes; all ticked → “Great start — you greeted and said who you are.” (NAR) → line 2 | ✅ [s1-1 test 1] |
 | A box empty → “Record again: Say hello. Say your name and your job.” + mic → record → “Good — now the person in charge knows who you are.” → line 2 | ✅ [s1-1 test 2: two recordings stored] |
 | “Continue” after line 2 | ✅ |
+| Speech check (added on request): live words while recording; “What the system heard”; rating “x of 3 heard” with each cue; boxes pre-ticked and changeable; script cues follow | ✅ [s1-1-speech, 4 tests, with a stand-in recognizer] · 🟡 real speech service not verifiable in automation |
+| Recording stays on screen after Keep with a player and Download; it really plays to the end | ✅ [s1-1-speech test 1] |
+| Browser without speech recognition: recording still works, learner ticks the boxes | ✅ [s1-1-speech test 4; real Edge in automation also takes this path] |
+| Cue detection on typical answers | ✅ [vitest: src/lib/introCheck.test.ts, 10 cases] |
 | Max 5 min → restart | ✅ [s1-1 time card] |
 
 ## 1.2 Walk round your new workplace
