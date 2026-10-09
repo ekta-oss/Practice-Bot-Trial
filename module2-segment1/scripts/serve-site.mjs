@@ -4,7 +4,7 @@ import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 
-const root = path.resolve(import.meta.dirname, "..", "..", "module2-segment1-site");
+const root = process.env.SITE_ROOT ? path.resolve(process.env.SITE_ROOT) : path.resolve(import.meta.dirname, "..", "..", "module2-segment1-site");
 const port = Number(process.argv[2] ?? 3300);
 const types = {
   ".html": "text/html; charset=utf-8",
@@ -28,7 +28,8 @@ http
     const headers = { "Permissions-Policy": "microphone=(self)" };
     if (!hit) {
       res.writeHead(404, { ...headers, "content-type": types[".html"] });
-      return res.end(fs.readFileSync(path.join(root, "404.html")));
+      const page404 = path.join(root, "404.html");
+      return res.end(fs.existsSync(page404) ? fs.readFileSync(page404) : "Not found");
     }
     res.writeHead(200, { ...headers, "content-type": types[path.extname(hit)] ?? "application/octet-stream" });
     if (req.method === "HEAD") return res.end();

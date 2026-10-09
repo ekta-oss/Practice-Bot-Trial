@@ -14,7 +14,9 @@ Put it in `public/media/<folder>/` with **exactly** the name below. Reload the c
 | `public/media/video/` | `.mp4` (H.264/AAC). Optional `.vtt` captions with the same base name. |
 | `public/media/images/` | `.webp`, 16:9 (e.g. 1600×900). |
 
-## Audio (13 files)
+## Audio (14 files) — interim computer voices in place
+
+All 14 lines now have **interim** MP3s made with built-in Windows voices (`scripts/make-interim-audio.mjs`; see `public/media/audio/INTERIM_AUDIO.md`), so the course plays sound. They are stand-ins, not the recorded voices the script asks for: replace each by dropping the artist's file in with the same name.
 
 | Stage | File | Voice | Words | Line | Named in script? |
 |---|---|---|---|---|---|
