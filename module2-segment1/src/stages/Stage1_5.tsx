@@ -78,7 +78,7 @@ export function Stage1_5({ onComplete }: { onComplete: () => void }) {
       />
       {done && (
         <>
-          <FeedbackCard kind="right" testId="done-feedback">
+          <FeedbackCard kind="right" testId="done-feedback" speak>
             {S1_5.done}
           </FeedbackCard>
           <FooterActions>

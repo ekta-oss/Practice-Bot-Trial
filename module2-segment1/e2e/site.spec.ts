@@ -91,7 +91,7 @@ test("static site: full journey with real recording, speech check, playback and 
 
 test("static site: asset status page and 404 page are served", async ({ page }) => {
   await page.goto(SITE + "assets");
-  await expect(page.getByTestId("asset-summary")).toContainText("0 of 22 files present");
+  await expect(page.getByTestId("asset-summary")).toContainText("14 of 22 files present");
   const res = await page.goto(SITE + "no-such-page");
   expect(res?.status()).toBe(404);
 });

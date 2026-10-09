@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { lineDurationMs } from "@/lib/media";
 import { createPortal } from "react-dom";
 import { useShellSlots } from "./StageShell";
-import type { NowPlaying } from "@/lib/runtime";
+import { useSay, type NowPlaying } from "@/lib/runtime";
 import { ReplayIcon, WaveLine } from "./Recorder";
 
 /** Circular-arrow replay button. Replay always starts from the beginning. */
@@ -61,8 +61,10 @@ export type FeedbackKind = "right" | "wrong" | "hint" | "info" | "reveal";
  * Wrong: a gentle shake and an amber card (never red, never a buzzer).
  * Hint: lightbulb help card.
  */
-export function FeedbackCard({ kind, children, testId }: { kind: FeedbackKind; children: React.ReactNode; testId?: string }) {
+export function FeedbackCard({ kind, children, testId, speak }: { kind: FeedbackKind; children: React.ReactNode; testId?: string; speak?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
+  // Read the card aloud (narrator voice) when it appears.
+  useSay([speak && typeof children === "string" ? children : null]);
   const styles: Record<FeedbackKind, string> = {
     right: "bg-emerald-50 text-emerald-900 ring-emerald-300",
     wrong: "bg-amber-50 text-amber-950 ring-amber-300 animate-[shake_0.4s_ease-in-out]",

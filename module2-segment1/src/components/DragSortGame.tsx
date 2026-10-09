@@ -195,12 +195,12 @@ export function DragSortGame({
 
         <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-24 z-30 mx-auto flex max-w-xl flex-col px-4 [&>*]:shadow-lg">
           {bulb.open && bulb.text && (
-            <FeedbackCard kind="hint" testId="hint-card">
+            <FeedbackCard kind="hint" testId="hint-card" speak>
               {bulb.text}
             </FeedbackCard>
           )}
           {msg && !bulb.open && (
-            <FeedbackCard key={`${msg.kind}-${msg.text}-${Object.keys(placed).length}-${JSON.stringify(wrongs)}`} kind={msg.kind} testId={`game-feedback-${msg.kind}`}>
+            <FeedbackCard key={`${msg.kind}-${msg.text}-${Object.keys(placed).length}-${JSON.stringify(wrongs)}`} kind={msg.kind} testId={`game-feedback-${msg.kind}`} speak>
               {msg.text}
             </FeedbackCard>
           )}

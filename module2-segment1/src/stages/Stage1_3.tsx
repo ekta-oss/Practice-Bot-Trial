@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { S1_3, UI } from "@/content/segment1";
-import { useLinePlayer, useRestartsOnResume } from "@/lib/runtime";
+import { useLinePlayer, useRestartsOnResume, useSay } from "@/lib/runtime";
 import { SceneFrame } from "@/components/Scene";
 import { MySignsGrid } from "@/components/Notebook";
 import { FeedbackCard, FooterActions, MainButton, NarrationBar } from "@/components/ui";
@@ -19,6 +19,7 @@ export function Stage1_3({ onComplete }: { onComplete: () => void }) {
   const [answer1, setAnswer1] = useState<"yes" | "notReally" | null>(null);
   const nar = useLinePlayer();
   useRestartsOnResume(nar.playing);
+  useSay([answer1 === "yes" ? S1_3.yesFeedback : S1_3.notReallyFeedback, S1_3.q2], { when: step === "q2" });
 
   useEffect(() => {
     void nar.play([S1_3.nar1]);

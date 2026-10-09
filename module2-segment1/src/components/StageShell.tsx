@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { UI, type StageMeta } from "@/content/segment1";
-import { RuntimeCtx } from "@/lib/runtime";
+import { RuntimeCtx, setUiBlocked, stopUi } from "@/lib/runtime";
 import { timeScale } from "@/lib/media";
 import { Notebook } from "./Notebook";
 
@@ -44,6 +44,12 @@ export function StageShell({
   const [footerLeft, setFooterLeft] = useState<HTMLElement | null>(null);
 
   const paused = overlay !== null;
+
+  // Spoken instructions stop while paused, and when the learner leaves the stage.
+  useEffect(() => {
+    setUiBlocked(paused);
+  }, [paused]);
+  useEffect(() => () => stopUi(), []);
 
   // Elapsed time only runs while the stage is not paused.
   const elapsed = useRef(0);

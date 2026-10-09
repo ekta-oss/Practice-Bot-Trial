@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { S1_1, UI } from "@/content/segment1";
 import { chime } from "@/lib/media";
 import { checkIntroduction, type IntroCheck } from "@/lib/introCheck";
-import { useLinePlayer, useRestartsOnResume } from "@/lib/runtime";
+import { useLinePlayer, useRestartsOnResume, useSay } from "@/lib/runtime";
 import { KeptRecordingPlayer, Recorder, type KeptRecording } from "@/components/Recorder";
 import { SceneFrame, useClip } from "@/components/Scene";
 import { FeedbackCard, FooterActions, MainButton, Subtitles, TickIcon } from "@/components/ui";
@@ -60,6 +60,9 @@ export function Stage1_1({ onComplete }: { onComplete: () => void }) {
   };
 
   const rating1 = rec1?.transcript != null ? checkIntroduction(rec1.transcript) : null;
+  // Instructions are read aloud too (after the person in charge has finished speaking).
+  useSay([S1_1.prompt], { afterFlow: true, when: step === "record1" });
+  useSay([S1_1.checkNote], { when: step === "check" && rating1 !== null });
   const rating2 = rec2?.transcript != null ? checkIntroduction(rec2.transcript) : null;
   const latest = rec2 ?? rec1;
 
@@ -113,7 +116,7 @@ export function Stage1_1({ onComplete }: { onComplete: () => void }) {
               {label}
             </label>
           ))}
-          {rating1 && <p className="text-base text-slate-600">The boxes are ticked from what the system heard. Change them if they are wrong.</p>}
+          {rating1 && <p className="text-base text-slate-600">{S1_1.checkNote}</p>}
           <FooterActions>
             <MainButton onClick={check} testId="check-button">
               {UI.check}

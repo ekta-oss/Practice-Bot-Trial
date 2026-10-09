@@ -165,6 +165,7 @@ export const S1_1 = {
   notAllTicked: { file: "M2_S01_01_NAR_FB02.mp3", role: "NAR", text: "Record again: Say hello. Say your name and your job.", words: 10 } as Line,
   afterSecond: { file: "M2_S01_01_NAR_FB03.mp3", role: "NAR", text: "Good — now the person in charge knows who you are.", words: 10 } as Line,
   maxRecordSeconds: 20,
+  checkNote: "The boxes are ticked from what the system heard. Change them if they are wrong.", // BUILD-WORDING
 };
 
 /* ------------------------------------------------------------------ */

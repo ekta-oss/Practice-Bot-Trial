@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { Line } from "@/content/segment1";
 import { AUDIO_DIR, assetExists, fastMedia, lineDurationMs, standInVoiceEnabled } from "./media";
+import { uiAudioFile } from "./uiAudio";
 
 /**
  * Per-stage runtime: pause state shared by every media element in a stage.
@@ -45,7 +46,8 @@ async function playOne(line: Line, signal: AbortSignal, onInfo: (n: NowPlaying) 
   const exists = await assetExists(src);
   if (signal.aborted) throw new Aborted();
 
-  if (exists) {
+  // ?fastmedia=1 (automated tests) skips real audio so runs stay quick.
+  if (exists && !fastMedia()) {
     onInfo({ line, missing: false, standIn: false });
     const audio = new Audio(src);
     await new Promise<void>((resolve, reject) => {
@@ -125,21 +127,26 @@ export function useLinePlayer() {
   const runFrom = useCallback(async () => {
     const r = run.current;
     if (!r) return;
-    while (r.idx < r.lines.length) {
-      if (run.current !== r || pausedRef.current) return;
-      const ctrl = new AbortController();
-      r.ctrl = ctrl;
-      try {
-        await playOne(r.lines[r.idx], ctrl.signal, setNow);
-      } catch {
-        return; // aborted (pause or stop)
+    flowBegin();
+    try {
+      while (r.idx < r.lines.length) {
+        if (run.current !== r || pausedRef.current) return;
+        const ctrl = new AbortController();
+        r.ctrl = ctrl;
+        try {
+          await playOne(r.lines[r.idx], ctrl.signal, setNow);
+        } catch {
+          return; // aborted (pause or stop)
+        }
+        if (run.current !== r) return;
+        r.idx++;
       }
-      if (run.current !== r) return;
-      r.idx++;
+      run.current = null;
+      setNow(null);
+      r.resolve();
+    } finally {
+      flowEnd();
     }
-    run.current = null;
-    setNow(null);
-    r.resolve();
   }, []);
 
   const stop = useCallback(() => {
@@ -177,4 +184,95 @@ export function useLinePlayer() {
   useEffect(() => stop, [stop]);
 
   return { now, playing: now !== null, play, stop, replay, hasPlayed: lastLines !== null };
+}
+
+/* ------------------------------------------------------------------ */
+/* Instruction and feedback audio                                      */
+/* ------------------------------------------------------------------ */
+/*
+ * One channel for spoken instructions and feedback cards. It never talks over
+ * the narrator or a character: while a line player is speaking, a new
+ * instruction is dropped, or (afterFlow) waits until the speaking ends.
+ * Missing files are silent; the text is always on screen.
+ */
+
+let flowCount = 0;
+let uiAudio: HTMLAudioElement | null = null;
+let uiQueue: string[] = [];
+let uiPending: string[] | null = null;
+let uiBlocked = false;
+
+function flowBegin() {
+  flowCount++;
+  stopUi();
+}
+
+function flowEnd() {
+  flowCount = Math.max(0, flowCount - 1);
+  if (flowCount === 0 && uiPending) {
+    const q = uiPending;
+    uiPending = null;
+    playUiQueue(q);
+  }
+}
+
+export function stopUi() {
+  uiQueue = [];
+  if (uiAudio) {
+    uiAudio.pause();
+    uiAudio.removeAttribute("src");
+    uiAudio = null;
+  }
+}
+
+/** Pausing a stage, or leaving it, silences instructions and drops any waiting ones. */
+export function setUiBlocked(blocked: boolean) {
+  uiBlocked = blocked;
+  if (blocked) {
+    uiPending = null;
+    stopUi();
+  }
+}
+
+function playUiQueue(texts: string[]) {
+  stopUi();
+  if (uiBlocked || fastMedia()) return;
+  uiQueue = [...texts];
+  playNextUi();
+}
+
+function playNextUi() {
+  const text = uiQueue.shift();
+  if (!text) return;
+  const a = new Audio(AUDIO_DIR + uiAudioFile(text));
+  uiAudio = a;
+  const next = () => {
+    if (uiAudio !== a) return;
+    uiAudio = null;
+    playNextUi();
+  };
+  a.addEventListener("ended", next);
+  a.addEventListener("error", next);
+  a.play().catch(next);
+}
+
+/** Speak instruction or feedback texts in order (replacing what the channel was saying). */
+export function sayUi(texts: string[], opts: { afterFlow?: boolean } = {}) {
+  if (texts.length === 0 || uiBlocked) return;
+  if (flowCount > 0) {
+    if (opts.afterFlow) uiPending = texts;
+    return;
+  }
+  playUiQueue(texts);
+}
+
+/** Speaks the texts when the component appears (and again if they change). */
+export function useSay(texts: (string | null | undefined | false)[], opts: { afterFlow?: boolean; when?: boolean } = {}) {
+  const list = texts.filter((t): t is string => typeof t === "string" && t.length > 0);
+  const key = list.join(" ");
+  const when = opts.when ?? true;
+  const afterFlow = opts.afterFlow ?? false;
+  useEffect(() => {
+    if (when && key) sayUi(key.split(" "), { afterFlow });
+  }, [key, when, afterFlow]);
 }

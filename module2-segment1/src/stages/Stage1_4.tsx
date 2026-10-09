@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { S1_4, UI } from "@/content/segment1";
-import { useLinePlayer, useRestartsOnResume, useRuntime } from "@/lib/runtime";
+import { useLinePlayer, useRestartsOnResume, useRuntime, useSay } from "@/lib/runtime";
 import { OpenArticleButton } from "@/components/ArticleLink";
 import { QuizQuestion } from "@/components/QuizQuestion";
 import { FeedbackCard, FooterActions, MainButton, NarrationBar } from "@/components/ui";
@@ -22,6 +22,8 @@ export function Stage1_4({ onComplete }: { onComplete: () => void }) {
   const nar = useLinePlayer();
   const { resumeToken } = useRuntime();
   useRestartsOnResume(step.kind === "prompt" ? nar.playing : step.kind === "question");
+  useSay([S1_4.predictionQuestion, S1_4.predictionInstruction], { afterFlow: true, when: step.kind === "prompt" && !step.opened });
+  useSay([S1_4.backupCard], { when: step.kind === "backup" });
 
   useEffect(() => {
     void nar.play([S1_4.nar1]);

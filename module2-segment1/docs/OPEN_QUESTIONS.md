@@ -46,6 +46,12 @@ Places where the script is silent or ambiguous. The build made the smallest reas
 28. **Where the check cannot run.** Firefox has no speech recognition, and Chrome/Edge refuse it to automated browsers. In those cases the app says “The automatic check does not work in this browser…” and the learner ticks the boxes themselves, exactly as the script describes. **The real service has not been verified with a human voice;** please try it once in normal Chrome and Edge, and on a phone.
 29. The cue detection (`src/lib/introCheck.ts`) is forgiving and English-only: greetings such as hello / hi / good morning / namaste; names via “my name is”, “I'm X”, “myself X”; jobs via “I work as”, “I am a…”, common job words, intern / trainee. Unit tests cover typical Level 1 answers. Tell us about phrasings your learners use that it misses.
 
+## Audio (added on request)
+
+30. **Pace.** The script asks for 105–115 words per minute. After review, the interim voices were made livelier at about 140 words per minute ("too slow and boring"). Confirm the pace for the final recordings.
+31. **Instructions and feedback are read aloud.** Beyond the script's own audio lines, the build now reads out on-screen instructions (e.g. “Say hello, and introduce yourself.”, the 1.4 reading prompt, the 1.6 guess prompts) and the feedback cards in quizzes and games. These are not in the script's audio list, so they need recording too (`M2_UI_…` files). The 1.4 quiz questions and answer options are **not** read aloud, because they check reading.
+32. **Voices.** Interim narrator and person in charge are both female neural voices (Kokoro has no Indian English voice). Final casting stays as in the script.
+
 ## Backend (Supabase)
 
 24. The script keeps everything on the device: recordings (“stored locally for self-review only”), ‘My signs’ (“Stored locally for this module only”), and answers (“not stored”). So Stages 1.1–1.6 need **no** server storage. The build:

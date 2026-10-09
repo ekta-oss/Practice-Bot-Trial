@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { COLOUR_KEY, COLOUR_KEY_LINES, COLOUR_NAMES, S1_6, UI, WALK_SIGNS, type ColourGroup } from "@/content/segment1";
+import { S1_6, UI, WALK_SIGNS, type ColourGroup } from "@/content/segment1";
+import { colourLine, colourRight, colourWrong, shapeKey, shapeRight, shapeWrong, type ShapeId } from "@/content/feedbackText";
+import { uiLine } from "@/lib/uiAudio";
 import { useProgress } from "@/lib/progress";
-import { useLinePlayer, useRestartsOnResume, useRuntime } from "@/lib/runtime";
+import { useLinePlayer, useRestartsOnResume, useRuntime, useSay } from "@/lib/runtime";
 import { OpenArticleButton } from "@/components/ArticleLink";
 import { DragSortGame, type GameItem, type GameTarget } from "@/components/DragSortGame";
 import { ColourKeyCard } from "@/components/Notebook";
@@ -23,8 +25,6 @@ type Step =
   | { kind: "score"; opened: boolean }
   | { kind: "backup" }
   | { kind: "game"; n: 1 | 2 | 3; done: boolean };
-
-const colourLine = (c: ColourGroup) => COLOUR_KEY_LINES.find((l) => l.colour === c)!.line;
 
 export function Stage1_6({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState<Step>({ kind: "guess", index: 0 });
@@ -50,7 +50,7 @@ export function Stage1_6({ onComplete }: { onComplete: () => void }) {
     } else {
       setStep({ kind: "score", opened: false });
       const right = next.filter((g, i) => g === S1_6.guesses[i].correct).length;
-      void nar.play([right >= 3 ? S1_6.nar2 : S1_6.nar3, S1_6.nar4]);
+      void nar.play([uiLine(S1_6.score(right)), right >= 3 ? S1_6.nar2 : S1_6.nar3, S1_6.nar4]);
     }
   };
 
@@ -148,6 +148,7 @@ export function Stage1_6({ onComplete }: { onComplete: () => void }) {
 
 function GuessScreen({ index, onPick }: { index: number; onPick: (answer: string) => void }) {
   const g = S1_6.guesses[index];
+  useSay([g.prompt], { afterFlow: true });
   return (
     <section className="mx-auto flex w-full max-w-2xl flex-col items-center gap-6" aria-labelledby="guess-q" data-testid="guess-screen" data-guess={g.id}>
       <p className="text-base text-slate-600">
@@ -191,8 +192,8 @@ function Game1({ onDone }: { onDone: () => void }) {
       targets={targets}
       onDone={onDone}
       feedback={{
-        right: (_i, t) => S1_6.right(COLOUR_NAMES[t.id as ColourGroup].toLowerCase(), COLOUR_KEY[t.id as ColourGroup]),
-        wrong1: (_i, attempted) => S1_6.wrong(COLOUR_NAMES[attempted.id as ColourGroup].toLowerCase()),
+        right: (_i, t) => colourRight(t.id as ColourGroup),
+        wrong1: (_i, attempted) => colourWrong(attempted.id as ColourGroup),
         hint: (i) => colourLine(i.target as ColourGroup),
       }}
     />
@@ -200,13 +201,6 @@ function Game1({ onDone }: { onDone: () => void }) {
 }
 
 /* ---------------- Game 2 'Shape Match' ---------------- */
-
-const SHAPE_ARTICLE: Record<string, string> = { triangle: "a triangle", circle: "a circle", square: "a square or rectangle" };
-const SHAPE_KEY: Record<string, string> = {
-  triangle: "Triangle = warns of a hazard",
-  circle: "Circle = something you must do, or must not do",
-  square: "Square or rectangle = safe way or fire safety",
-};
 
 function Game2({ onDone }: { onDone: () => void }) {
   const items: GameItem[] = useMemo(
@@ -229,7 +223,7 @@ function Game2({ onDone }: { onDone: () => void }) {
       })),
     [],
   );
-  const shapeOf = (targetId: string) => targetId.replace("meaning-", "");
+  const shapeOf = (targetId: string) => targetId.replace("meaning-", "") as ShapeId;
   return (
     <DragSortGame
       title={S1_6.game2.title}
@@ -238,9 +232,9 @@ function Game2({ onDone }: { onDone: () => void }) {
       targets={targets}
       onDone={onDone}
       feedback={{
-        right: (i, t) => S1_6.right(SHAPE_ARTICLE[i.id], `‘${t.label}’`),
-        wrong1: (i) => S1_6.wrong(SHAPE_ARTICLE[i.id]),
-        hint: (i) => SHAPE_KEY[shapeOf(i.target)],
+        right: (i) => shapeRight(i.id as ShapeId),
+        wrong1: (i) => shapeWrong(i.id as ShapeId),
+        hint: (i) => shapeKey(shapeOf(i.target)),
       }}
     />
   );
@@ -267,8 +261,8 @@ function Game3({ onDone }: { onDone: () => void }) {
       targets={targets}
       onDone={onDone}
       feedback={{
-        right: (_i, t) => S1_6.right(COLOUR_NAMES[t.id as ColourGroup].toLowerCase(), COLOUR_KEY[t.id as ColourGroup]),
-        wrong1: (_i, attempted) => S1_6.wrong(COLOUR_NAMES[attempted.id as ColourGroup].toLowerCase()),
+        right: (_i, t) => colourRight(t.id as ColourGroup),
+        wrong1: (_i, attempted) => colourWrong(attempted.id as ColourGroup),
         hint: (i) => colourLine(i.target as ColourGroup),
       }}
     />

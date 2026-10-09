@@ -97,12 +97,12 @@ export function QuizQuestion({
       </div>
 
       {state === "hint" && hintOpen && (
-        <FeedbackCard kind="wrong" testId="feedback-wrong">
+        <FeedbackCard kind="wrong" testId="feedback-wrong" speak>
           {hintText}
         </FeedbackCard>
       )}
-      {state === "right" && <FeedbackCard kind="right">{rightText}</FeedbackCard>}
-      {state === "reveal" && <FeedbackCard kind="reveal">{revealText}</FeedbackCard>}
+      {state === "right" && <FeedbackCard kind="right" speak>{rightText}</FeedbackCard>}
+      {state === "reveal" && <FeedbackCard kind="reveal" speak>{revealText}</FeedbackCard>}
 
       {finished && (
         <FooterActions>

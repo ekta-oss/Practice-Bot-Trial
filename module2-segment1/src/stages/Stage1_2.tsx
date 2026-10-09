@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { PLACES, S1_2, UI, WALK_SIGNS, savedSignLabel, type WalkSign } from "@/content/segment1";
 import { chime } from "@/lib/media";
 import { useProgress } from "@/lib/progress";
-import { useLinePlayer, useRestartsOnResume } from "@/lib/runtime";
+import { sayUi, useLinePlayer, useRestartsOnResume, useSay } from "@/lib/runtime";
 import { SceneFrame } from "@/components/Scene";
 import { HOTSPOTS } from "@/components/scenes";
 import { SignIcon } from "@/components/SignIcon";
@@ -34,6 +34,7 @@ export function Stage1_2({ onComplete }: { onComplete: () => void }) {
   }, []);
   useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
 
+  useSay([S1_2.lookAgain], { when: step === "lookAgain" });
   const savedIds = new Set(state.mySigns.map((s) => s.id));
   const place = PLACES[placeIdx];
   const isLast = placeIdx === PLACES.length - 1;
@@ -55,6 +56,7 @@ export function Stage1_2({ onComplete }: { onComplete: () => void }) {
     setBig({ sign, isNewSave, flying: false });
     if (!isNewSave) return;
     chime();
+    sayUi([S1_2.saved]);
     // 1. big in the middle; 2. green tick; 3. moves into the notebook; 4. number goes up.
     timers.current.push(
       window.setTimeout(() => {
@@ -173,7 +175,7 @@ export function Stage1_2({ onComplete }: { onComplete: () => void }) {
 
       {step === "allFound" && (
         <div className="mx-auto w-full max-w-xl">
-          <FeedbackCard kind="right">{S1_2.allFound}</FeedbackCard>
+          <FeedbackCard kind="right" speak>{S1_2.allFound}</FeedbackCard>
         </div>
       )}
 
