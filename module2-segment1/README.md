@@ -23,6 +23,14 @@ Open **http://localhost:3100**, press **Start**, and allow the microphone when t
 
 “Start over” on the menu clears this device's progress, signs, notes and practice recordings.
 
+## Static website for GitHub + Vercel
+
+```bash
+node scripts/build-site.mjs
+```
+
+This writes `../module2-segment1-site/`: plain HTML, JavaScript, CSS and fonts, plus `vercel.json`. In Vercel, import the repository, set **Root Directory** to `module2-segment1-site` and **Framework Preset** to **Other**, then deploy. Steps are in that folder's README.
+
 ## Tests
 
 ```bash

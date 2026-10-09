@@ -59,12 +59,14 @@ test.describe("Stage 1.4 Read online", () => {
     await expect(page.getByTestId("stage-title")).toContainText("1.5");
   });
 
-  test("popup blocked by the browser → backup card automatically", async ({ page }) => {
+  test("the article button is a real link (works where pop-up windows are blocked)", async ({ page }) => {
     await page.addInitScript(() => {
       window.open = () => null;
     });
     await startAt(page, 3);
-    await page.getByTestId("open-article").click();
+    await expect(page.getByTestId("open-article")).toHaveAttribute("target", "_blank");
+    await expect(page.getByTestId("open-article")).toHaveAttribute("rel", /noopener/);
+    await page.getByTestId("article-did-not-open").click();
     await expect(page.getByTestId("backup-card")).toBeVisible();
   });
 

@@ -70,10 +70,6 @@ export function Stage1_4({ onComplete }: { onComplete: () => void }) {
               label={S1_4.openArticle}
               url={S1_4.articleUrl}
               onOpened={() => setStep({ kind: "prompt", opened: true })}
-              onBlocked={() => {
-                setUsedBackup(true);
-                setStep({ kind: "backup" });
-              }}
             />
             <button
               type="button"

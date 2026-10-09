@@ -45,3 +45,5 @@ next-env.d.ts
 /e2e-report/
 /playwright-report/
 !.env.example
+/.next-prototype/
+/prototype/

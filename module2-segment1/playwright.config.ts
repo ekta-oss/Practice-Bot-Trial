@@ -23,7 +23,7 @@ export default defineConfig({
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 } } },
     // Phone portrait (touch): runs the full journey only.
-    { name: "mobile", testMatch: /(journey|shots).spec.ts/, use: { ...devices["Pixel 7"] } },
+    { name: "mobile", testMatch: /(journey|shots|prototype|site).spec.ts/, use: { ...devices["Pixel 7"] } },
   ],
   webServer: {
     command: "npm run dev -- -p 3100",

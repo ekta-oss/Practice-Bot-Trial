@@ -29,6 +29,7 @@ function Course() {
   const { state, ready, completeStage, reset } = useProgress();
   const [view, setView] = useState<View>({ kind: "home" });
   const [runKey, setRunKey] = useState(0);
+  const [confirmReset, setConfirmReset] = useState(false);
 
   if (!ready) return null;
 
@@ -95,15 +96,35 @@ function Course() {
           );
         })}
       </ol>
+      {confirmReset && (
+        <div className="rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-300" role="alertdialog" aria-labelledby="reset-q" data-testid="reset-confirm">
+          <p id="reset-q" className="mb-4 text-lg text-amber-950">
+            Start the segment from the beginning? Your signs, notes and practice recordings on this device will be removed.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              className="btn-primary"
+              data-testid="reset-yes"
+              onClick={async () => {
+                reset();
+                await clearRecordings().catch(() => {});
+                setConfirmReset(false);
+              }}
+            >
+              Yes, start over
+            </button>
+            <button type="button" className="btn-secondary" onClick={() => setConfirmReset(false)} autoFocus>
+              Keep my progress
+            </button>
+          </div>
+        </div>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <button
           type="button"
           className="text-base text-slate-600 underline underline-offset-4 hover:text-slate-800"
-          onClick={async () => {
-            if (!window.confirm("Start the segment from the beginning? Your signs, notes and practice recordings on this device will be removed.")) return;
-            reset();
-            await clearRecordings().catch(() => {});
-          }}
+          onClick={() => setConfirmReset(true)}
           data-testid="reset-progress"
         >
           Start over

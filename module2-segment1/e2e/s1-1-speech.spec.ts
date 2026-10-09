@@ -26,7 +26,9 @@ test.describe("Stage 1.1 — speech check, rating and kept recording", () => {
       (a: HTMLAudioElement) => new Promise<string>((res) => { a.muted = true; a.onended = () => res("ended"); a.onerror = () => res("error"); a.play().catch((e) => res(String(e))); }),
     );
     expect(played).toBe("ended");
-    await expect(page.getByTestId("kept-recording").getByRole("link", { name: "Download" })).toHaveAttribute("download", /my-recording\./);
+    const download = page.waitForEvent("download");
+    await page.getByTestId("kept-download").click();
+    expect((await download).suggestedFilename()).toMatch(/^my-recording\.(webm|mp4)$/);
 
     // Script cue follows
     await page.getByTestId("check-button").click();

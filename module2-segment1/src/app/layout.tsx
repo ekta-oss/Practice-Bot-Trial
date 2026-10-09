@@ -9,7 +9,7 @@ const noto = Noto_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Module 2 · Segment 1: Your First Morning",
+  title: "Your First Morning",
   description: "Everyday Workplace Communication — Module 2, Segment 1, Stages 1.1–1.6.",
 };
 

@@ -82,7 +82,7 @@ export function Stage1_6({ onComplete }: { onComplete: () => void }) {
             {score >= 3 ? S1_6.nar2.text : S1_6.nar3.text}
           </p>
           <p className="text-xl font-semibold text-slate-900">{S1_6.readPrompt}</p>
-          <OpenArticleButton label={S1_6.openArticle} url={S1_6.articleUrl} onOpened={() => setStep({ kind: "score", opened: true })} onBlocked={() => setStep({ kind: "backup" })} />
+          <OpenArticleButton label={S1_6.openArticle} url={S1_6.articleUrl} onOpened={() => setStep({ kind: "score", opened: true })} />
           <p className="text-base text-slate-600">
             {S1_6.articleSource}, ‘{S1_6.articleTitle}’
           </p>

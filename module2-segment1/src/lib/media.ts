@@ -8,9 +8,9 @@ import type { Line } from "@/content/segment1";
  * says so on screen (a "missing" badge) and never pretends it is there.
  */
 
-export const AUDIO_DIR = "/media/audio/";
-export const VIDEO_DIR = "/media/video/";
-export const IMAGE_DIR = "/media/images/";
+export const AUDIO_DIR = "media/audio/";
+export const VIDEO_DIR = "media/video/";
+export const IMAGE_DIR = "media/images/";
 
 const existsCache = new Map<string, Promise<boolean>>();
 

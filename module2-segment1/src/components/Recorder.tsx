@@ -5,6 +5,7 @@ import { UI } from "@/content/segment1";
 import { saveRecording } from "@/lib/recordings";
 import { useRuntime } from "@/lib/runtime";
 import { listen, speechCheckAvailable, type Listener } from "@/lib/speech";
+import { saveFile } from "@/lib/host";
 
 /**
  * Real microphone recording (getUserMedia + MediaRecorder).
@@ -25,6 +26,8 @@ export interface KeptRecording {
   blob: Blob;
   /** What the browser's speech service heard; null when no check was possible. */
   transcript: string | null;
+  /** The learner uploaded a sound file because the microphone could not be used. */
+  uploaded?: boolean;
 }
 
 interface Props {
@@ -61,6 +64,7 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
   const [liveText, setLiveText] = useState("");
   const [transcript, setTranscript] = useState<string | null>(null);
   const [speechOk, setSpeechOk] = useState(true);
+  const [uploaded, setUploaded] = useState(false);
   const listenerRef = useRef<Listener | null>(null);
 
   const streamRef = useRef<MediaStream | null>(null);
@@ -139,10 +143,10 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
       setPhase("error");
       setError(
         name === "NotAllowedError" || name === "SecurityError"
-          ? "The microphone is blocked. Allow the microphone for this page in your browser, then tap the mic again."
+          ? "The microphone is blocked. Allow the microphone for this page in your browser and tap the mic again, or upload a recording instead."
           : name === "NotFoundError"
-            ? "No microphone was found. Connect a microphone, then tap the mic again."
-            : "The microphone could not start. Check it is not used by another app, then tap the mic again.",
+            ? "No microphone was found. Connect a microphone and tap the mic again, or upload a recording instead."
+            : "The microphone could not start. Check it is not used by another app and tap the mic again, or upload a recording instead.",
       );
       return;
     }
@@ -228,6 +232,7 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
     audioRef.current?.pause();
     setBlob(null);
     setTranscript(null);
+    setUploaded(false);
     void start();
   };
 
@@ -242,7 +247,37 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
     }
     setSaving(false);
     setPhase("kept");
-    onKeep({ durationMs: durationRef.current, blob, transcript: recognize && speechOk ? (transcript ?? "") : null });
+    onKeep({ durationMs: durationRef.current, blob, transcript: recognize && speechOk && !uploaded ? (transcript ?? "") : null, uploaded });
+  };
+
+  /** When the microphone cannot be used: take a sound file the learner recorded elsewhere. */
+  const onUpload = async (file: File | undefined) => {
+    if (!file) return;
+    if (!file.type.startsWith("audio/") && !/\.(mp3|m4a|wav|webm|ogg|aac|mp4|opus)$/i.test(file.name)) {
+      setError("Choose a sound file, for example .mp3, .m4a or .wav.");
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    const ms = await new Promise<number>((res) => {
+      const a = new Audio();
+      a.preload = "metadata";
+      a.onloadedmetadata = () => res(Number.isFinite(a.duration) ? a.duration * 1000 : 0);
+      a.onerror = () => res(-1);
+      a.src = url;
+    });
+    if (ms < 0) {
+      URL.revokeObjectURL(url);
+      setError("This file cannot be played. Choose another sound file.");
+      return;
+    }
+    if (urlRef.current) URL.revokeObjectURL(urlRef.current);
+    urlRef.current = url;
+    durationRef.current = Math.round(ms);
+    setBlob(file);
+    setUploaded(true);
+    setTranscript(null);
+    setError(null);
+    setPhase("review");
   };
 
   const badge =
@@ -344,6 +379,13 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
           {error}
         </p>
       )}
+      {phase === "error" && (
+        <label className="btn-secondary cursor-pointer has-[:focus-visible]:outline has-[:focus-visible]:outline-4 has-[:focus-visible]:outline-amber-400" data-testid="upload-label">
+          <input type="file" accept="audio/*,.mp3,.m4a,.wav,.webm,.ogg,.aac" className="sr-only" data-testid="upload-input" onChange={(e) => void onUpload(e.target.files?.[0])} />
+          Upload a recording
+        </label>
+      )}
+      {phase === "review" && uploaded && <p className="text-base text-slate-600" data-testid="uploaded-note">You uploaded this recording. Play it to check it is the right one.</p>}
     </div>
   );
 }
@@ -396,17 +438,18 @@ export function KeptRecordingPlayer({ rec, label = "Your recording" }: { rec: Ke
     setUrl(u);
     return () => URL.revokeObjectURL(u);
   }, [rec.blob]);
-  const ext = rec.blob.type.includes("mp4") ? "m4a" : rec.blob.type.includes("ogg") ? "ogg" : "webm";
+  // Recorded by this browser: webm (Chrome, Edge, Firefox) or mp4 (Safari). Uploaded files are already the learner's own.
+  const ext = rec.uploaded ? null : rec.blob.type.includes("mp4") ? "mp4" : rec.blob.type.includes("webm") ? "webm" : null;
   return (
     <div className="flex w-full max-w-xl flex-wrap items-center gap-3 rounded-2xl bg-white p-3 ring-1 ring-slate-200" data-testid="kept-recording">
       <span className="text-base text-slate-700">
         {label} · {fmt(Math.max(1000, Math.round(rec.durationMs / 1000) * 1000))}
       </span>
       {url && <audio controls src={url} className="h-10 min-w-0 flex-1" data-testid="kept-audio" />}
-      {url && (
-        <a href={url} download={`my-recording.${ext}`} className="text-base text-teal-800 underline underline-offset-4">
+      {url && ext && (
+        <button type="button" onClick={() => void saveFile(rec.blob, `my-recording.${ext}`)} className="text-base text-teal-800 underline underline-offset-4" data-testid="kept-download">
           Download
-        </a>
+        </button>
       )}
     </div>
   );
