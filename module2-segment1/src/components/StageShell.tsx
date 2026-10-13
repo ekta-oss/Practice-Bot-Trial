@@ -95,11 +95,11 @@ export function StageShell({
     <RuntimeCtx.Provider value={runtime}>
       <SlotsCtx.Provider value={slots}>
         <div className="flex min-h-dvh flex-col bg-[var(--page)]" data-testid={`stage-${meta.id}`}>
-          <header className="sticky top-0 z-30 grid grid-cols-[1fr_auto_auto] items-center gap-2 border-b border-slate-200 bg-white/95 px-4 py-2 backdrop-blur sm:grid-cols-[1fr_auto_1fr] sm:px-6">
-            <h1 className="line-clamp-2 min-w-0 text-base font-semibold leading-tight text-slate-900 sm:text-xl" data-testid="stage-title">
-              <span className="text-teal-700">{meta.number}</span> {meta.title}
+          <header className="shell-bar sticky top-0 z-30 grid grid-cols-[1fr_auto_auto] items-center gap-2 bg-[var(--bar)] px-4 py-2 text-white shadow-md sm:grid-cols-[1fr_auto_1fr] sm:px-6">
+            <h1 className="line-clamp-2 min-w-0 text-base font-bold leading-tight text-white sm:text-2xl" data-testid="stage-title">
+              <span className="text-[#9fd8e6]">{meta.number}</span> {meta.title}
             </h1>
-            <div className="flex items-center gap-2 text-base text-teal-700" data-testid="expected-time" aria-label={`Expected time: ${UI.aboutMinutes(meta.aboutMinutes)}`}>
+            <div className="flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-base text-white" data-testid="expected-time" aria-label={`Expected time: ${UI.aboutMinutes(meta.aboutMinutes)}`}>
               <ClockIcon />
               <span>{UI.aboutMinutes(meta.aboutMinutes)}</span>
             </div>
@@ -107,12 +107,11 @@ export function StageShell({
               <button
                 type="button"
                 onClick={() => setOverlay("pause")}
-                className="flex h-12 items-center gap-2 rounded-full bg-slate-100 px-4 text-base font-semibold text-slate-800 hover:bg-slate-200 focus-visible:outline focus-visible:outline-4 focus-visible:outline-amber-400"
+                className="grid h-12 w-12 place-items-center rounded-full text-white ring-2 ring-white/80 hover:bg-white/15 focus-visible:outline focus-visible:outline-4 focus-visible:outline-amber-400"
                 data-testid="pause-button"
                 aria-label={UI.pause}
               >
                 <PauseIcon />
-                <span className="hidden sm:inline">{UI.pause}</span>
               </button>
             </div>
           </header>
@@ -121,7 +120,7 @@ export function StageShell({
             {children}
           </main>
 
-          <footer className="sticky bottom-0 z-20 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6" inert={paused || undefined}>
+          <footer className="shell-bar sticky bottom-0 z-20 flex flex-wrap items-center justify-between gap-3 bg-[var(--bar)] px-4 py-3 shadow-[0_-2px_8px_rgba(0,0,0,0.15)] sm:px-6" inert={paused || undefined}>
             <div className="flex flex-wrap items-center gap-2">
               <Notebook />
               <div ref={setFooterLeft} className="contents" />

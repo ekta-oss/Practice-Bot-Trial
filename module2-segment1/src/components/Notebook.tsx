@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { COLOUR_KEY_LINES, S1_2, WALK_SIGNS, savedSignLabel } from "@/content/segment1";
 import { useProgress } from "@/lib/progress";
 import { listRecordings, type StoredRecording } from "@/lib/recordings";
@@ -23,18 +24,19 @@ export function Notebook() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="relative flex h-12 items-center gap-2 rounded-full bg-amber-100 px-4 text-base font-semibold text-amber-950 ring-1 ring-amber-300 hover:bg-amber-200 focus-visible:outline focus-visible:outline-4 focus-visible:outline-amber-400"
+        className="relative flex h-12 items-center gap-2 rounded-xl bg-white px-4 text-base font-semibold text-slate-900 shadow ring-1 ring-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:outline-4 focus-visible:outline-amber-400"
         data-testid="notebook-button"
         aria-label={`My signs: ${count}. Open notebook`}
       >
         <NotebookIcon />
         <span className="hidden sm:inline">My signs</span>
-        <span className="grid h-7 min-w-7 place-items-center rounded-full bg-amber-700 px-1.5 text-sm text-white" data-testid="notebook-count" id="notebook-target">
+        <span className="grid h-8 min-w-8 place-items-center rounded-full bg-[#cfe3fb] px-1.5 text-base font-bold text-slate-900" data-testid="notebook-count" id="notebook-target">
           {count}
         </span>
       </button>
 
-      {open && (
+      {open &&
+        createPortal(
         <div className="fixed inset-0 z-50 flex justify-start bg-slate-900/40" role="dialog" aria-modal="true" aria-label="My notebook" onClick={() => setOpen(false)}>
           <div className="flex h-full w-full max-w-xl flex-col bg-amber-50 shadow-2xl" onClick={(e) => e.stopPropagation()} data-testid="notebook-panel">
             <div className="flex items-center justify-between border-b border-amber-200 px-5 py-3">
@@ -67,8 +69,9 @@ export function Notebook() {
               {tab === "recordings" && <MyRecordings />}
             </div>
           </div>
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
     </>
   );
 }

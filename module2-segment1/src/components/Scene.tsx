@@ -2,18 +2,25 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Line, PlaceId } from "@/content/segment1";
-import { IMAGE_DIR, VIDEO_DIR, assetExists } from "@/lib/media";
+import { VIDEO_DIR, assetExists } from "@/lib/media";
+import { useArt } from "@/lib/useArt";
 import { useLinePlayer, useRuntime, type NowPlaying } from "@/lib/runtime";
 import { SCENE_IMAGE, SceneArt } from "./scenes";
 import { MissingAssetBadge } from "./ui";
 
-/** A 16:9 picture. Uses the illustrator's file when it exists, else the interim drawing. */
+export { useArt };
+
+/**
+ * A scene picture. Uses the illustrator's file when it exists (at its own
+ * aspect ratio, `artAspect`), else the interim 16:9 drawing.
+ */
 export function SceneFrame({
   place,
   withPic,
   children,
   className = "",
   imageOverride,
+  artAspect,
   blur,
 }: {
   place: PlaceId;
@@ -21,23 +28,22 @@ export function SceneFrame({
   children?: React.ReactNode;
   className?: string;
   imageOverride?: string;
+  artAspect?: number;
   blur?: boolean;
 }) {
-  const file = imageOverride ?? SCENE_IMAGE[place];
-  const [img, setImg] = useState<string | null>(null);
-  useEffect(() => {
-    let live = true;
-    void assetExists(IMAGE_DIR + file).then((ok) => live && setImg(ok ? IMAGE_DIR + file : null));
-    return () => {
-      live = false;
-    };
-  }, [file]);
+  const img = useArt(imageOverride ?? SCENE_IMAGE[place]);
+  const ratio = img && artAspect ? { aspectRatio: String(artAspect) } : undefined;
   return (
-    <div className={`relative aspect-video ${/(^|\s)w-/.test(className) ? "" : "w-full"} overflow-hidden bg-[#efe6d6] ${className}`} data-scene={place} data-art={img ? "final" : "interim"}>
+    <div
+      className={`relative ${ratio ? "" : "aspect-video"} ${/(^|\s)w-/.test(className) ? "" : "w-full"} overflow-hidden bg-[#efe6d6] ${className}`}
+      style={ratio}
+      data-scene={place}
+      data-art={img ? "final" : "interim"}
+    >
       <div className={`absolute inset-0 ${blur ? "scale-105 blur-md" : ""}`}>
         {img ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={img} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <img src={img} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
         ) : (
           <SceneArt place={place} withPic={withPic} />
         )}

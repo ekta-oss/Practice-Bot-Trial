@@ -1,4 +1,9 @@
-import type { SignDef, SignShape, SignSymbol } from "@/content/segment1";
+"use client";
+
+import { WALK_SIGNS, type SignDef, type SignShape, type SignSymbol } from "@/content/segment1";
+import { useArt } from "@/lib/useArt";
+
+const WALK_IDS = new Set(WALK_SIGNS.map((s) => s.id));
 
 /**
  * Safety signs drawn in code (ISO 7010 shapes and colours — Visual & Context
@@ -218,6 +223,23 @@ function Pictogram({ shape, symbol }: { shape: SignShape; symbol: SignSymbol }) 
  * `size` is the plate width in px (or "fill" to fill the parent).
  */
 export function SignIcon({ sign, size = 120, className = "" }: { sign: SignDef; size?: number | "fill"; className?: string }) {
+  // The 12 workplace signs use the illustrator's own sign, cut from the scene art, when it is there.
+  const art = useArt(WALK_IDS.has(sign.id) ? `M2_S01_SIGN_${sign.id}.webp` : "");
+  if (art) {
+    return (
+      <div
+        className={`flex items-center justify-center ${className}`}
+        style={size === "fill" ? { width: "100%" } : { width: size, height: Math.round(size * 1.25) }}
+        role="img"
+        aria-label={`${sign.word} sign`}
+        data-sign={sign.id}
+        data-art="final"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={art} alt="" className="max-h-full max-w-full object-contain drop-shadow" draggable={false} />
+      </div>
+    );
+  }
   const isColouredPlate = sign.shape === "safe" || sign.shape === "fire";
   const plateBg = isColouredPlate ? (sign.shape === "safe" ? C.green : C.red) : sign.shape === "floorStand" ? C.yellow : "white";
   const textColor = isColouredPlate ? "white" : C.black;

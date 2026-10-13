@@ -266,3 +266,66 @@ export const SCENE_IMAGE: Record<PlaceId, string> = {
   pantry: "M2_S01_02_IMG_03_pantry.webp",
   meeting: "M2_S01_02_IMG_04_meeting-room.webp",
 };
+
+/* ------------------------------------------------------------------ */
+/* Final art (illustrator's scenes, imported by scripts/import-art.mjs) */
+/* ------------------------------------------------------------------ */
+
+export interface Box {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * For each walk picture: its aspect ratio, where each sign is painted (in % of
+ * the picture), and where the mock-up painted its own mini-map / counter, so
+ * the app's real controls can sit exactly on top of them.
+ */
+export const ART: Record<PlaceId, { aspect: number; signs: Record<string, Box>; map: Box; counter?: Box }> = {
+  entrance: {
+    aspect: 1672 / 763,
+    signs: {
+      "assembly-point": { left: 32.2, top: 21.5, width: 5.0, height: 18.2 },
+      "no-smoking": { left: 59.8, top: 19.7, width: 7.2, height: 22.3 },
+    },
+    map: { left: 0.7, top: 1.7, width: 22.4, height: 22.5 },
+  },
+  corridor: {
+    aspect: 1672 / 752,
+    signs: {
+      "no-entry-staff-only": { left: 11.2, top: 7.3, width: 9.4, height: 36.6 },
+      "wear-gloves": { left: 11.2, top: 46.9, width: 9.4, height: 34.6 },
+      "fire-extinguisher": { left: 67.2, top: 11.7, width: 5.9, height: 17.3 },
+      "electrical-hazard": { left: 83.1, top: 29.9, width: 6.7, height: 29.2 },
+    },
+    map: { left: 76.3, top: 1.7, width: 22.6, height: 12.6 },
+  },
+  pantry: {
+    aspect: 1672 / 786,
+    signs: {
+      "wash-hands": { left: 25.4, top: 15.8, width: 7.4, height: 21.6 },
+      "hot-water": { left: 49.2, top: 35.8, width: 7.2, height: 6.7 },
+      "wet-floor": { left: 9.1, top: 61.2, width: 13.0, height: 36.5 },
+      "first-aid": { left: 68.8, top: 6.5, width: 11.1, height: 24.2 },
+    },
+    map: { left: 1.8, top: 1.4, width: 29.2, height: 12.8 },
+    counter: { left: 85.9, top: 2.0, width: 12.6, height: 6.0 },
+  },
+  meeting: {
+    aspect: 1672 / 723,
+    signs: {
+      "fire-exit": { left: 45.8, top: 3.2, width: 10.0, height: 7.6 },
+      "keep-fire-door-shut": { left: 48.9, top: 21.8, width: 4.6, height: 14.1 },
+    },
+    map: { left: 68.0, top: 0, width: 16.9, height: 19.1 },
+  },
+};
+
+/** Stage 1.1 stills from the illustrator (arrival → welcome → pointing down the corridor). */
+export const RECEPTION_ART = {
+  arrival: { file: "M2_S01_01_IMG_01_arrival.webp", aspect: 1672 / 941 },
+  welcome: { file: "M2_S01_01_IMG_02_welcome.webp", aspect: 1383 / 778 },
+  pointing: { file: "M2_S01_01_IMG_03_pointing.webp", aspect: 1324 / 745 },
+};

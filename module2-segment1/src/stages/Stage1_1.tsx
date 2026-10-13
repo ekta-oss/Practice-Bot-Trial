@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { S1_1, UI } from "@/content/segment1";
-import { chime } from "@/lib/media";
+import { chime, fastMedia } from "@/lib/media";
 import { checkIntroduction, type IntroCheck } from "@/lib/introCheck";
 import { useLinePlayer, useRestartsOnResume, useSay } from "@/lib/runtime";
 import { KeptRecordingPlayer, Recorder, type KeptRecording } from "@/components/Recorder";
 import { SceneFrame, useClip } from "@/components/Scene";
+import { RECEPTION_ART } from "@/components/scenes";
 import { FeedbackCard, FooterActions, MainButton, Subtitles, TickIcon } from "@/components/ui";
 
 /**
@@ -26,6 +27,8 @@ const CUE_LABEL: Record<"hello" | "name" | "job", string> = { hello: "hello", na
 
 export function Stage1_1({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState<Step>("line1");
+  // You walk in through the glass door first; then the person in charge greets you.
+  const [arrived, setArrived] = useState(false);
   const [ticks, setTicks] = useState([false, false, false]);
   const [rec1, setRec1] = useState<KeptRecording | null>(null);
   const [rec2, setRec2] = useState<KeptRecording | null>(null);
@@ -36,9 +39,17 @@ export function Stage1_1({ onComplete }: { onComplete: () => void }) {
 
   useEffect(() => {
     let live = true;
-    void clip.play(S1_1.video1, [S1_1.pic1]).then(() => live && setStep("record1"));
+    const t = window.setTimeout(
+      () => {
+        if (!live) return;
+        setArrived(true);
+        void clip.play(S1_1.video1, [S1_1.pic1]).then(() => live && setStep("record1"));
+      },
+      fastMedia() ? 100 : 1800,
+    );
     return () => {
       live = false;
+      window.clearTimeout(t);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -68,10 +79,16 @@ export function Stage1_1({ onComplete }: { onComplete: () => void }) {
 
   const now = nar.now ?? clip.now;
   const showStill = step !== "line1" && step !== "line2";
+  const pic = !arrived ? RECEPTION_ART.arrival : step === "line2" || step === "done" ? RECEPTION_ART.pointing : RECEPTION_ART.welcome;
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center gap-4 px-3 py-4 sm:px-6">
-      <SceneFrame place="entrance" withPic={step === "line2" ? "point" : "stand"} className={`mx-auto w-full rounded-2xl shadow transition-[max-width] duration-500 ${showStill ? "max-w-[calc(24vh*16/9)]" : "max-w-[calc(44vh*16/9)]"}`}>
+      <SceneFrame
+        place="entrance"
+        imageOverride={pic.file}
+        artAspect={pic.aspect}
+        withPic={step === "line2" ? "point" : "stand"}
+        className={`mx-auto w-full rounded-2xl shadow transition-[max-width] duration-500 ${showStill ? "max-w-[calc(24vh*16/9)]" : "max-w-[calc(44vh*16/9)]"}`}>
         {!showStill && clip.video}
         <Subtitles now={now} />
         <div className="absolute left-2 top-2">{clip.missingBadge}</div>

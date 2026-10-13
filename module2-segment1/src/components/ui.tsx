@@ -39,14 +39,17 @@ export function MainButton({
   onClick,
   disabled,
   testId,
+  finish,
 }: {
   children: React.ReactNode;
   onClick: () => void;
   disabled?: boolean;
   testId?: string;
+  /** The yellow end-of-activity button from the mock-ups. */
+  finish?: boolean;
 }) {
   return (
-    <button type="button" className="btn-main" onClick={onClick} disabled={disabled} data-testid={testId ?? "main-button"}>
+    <button type="button" className={finish ? "btn-main btn-finish" : "btn-main"} onClick={onClick} disabled={disabled} data-testid={testId ?? "main-button"}>
       {children}
     </button>
   );

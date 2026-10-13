@@ -5,8 +5,8 @@ import { PLACES, S1_2, UI, WALK_SIGNS, savedSignLabel, type WalkSign } from "@/c
 import { chime } from "@/lib/media";
 import { useProgress } from "@/lib/progress";
 import { sayUi, useLinePlayer, useRestartsOnResume, useSay } from "@/lib/runtime";
-import { SceneFrame } from "@/components/Scene";
-import { HOTSPOTS } from "@/components/scenes";
+import { SceneFrame, useArt } from "@/components/Scene";
+import { ART, HOTSPOTS, SCENE_IMAGE, type Box } from "@/components/scenes";
 import { SignIcon } from "@/components/SignIcon";
 import { FeedbackCard, FooterActions, MainButton, Subtitles, TickIcon } from "@/components/ui";
 
@@ -39,6 +39,10 @@ export function Stage1_2({ onComplete }: { onComplete: () => void }) {
   const place = PLACES[placeIdx];
   const isLast = placeIdx === PLACES.length - 1;
   const signsHere = WALK_SIGNS.filter((s) => s.place === place.id);
+  // With the illustrator's picture, the signs are painted in it: the hotspots sit on top of them.
+  const artSrc = useArt(SCENE_IMAGE[place.id]);
+  const art = artSrc ? ART[place.id] : null;
+  const at = (b: Box) => ({ left: `${b.left}%`, top: `${b.top}%`, width: `${b.width}%`, height: `${b.height}%` });
 
   const finishBig = useCallback(
     (sign: WalkSign, isNewSave: boolean) => {
@@ -77,18 +81,57 @@ export function Stage1_2({ onComplete }: { onComplete: () => void }) {
     <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-3 px-3 py-3 sm:px-6">
       {/* Top: 'My signs: 0' (counts up; no target number is shown). */}
       <div className="flex items-center justify-between gap-3">
-        <MiniMap current={placeIdx} />
-        <p className="rounded-full bg-amber-100 px-4 py-1.5 text-lg font-semibold text-amber-950 ring-1 ring-amber-300" data-testid="my-signs-counter" aria-live="polite">
+        {art ? <span /> : <MiniMap current={placeIdx} />}
+        <p className="rounded-full bg-white px-4 py-1.5 text-lg font-semibold text-slate-900 shadow-sm ring-1 ring-slate-300" data-testid="my-signs-counter" aria-live="polite">
           {S1_2.counter(state.mySigns.length)}
         </p>
       </div>
 
       {/* On narrow screens the picture is wider than the screen: swipe to look round. */}
-      <div className="relative">
+      <div className="relative" style={art ? ({ "--mw": `calc(60vh * ${art.aspect})` } as React.CSSProperties) : undefined}>
       <div className="-mx-3 overflow-x-auto px-3 sm:mx-0 sm:overflow-visible sm:px-0" data-testid="scene-scroller">
-        <SceneFrame place={place.id} className="mx-auto w-[210%] rounded-2xl shadow sm:w-full sm:max-w-[calc(60vh*16/9)]">
+        <SceneFrame
+          place={place.id}
+          artAspect={art?.aspect}
+          className={`mx-auto w-[210%] rounded-2xl shadow sm:w-full ${art ? "sm:max-w-[var(--mw)]" : "sm:max-w-[calc(60vh*16/9)]"}`}
+        >
           <h2 className="sr-only">{place.name}</h2>
-          {signsHere.map((s) => {
+          {art && (
+            <>
+              {/* The map and counter painted in the mock-up, replaced by the live ones. */}
+              <div className="absolute" style={at(art.map)}>
+                <MiniMap current={placeIdx} card />
+              </div>
+              {art.counter && (
+                <div className="absolute grid place-items-center rounded-full bg-white text-[clamp(9px,1.2vw,18px)] font-semibold text-slate-900 ring-1 ring-slate-300" style={at(art.counter)} aria-hidden>
+                  {S1_2.counter(state.mySigns.length)}
+                </div>
+              )}
+            </>
+          )}
+          {art &&
+            signsHere.map((s) => {
+              const saved = savedIds.has(s.id);
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  data-hotspot={s.id}
+                  data-saved={saved}
+                  onClick={() => tapSign(s)}
+                  aria-label={`${s.word} sign. ${s.placement}${saved ? " Saved." : ""}`}
+                  className="absolute min-h-11 min-w-11 rounded-lg transition hover:bg-white/15 hover:ring-4 hover:ring-amber-300 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-400"
+                  style={at(art.signs[s.id])}
+                >
+                  {saved && (
+                    <span className="absolute -right-2 -top-2 rounded-full bg-white shadow" aria-hidden>
+                      <TickIcon className="h-6 w-6" />
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          {!art && signsHere.map((s) => {
             const pos = HOTSPOTS[s.id];
             const saved = savedIds.has(s.id);
             return (
@@ -190,7 +233,7 @@ export function Stage1_2({ onComplete }: { onComplete: () => void }) {
       >
         {step === "walk" &&
           (isLast ? (
-            <MainButton onClick={onFinishWalk} testId="finish-walk">
+            <MainButton onClick={onFinishWalk} testId="finish-walk" finish>
               {S1_2.finish}
             </MainButton>
           ) : (
@@ -209,7 +252,29 @@ export function Stage1_2({ onComplete }: { onComplete: () => void }) {
 }
 
 /** Top left — a small map of the 4 places, the current place coloured. */
-function MiniMap({ current }: { current: number }) {
+function MiniMap({ current, card }: { current: number; card?: boolean }) {
+  if (card) {
+    // 2 × 2 map card, like the illustrator's: the current place in yellow with a pin.
+    return (
+      <ol className="grid h-full w-full grid-cols-2 gap-[4%] rounded-lg bg-white p-[3%] text-[clamp(8px,1vw,15px)] shadow ring-1 ring-slate-300" aria-label="Map of the work area" data-testid="mini-map">
+        {PLACES.map((p, i) => (
+          <li
+            key={p.id}
+            aria-current={i === current ? "location" : undefined}
+            className={`flex items-center justify-center rounded-md text-center font-semibold leading-tight ring-1 ${i === current ? "bg-[#fed835] text-slate-900 ring-amber-500" : "bg-slate-100 text-slate-700 ring-slate-300"}`}
+          >
+            {i === current && (
+              <svg viewBox="0 0 24 24" className="mr-[0.3em] h-[1.3em] w-[1.3em] shrink-0" aria-hidden>
+                <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" fill="#dc2626" />
+                <circle cx="12" cy="9" r="2.6" fill="white" />
+              </svg>
+            )}
+            {p.name}
+          </li>
+        ))}
+      </ol>
+    );
+  }
   return (
     <ol className="flex items-center gap-1" aria-label="Map of the work area" data-testid="mini-map">
       {PLACES.map((p, i) => (

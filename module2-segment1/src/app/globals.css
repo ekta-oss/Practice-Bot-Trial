@@ -4,6 +4,11 @@
   --page: #f7f4ee;
   --ink: #1f2937;
   --teal: #0f766e;
+  /* From the illustrator's mock-ups */
+  --bar: #0c4559;
+  --action: #1468c4;
+  --action-hover: #0f56a3;
+  --finish: #fed835;
 }
 
 @theme inline {
@@ -22,7 +27,15 @@ body {
 
 @layer components {
   .btn-main {
-    @apply inline-flex min-h-14 min-w-28 items-center justify-center gap-2 rounded-2xl bg-teal-700 px-5 text-xl sm:min-w-36 sm:px-7 font-semibold text-white shadow-md transition hover:bg-teal-800 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-400 disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex min-h-14 min-w-28 items-center justify-center gap-2 rounded-2xl bg-[var(--action)] px-5 text-xl sm:min-w-36 sm:px-7 font-semibold text-white shadow-md transition hover:bg-[var(--action-hover)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-400 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  /* "I have looked around": the yellow button in the mock-ups */
+  .btn-finish {
+    @apply bg-[var(--finish)] text-slate-900 hover:bg-[#f2c919];
+  }
+  /* Secondary buttons on the dark bars: white outline */
+  .shell-bar .btn-secondary {
+    @apply bg-transparent text-white ring-white/80 hover:bg-white/15;
   }
   .btn-primary {
     @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-teal-700 px-5 text-lg font-semibold text-white transition hover:bg-teal-800 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-400 disabled:opacity-50;

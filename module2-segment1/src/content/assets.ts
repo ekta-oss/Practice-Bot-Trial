@@ -1,5 +1,5 @@
 import { S1_1, S1_2, S1_3, S1_4, S1_5, S1_6, type Line } from "./segment1";
-import { SCENE_IMAGE } from "@/components/scenes";
+import { RECEPTION_ART, SCENE_IMAGE } from "@/components/scenes";
 
 /**
  * Every produced media file Stages 1.1–1.6 can load. The app checks for each
@@ -35,6 +35,20 @@ export const ASSETS: AssetEntry[] = [
   { stage: "1.1", kind: "video", file: S1_1.video2, dir: "video", what: "Same video, line 2: PIC opens one hand and points down the corridor.", fallback: "Still picture (PIC pointing) + line 2 audio and subtitles; 'Video missing' badge.", namedInScript: false, required: true },
   { stage: "1.1", kind: "captions", file: S1_1.video1.replace(".mp4", ".vtt"), dir: "video", what: "WebVTT English subtitles for clip 1 (within 1 s of the audio).", fallback: "App subtitles timed at 110 wpm.", namedInScript: false, required: false },
   { stage: "1.1", kind: "captions", file: S1_1.video2.replace(".mp4", ".vtt"), dir: "video", what: "WebVTT English subtitles for clip 2.", fallback: "App subtitles timed at 110 wpm.", namedInScript: false, required: false },
+  ...([
+    ["arrival", "First frame: your hand on the glass door; the person in charge at reception."],
+    ["welcome", "The person in charge welcomes you (line 1, recording, self-check)."],
+    ["pointing", "The person in charge points down the corridor (line 2)."],
+  ] as const).map(([k, what]) => ({
+    stage: "1.1",
+    kind: "image" as const,
+    file: RECEPTION_ART[k].file,
+    dir: "images" as const,
+    what,
+    fallback: "Interim build-drawn SVG scene.",
+    namedInScript: false,
+    required: true,
+  })),
   line("1.1", S1_1.pic1),
   line("1.1", S1_1.pic2),
   line("1.1", S1_1.allTicked, false),

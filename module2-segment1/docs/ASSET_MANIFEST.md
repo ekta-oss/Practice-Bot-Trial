@@ -51,25 +51,30 @@ The script says “An avatar (based on user profile female/male)”. There is no
 
 **While missing:** the still entrance picture (person in charge standing, then pointing on line 2) plays with the line's audio and subtitles, plus a `Video missing` badge.
 
-## Pictures (4 files, plus interim art in code)
+## Pictures — illustrator's art in place
 
-| File | Place | Must contain (Settings Sheet + Stage 1.2 Visuals) |
+Imported from the illustrator's folder “Communication Module 1 Asset” (28 mock-up screens, 1672×941) by `node scripts/import-art.mjs "<folder>"`. The mock-ups have screen furniture painted in (title bars, buttons, subtitles), so the script crops out the clean picture and the app draws its own live controls.
+
+| File | From mock-up | Used in |
 |---|---|---|
-| `M2_S01_02_IMG_01_entrance.webp` | Entrance | Glass front door (middle), reception desk + small bell (right), shoe rack (left), notice board. |
-| `M2_S01_02_IMG_02_corridor.webp` | Corridor | Long corridor, white wall, grey floor; store-room door (left wall); grey fuse box (right wall); red extinguisher (right wall, far end). |
-| `M2_S01_02_IMG_03_pantry.webp` | Pantry | Sink (left), water dispenser with red hot tap (middle), first-aid box (right wall), wet shiny floor in front of the sink, kettle, counter. |
-| `M2_S01_02_IMG_04_meeting-room.webp` | Meeting room | Long table and chairs; door in the back wall. |
+| `M2_S01_01_IMG_01_arrival.webp` | 13 Morning arrival at the reception | 1.1, first frame: your hand on the glass door |
+| `M2_S01_01_IMG_02_welcome.webp` | 14 Welcome at the Reception Entrance (subtitle cropped off) | 1.1, line 1, recording and self-check |
+| `M2_S01_01_IMG_03_pointing.webp` | 16 Look Around the Reception Corridor (subtitle cropped off) | 1.1, line 2: points down the corridor |
+| `M2_S01_02_IMG_01_entrance.webp` | 19 Flat office map with assembly point | 1.2 Entrance |
+| `M2_S01_02_IMG_02_corridor.webp` | 20 Four signs with a corrected office map | 1.2 Corridor; 1.3 background (blurred) |
+| `M2_S01_02_IMG_03_pantry.webp` | 21 Pantry vector map and hot water sticker | 1.2 Pantry |
+| `M2_S01_02_IMG_04_meeting-room.webp` | 25 Vector Meeting Room Safety Layout | 1.2 Meeting room |
+| `M2_S01_SIGN_<sign>.webp` (12) | cut from 19, 20, 21, 25 | the same sign in the notebook, pop-up, 1.3 cards, 1.5 game, 1.6 backup card |
 
-**Leave the 12 sign areas clear.** The app draws the signs on top as tappable buttons, at the positions in `src/components/scenes.tsx` (`HOTSPOTS`, in % of the picture). If a final picture moves a door or the fuse box, update those numbers.
+The signs are painted in the scenes; tappable areas sit exactly over them (`ART` in `src/components/scenes.tsx`, in % of each picture). The mock-ups' painted mini-maps and counter are covered by the app's live ones in the same place. Screen colours follow the mock-ups (bar `#0c4559`, action `#1468c4`, finish `#fed835`).
 
-**Also interim (build-drawn in code, not separate files):**
-- The 12 workplace signs and 6 “New Signs” (ISO 7010 shapes and colours, each with its word): `src/components/SignIcon.tsx`.
-- The person in charge still for 1.1: `PersonInCharge` in `src/components/scenes.tsx`. The appearance follows the Character Sheet; the gender was the build's choice (see OPEN_QUESTIONS #2).
-- The blurred corridor background for 1.3.
+**Not used as pictures:** mock-ups 3, 4, 15, 17, 23 (recording and self-check dialogs), 6 and 18 (top bar and Continue painted in), 11, 12, 22, 26, 28 (notebook in hands with buttons painted in) and 1, 2, 5, 7–10, 24, 27 (duplicates of the above). Their layouts were followed for the app's own screens. A clean version of the notebook-in-hands picture (no buttons) would let 1.3 match mock-up 11 exactly.
+
+**Still missing:** the 1.1 video, and the six “New Signs” in 1.6 Game 3 (still build-drawn).
 
 ## Sounds
 
 | Sound | Status |
 |---|---|
-| Soft chime (right answer, sign saved) | Made in the browser (Web Audio). No file is needed. There is no buzzer anywhere. |
+| Soft chime (right answer, sign saved) | Made in the browser (Web Audio). No file needed; there is no buzzer anywhere. |
 | Train horn | Not used in 1.1–1.6 (it belongs to 1.11). |
