@@ -22,8 +22,12 @@ test("screens", async ({ page }, info) => {
 
   await startAt(page, 2, { signs: ALL_SIGNS });
   await page.screenshot({ path: p("1-3") });
-  await page.getByTestId("answer-yes").click();
-  await page.screenshot({ path: p("1-3-q2") });
+  await page.getByTestId("answer-safe").click();
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: p("1-3-reply") });
+  await page.getByTestId("notebook-button").click();
+  await page.getByRole("tab", { name: /Audio/ }).click();
+  await page.screenshot({ path: p("1-3-audio-tab") });
 
   await startAt(page, 3);
   await page.screenshot({ path: p("1-4-prompt") });
@@ -36,7 +40,9 @@ test("screens", async ({ page }, info) => {
   await startAt(page, 5, { signs: ALL_SIGNS });
   await page.screenshot({ path: p("1-6-guess") });
   for (const g of ["do not", "be careful", "you must", "safe way", "fire equipment"]) await page.getByTestId(`guess-${g}`).click();
-  await page.screenshot({ path: p("1-6-score") });
+  await page.screenshot({ path: p("1-6-results"), fullPage: true });
+  await page.getByTestId("to-article").click();
+  await page.screenshot({ path: p("1-6-article") });
   await page.getByTestId("article-did-not-open").click();
   await page.getByTestId("continue-button").click();
   await tapPlace(page, "triangle", "meaning-circle");
@@ -45,6 +51,6 @@ test("screens", async ({ page }, info) => {
   await tapPlace(page, "triangle", "meaning-triangle");
   await page.getByTestId("continue-button").click();
   await page.screenshot({ path: p("1-6-game3"), fullPage: true });
-  await tapPlace(page, "eye", "means-do-not");
+  await tapPlace(page, "eye", "means-red");
   await page.screenshot({ path: p("1-6-game3-wrong") });
 });

@@ -124,7 +124,7 @@ export interface StageMeta {
 export const STAGES: StageMeta[] = [
   { id: "1.1", number: "1.1", title: "Greet and get your task", aboutMinutes: 3, maxMinutes: 5, kind: "Video · Speaking", theme: "dark" },
   { id: "1.2", number: "1.2", title: "Walk round your new workplace", aboutMinutes: 7, maxMinutes: 9, kind: "Interactive", theme: "light" },
-  { id: "1.3", number: "1.3", title: "Did you notice the signs?", aboutMinutes: 2, maxMinutes: 3, kind: "Reflection", theme: "light" },
+  { id: "1.3", number: "1.3", title: "What are the signs for?", aboutMinutes: 2, maxMinutes: 3, kind: "Reflection", theme: "light" },
   { id: "1.4", number: "1.4", title: "Read online: why workplaces have safety signs", aboutMinutes: 7, maxMinutes: 9, kind: "Reading · Quiz", theme: "light" },
   { id: "1.5", number: "1.5", title: "Sort the signs by colour", aboutMinutes: 5, maxMinutes: 7, kind: "Game", theme: "light" },
   { id: "1.6", number: "1.6", title: "What does each colour mean?", aboutMinutes: 9, maxMinutes: 11, kind: "Quiz · Reading · Games", theme: "light" },
@@ -196,15 +196,18 @@ export const S1_2 = {
 /* ------------------------------------------------------------------ */
 
 export const S1_3 = {
-  nar1: { file: "M2_S01_03_NAR_01.mp3", role: "NAR", text: "Before you go back — did you notice the signs as you walked round?", words: 13 } as Line,
+  // BUILD-WORDING: the script's "did you notice the signs?" is answered by the walk itself (every sign
+  // the learner saved, they noticed). The reflection now asks what signs are FOR, which is exactly what
+  // the next line and the 1.4 reading answer (see docs/OPEN_QUESTIONS.md #43).
+  nar1: { file: "M2_S01_03_NAR_01.mp3", role: "NAR", text: "Before you go back — look at the signs you saved on your walk.", words: 13 } as Line,
   nar2: { file: "M2_S01_03_NAR_02.mp3", role: "NAR", text: "Workplaces have lots of signs. Why? Let’s read what a company that makes safety signs says.", words: 16 } as Line,
-  q1: "Did you notice the signs as you walked round?",
-  yes: "Yes",
-  notReally: "Not really",
-  yesFeedback: "Good eyes. Signs are everywhere in a workplace.",
-  notReallyFeedback: "That is normal — many people walk past signs without seeing them.",
-  q2: "Which sign did you notice first?",
-  dontRemember: "I don’t remember",
+  signsLabel: (n: number) => `Your signs: ${n}`,
+  q1: "What do you think these signs are for?",
+  answers: [
+    { id: "safe", text: "To keep people safe", feedback: "Yes — that is a big part of it." },
+    { id: "tell", text: "To tell people what to do", feedback: "Yes — many signs tell you what to do, or what not to do." },
+    { id: "unsure", text: "I’m not sure yet", feedback: "That is fine — you will find out now." },
+  ],
 };
 
 /* ------------------------------------------------------------------ */
@@ -234,6 +237,7 @@ export const S1_4 = {
   articleUrl: "https://www.signs.com/blog/common-safety-signs-and-what-they-really-mean/",
   articleDidNotOpen: "The article did not open", // BUILD-WORDING (trigger for the backup card)
   backupCard: "Safety signs help stop accidents and show people what to do. Employers must explain them to workers.",
+  yourGuess: (answer: string) => `Your answer in 1.3: “${answer}”. Read and check.`, // BUILD-WORDING
   right: (reason: string) => `Right — the article says ${reason}.`,
   wrong: (where: string) => `Not quite. Look again at ${where}.`,
   // BUILD-WORDING: "Second wrong: the right answer is shown with where to find it."
@@ -286,6 +290,8 @@ export interface Guess {
   swatch: ColourGroup | "redSquare";
   options: string[];
   correct: string;
+  /** One-line reason shown on the feedback screen after the guesses. BUILD-WORDING (from the colour key). */
+  why: string;
 }
 
 export const S1_6 = {
@@ -294,13 +300,17 @@ export const S1_6 = {
   nar3: { file: "M2_S01_06_NAR_03.mp3", role: "NAR", text: "Colours can be tricky. Let’s find out what each colour means from safety experts.", words: 14 } as Line,
   nar4: { file: "M2_S01_06_NAR_04.mp3", role: "NAR", text: "Tap the button to open the article. Read about the four colours and the shapes. Then come back for two games.", words: 21 } as Line,
   guesses: [
-    { id: "g1", prompt: "Red signs mean…", swatch: "red", options: ["do not", "be careful", "you must", "safe way"], correct: "do not" },
-    { id: "g2", prompt: "Yellow signs mean…", swatch: "yellow", options: ["do not", "be careful", "you must", "safe way"], correct: "be careful" },
-    { id: "g3", prompt: "Blue signs mean…", swatch: "blue", options: ["do not", "be careful", "you must", "safe way"], correct: "you must" },
-    { id: "g4", prompt: "Green signs mean…", swatch: "green", options: ["do not", "be careful", "you must", "safe way"], correct: "safe way" },
-    { id: "g5", prompt: "The red square sign shows…", swatch: "redSquare", options: ["fire equipment", "no entry", "be careful"], correct: "fire equipment" },
+    { id: "g1", prompt: "Red signs mean…", swatch: "red", options: ["do not", "be careful", "you must", "safe way"], correct: "do not", why: "Red = stop, do not, fire safety" },
+    { id: "g2", prompt: "Yellow signs mean…", swatch: "yellow", options: ["do not", "be careful", "you must", "safe way"], correct: "be careful", why: "Yellow = caution, watch out" },
+    { id: "g3", prompt: "Blue signs mean…", swatch: "blue", options: ["do not", "be careful", "you must", "safe way"], correct: "you must", why: "Blue = you must" },
+    { id: "g4", prompt: "Green signs mean…", swatch: "green", options: ["do not", "be careful", "you must", "safe way"], correct: "safe way", why: "Green = safe way, exits, first aid" },
+    { id: "g5", prompt: "The red square sign shows…", swatch: "redSquare", options: ["fire equipment", "no entry", "be careful"], correct: "fire equipment", why: "A red square shows fire equipment, like an extinguisher or an alarm." },
   ] as Guess[],
   score: (x: number) => `You got ${x} of 5 right.`,
+  // BUILD-WORDING: the feedback screen after the guesses (before the article).
+  youSaid: (a: string) => `You said: ${a}`,
+  answerWas: (a: string) => `Answer: ${a}`,
+  toArticle: "Read the article",
   openArticle: "Open the article",
   backToCourse: "Back to the course",
   readPrompt: "Read about the four colours and the shapes.",
@@ -326,15 +336,14 @@ export const S1_6 = {
   game3: {
     title: "New Signs",
     howTo: "What does each new sign tell you? Drag it to its meaning. Or tap a sign, then tap a meaning.", // BUILD-WORDING
-    /** The meaning boxes use the same words as the guessing step. */
-    meanings: ["do not", "be careful", "you must", "safe way", "fire equipment"],
+    // The four meaning boxes are the colour key's meanings, so every sign of one colour goes in one box.
     signs: [
       { id: "eye", word: "WEAR EYE PROTECTION", colour: "blue", shape: "mandatory", symbol: "goggles", meaning: "you must", subject: "a blue circle" },
       { id: "hardhat", word: "HARD HATS MUST BE WORN", colour: "blue", shape: "mandatory", symbol: "hardhat", meaning: "you must", subject: "a blue circle" },
-      { id: "forklift", word: "WARNING: FORKLIFT", colour: "yellow", shape: "warning", symbol: "forklift", meaning: "be careful", subject: "a yellow triangle" },
+      { id: "forklift", word: "WARNING: FORKLIFT", colour: "yellow", shape: "warning", symbol: "forklift", meaning: "caution", subject: "a yellow triangle" },
       { id: "emergency-exit", word: "EMERGENCY EXIT", colour: "green", shape: "safe", symbol: "runExit", arrow: "right", meaning: "safe way", subject: "a green rectangle" },
       { id: "no-entry", word: "NO ENTRY", colour: "red", shape: "prohibition", symbol: "bar", meaning: "do not", subject: "a red circle" },
-      { id: "fire-alarm", word: "FIRE ALARM", colour: "red", shape: "fire", symbol: "alarm", meaning: "fire equipment", subject: "a red square" },
+      { id: "fire-alarm", word: "FIRE ALARM", colour: "red", shape: "fire", symbol: "alarm", meaning: "fire safety", subject: "a red square" },
     ] as (SignDef & { meaning: string; subject: string })[],
   },
 };

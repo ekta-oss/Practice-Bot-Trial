@@ -55,8 +55,7 @@ test("static site: full journey with real recording, speech check, playback and 
   // 1.3
 
   await page.getByTestId("next-stage").click();
-  await page.getByTestId("answer-yes").click();
-  await page.getByTestId("my-sign-first-aid").getByRole("button").click();
+  await page.getByTestId("answer-safe").click();
   await page.getByTestId("continue-button").click();
 
   // 1.4
@@ -84,6 +83,7 @@ test("static site: full journey with real recording, speech check, playback and 
   await page.getByTestId("next-stage").click();
   for (const g of ["do not", "be careful", "you must", "safe way", "fire equipment"]) await page.getByTestId(`guess-${g}`).click();
   await expect(page.getByTestId("score-line")).toHaveText("You got 5 of 5 right.");
+  await page.getByTestId("to-article").click();
   await page.getByTestId("article-did-not-open").click();
   await page.getByTestId("continue-button").click();
   for (const s of ["triangle", "circle", "square"]) await tapPlace(page, s, `meaning-${s}`);

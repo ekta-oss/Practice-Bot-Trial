@@ -41,8 +41,8 @@ test("full learner journey 1.1 → 1.6 (with retries along the way)", async ({ p
   await noSideScroll();
   // 1.3
   await page.getByTestId("next-stage").click();
-  await page.getByTestId("answer-not-really").click();
-  await page.getByTestId("my-sign-no-smoking").getByRole("button").click();
+  await page.getByTestId("answer-unsure").click();
+  await expect(page.getByTestId("feedback-q1")).toHaveText("That is fine — you will find out now.");
   await page.getByTestId("continue-button").click();
 
   await noSideScroll();
@@ -78,6 +78,8 @@ test("full learner journey 1.1 → 1.6 (with retries along the way)", async ({ p
   for (const g of ["do not", "be careful", "safe way", "do not", "no entry"]) await page.getByTestId(`guess-${g}`).click();
   await expect(page.getByTestId("score-line")).toHaveText("You got 2 of 5 right.");
   await expect(page.getByTestId("segue-line")).toHaveText("Colours can be tricky. Let’s find out what each colour means from safety experts.");
+  await expect(page.getByTestId("result-g3")).toHaveAttribute("data-right", "false");
+  await page.getByTestId("to-article").click();
   const popup2 = context.waitForEvent("page");
   await page.getByTestId("open-article").click();
   await (await popup2).close();

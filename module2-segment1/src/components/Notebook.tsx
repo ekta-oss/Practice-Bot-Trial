@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { COLOUR_KEY_LINES, S1_2, WALK_SIGNS, savedSignLabel } from "@/content/segment1";
+import { COLOUR_KEY_LINES, S1_2, STAGES, WALK_SIGNS, savedSignLabel } from "@/content/segment1";
+import { heardUrl, useHeard, type HeardLine } from "@/lib/audioLibrary";
+import { stopUi } from "@/lib/runtime";
+import { holdMusic } from "@/lib/music";
 import { useProgress } from "@/lib/progress";
 import { listRecordings, type StoredRecording } from "@/lib/recordings";
 import { SignIcon, SIGN_COLOURS } from "./SignIcon";
@@ -10,13 +13,15 @@ import { SpeakerIcon } from "./Recorder";
 
 /**
  * Notebook icon 'My signs' with a number (bottom left on every screen) and the
- * learner's notebook: 'My signs', 'My notes' (the colour key card from 1.6)
- * and their practice recordings (stored on this device only).
+ * learner's notebook: 'My signs', 'My notes' (the colour key card from 1.6),
+ * their practice recordings, and 'Audio': every line they have heard, to play
+ * again at any time (all stored on this device only).
  */
 export function Notebook() {
   const { state } = useProgress();
   const [open, setOpen] = useState(false);
-  const [tab, setTab] = useState<"signs" | "notes" | "recordings">("signs");
+  const [tab, setTab] = useState<"signs" | "notes" | "recordings" | "audio">("signs");
+  const heard = useHeard();
   const count = state.mySigns.length;
 
   return (
@@ -40,12 +45,13 @@ export function Notebook() {
         <div className="fixed inset-0 z-50 flex justify-start bg-[var(--overlay)]" role="dialog" aria-modal="true" aria-label="My notebook" onClick={() => setOpen(false)}>
           <div className="flex h-full w-full max-w-xl flex-col bg-[#fbfbfe] text-[#5c6690] shadow-2xl" onClick={(e) => e.stopPropagation()} data-testid="notebook-panel">
             <div className="flex items-center justify-between border-b border-[#e4e8f5] px-5 py-3">
-              <div role="tablist" className="flex gap-1">
+              <div role="tablist" className="flex flex-wrap gap-1">
                 {(
                   [
                     ["signs", `My signs (${count})`],
                     ["notes", `My notes (${state.myNotes.length})`],
                     ["recordings", "My recordings"],
+                    ["audio", `Audio (${heard.length})`],
                   ] as const
                 ).map(([id, label]) => (
                   <button
@@ -67,6 +73,7 @@ export function Notebook() {
               {tab === "signs" && <MySignsGrid />}
               {tab === "notes" && <MyNotes />}
               {tab === "recordings" && <MyRecordings />}
+              {tab === "audio" && <MyAudio />}
             </div>
           </div>
         </div>,
@@ -174,6 +181,88 @@ function NotebookIcon() {
     <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
       <rect x="5" y="3" width="14" height="18" rx="2" />
       <path d="M9 3v18M12 8h4M12 12h4" />
+    </svg>
+  );
+}
+
+const ROLE_LABEL: Record<HeardLine["role"], string> = { NAR: "Narrator", PIC: "Person in charge", MOD: "Model voice", UI: "Instruction" };
+
+/** Every line the learner has heard, by stage, each with a play button. */
+function MyAudio() {
+  const heard = useHeard();
+  const [playing, setPlaying] = useState<string | null>(null);
+  const player = useRef<{ audio: HTMLAudioElement; revoke?: () => void } | null>(null);
+
+  const stop = () => {
+    player.current?.audio.pause();
+    player.current?.revoke?.();
+    player.current = null;
+    setPlaying(null);
+    holdMusic("audio-library", false);
+  };
+  useEffect(() => stop, []);
+
+  const play = async (file: string) => {
+    const again = playing === file;
+    stop();
+    if (again) return;
+    stopUi();
+    const { url, revoke } = await heardUrl(file);
+    const audio = new Audio(url);
+    player.current = { audio, revoke };
+    audio.onended = stop;
+    setPlaying(file);
+    holdMusic("audio-library", true);
+    void audio.play().catch(stop);
+  };
+
+  if (heard.length === 0) return <p className="text-lg text-[var(--body)]">Nothing yet. Every line you hear is kept here, so you can listen again.</p>;
+  return (
+    <div className="space-y-6" data-testid="audio-library">
+      {STAGES.filter((st) => heard.some((h) => h.stage === st.id)).map((st) => (
+        <section key={st.id}>
+          <h3 className="mb-2 text-base font-semibold text-[#0e1a4f]">
+            {st.number} {st.title}
+          </h3>
+          <ul className="space-y-2">
+            {heard
+              .filter((h) => h.stage === st.id)
+              .map((h) => (
+                <li key={h.file} className="flex items-start gap-3 rounded-xl bg-white p-3 ring-1 ring-[#e4e8f5]" data-testid={`heard-${h.file}`}>
+                  <button
+                    type="button"
+                    onClick={() => void play(h.file)}
+                    aria-label={`${playing === h.file ? "Stop" : "Play"}: ${h.text}`}
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[var(--blue-tonal-bg)] text-[var(--blue)] ring-1 ring-[var(--blue-tonal-border)] hover:brightness-105 focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--blue)]"
+                    data-testid="heard-play"
+                  >
+                    {playing === h.file ? <StopGlyph /> : <PlayGlyph />}
+                  </button>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[#5c6690]">{ROLE_LABEL[h.role]}</p>
+                    <p className="text-base text-[#0e1a4f]">{h.text}</p>
+                  </div>
+                </li>
+              ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function PlayGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
+      <path d="M8 5.5v13l10.5-6.5z" />
+    </svg>
+  );
+}
+
+function StopGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
+      <rect x="7" y="7" width="10" height="10" rx="1.5" />
     </svg>
   );
 }

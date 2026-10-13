@@ -78,8 +78,7 @@ test("hosted prototype: full journey 1.1 → 1.6 with the hosted page's limits",
   // 1.3
 
   await page.getByTestId("next-stage").click();
-  await page.getByTestId("answer-yes").click();
-  await page.getByTestId("dont-remember").click();
+  await page.getByTestId("answer-tell").click();
   await page.getByTestId("continue-button").click();
 
   // 1.4 — the article button is a real link to the article in a new tab
@@ -107,6 +106,7 @@ test("hosted prototype: full journey 1.1 → 1.6 with the hosted page's limits",
 
   await page.getByTestId("next-stage").click();
   for (const g of ["do not", "be careful", "you must", "safe way", "fire equipment"]) await page.getByTestId(`guess-${g}`).click();
+  await page.getByTestId("to-article").click();
   await page.getByTestId("article-did-not-open").click();
   await page.getByTestId("continue-button").click();
   for (const s of ["triangle", "circle", "square"]) await tapPlace(page, s, `meaning-${s}`);

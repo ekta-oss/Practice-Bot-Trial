@@ -167,10 +167,10 @@ export async function fakeSpeech(page: Page, text: string | null) {
 
 /** Stage 1.6 'New Signs': each new sign and the meaning box it belongs in. */
 export const NEW_SIGN_MEANINGS: [string, string][] = [
-  ["eye", "means-you-must"],
-  ["hardhat", "means-you-must"],
-  ["forklift", "means-be-careful"],
-  ["emergency-exit", "means-safe-way"],
-  ["no-entry", "means-do-not"],
-  ["fire-alarm", "means-fire-equipment"],
+  ["eye", "means-blue"],
+  ["hardhat", "means-blue"],
+  ["forklift", "means-yellow"],
+  ["emergency-exit", "means-green"],
+  ["no-entry", "means-red"],
+  ["fire-alarm", "means-red"],
 ];

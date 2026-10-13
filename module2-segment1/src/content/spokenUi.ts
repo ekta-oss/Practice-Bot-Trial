@@ -17,9 +17,8 @@ export const SPOKEN_UI: string[] = Array.from(
     S1_2.lookAgain,
     S1_2.allFound,
     // 1.3
-    S1_3.yesFeedback,
-    S1_3.notReallyFeedback,
-    S1_3.q2,
+    S1_3.q1,
+    ...S1_3.answers.map((a) => a.feedback),
     // 1.4
     S1_4.predictionQuestion,
     S1_4.predictionInstruction,

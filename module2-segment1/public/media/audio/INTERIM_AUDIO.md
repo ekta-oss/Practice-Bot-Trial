@@ -1,7 +1,7 @@
 # Interim course audio (computer voice)
 
-80 MP3s made with **Kokoro** (open-source neural text-to-speech, Apache-2.0) by `scripts/make-voice.mts`:
-14 lines named in the production script, and 66 on-screen instructions and feedback lines (`M2_UI_…`).
+81 MP3s made with **Kokoro** (open-source neural text-to-speech, Apache-2.0) by `scripts/make-voice.mts`:
+14 lines named in the production script, and 67 on-screen instructions and feedback lines (`M2_UI_…`).
 
 Voices:
 - **Person in charge** — `af_heart`, female, energetic and smiley: each line voiced in one natural pass at a brisk, steady pace, greetings voiced as exclamations (audio only); about 155 words per minute while speaking.
@@ -20,7 +20,7 @@ To replace one, drop the recorded file here with the same name.
 | M2_S01_01_NAR_FB02.mp3 | NAR | am_michael | 6.4 s | 94 wpm | Record again: Say hello. Say your name and your job. |
 | M2_S01_01_NAR_FB03.mp3 | NAR | am_michael | 5.2 s | 127 wpm | Good — now the person in charge knows who you are. |
 | M2_S01_02_NAR_01.mp3 | NAR | am_michael | 25.9 s | 134 wpm | This is your new workplace. Walk round and get to know it. Look out for signs on the walls, the doors and the floor — signs tell you a lot about a new place. When you see one, tap it to look closer. It goes into your ‘My signs’ notebook, so you can look at it again later. |
-| M2_S01_03_NAR_01.mp3 | NAR | am_michael | 6.2 s | 136 wpm | Before you go back — did you notice the signs as you walked round? |
+| M2_S01_03_NAR_01.mp3 | NAR | am_michael | 5.8 s | 144 wpm | Before you go back — look at the signs you saved on your walk. |
 | M2_S01_03_NAR_02.mp3 | NAR | am_michael | 10 s | 96 wpm | Workplaces have lots of signs. Why? Let’s read what a company that makes safety signs says. |
 | M2_S01_04_NAR_01.mp3 | NAR | am_michael | 10.4 s | 109 wpm | Tap the button to open the article. Read the first part. Then come back here and answer four questions. |
 | M2_S01_05_NAR_01.mp3 | NAR | am_michael | 12.7 s | 118 wpm | The article sorted signs into kinds — and many kinds have their own colour. Look at your 12 signs. Put them in groups by colour. |
@@ -33,9 +33,10 @@ To replace one, drop the recorded file here with the same name.
 | M2_UI_saved-to-my-signs_9c1508b7.mp3 | NAR | am_michael | 2.2 s | 108 wpm | Saved to My signs. |
 | M2_UI_there-are-more-signs-here-would-you-like_658c9220.mp3 | NAR | am_michael | 4.8 s | 136 wpm | There are more signs here. Would you like to look again? |
 | M2_UI_you-noticed-a-lot-for-your-first-walk_3a221329.mp3 | NAR | am_michael | 3.4 s | 142 wpm | You noticed a lot for your first walk. |
-| M2_UI_good-eyes-signs-are-everywhere-in-a-work_4ec294b8.mp3 | NAR | am_michael | 5.1 s | 94 wpm | Good eyes. Signs are everywhere in a workplace. |
-| M2_UI_that-is-normal-many-people-walk-past-sig_6e59687d.mp3 | NAR | am_michael | 6.3 s | 115 wpm | That is normal — many people walk past signs without seeing them. |
-| M2_UI_which-sign-did-you-notice-first_6718775e.mp3 | NAR | am_michael | 3 s | 122 wpm | Which sign did you notice first? |
+| M2_UI_what-do-you-think-these-signs-are-for_f6428808.mp3 | NAR | am_michael | 3.1 s | 156 wpm | What do you think these signs are for? |
+| M2_UI_yes-that-is-a-big-part-of-it_72fc1c2d.mp3 | NAR | am_michael | 3.9 s | 140 wpm | Yes — that is a big part of it. |
+| M2_UI_yes-many-signs-tell-you-what-to-do-or-wh_5d748de9.mp3 | NAR | am_michael | 6.4 s | 131 wpm | Yes — many signs tell you what to do, or what not to do. |
+| M2_UI_that-is-fine-you-will-find-out-now_6125e906.mp3 | NAR | am_michael | 4.2 s | 127 wpm | That is fine — you will find out now. |
 | M2_UI_why-do-workplaces-have-so-many-safety-si_a387e8d3.mp3 | NAR | am_michael | 4.5 s | 107 wpm | Why do workplaces have so many safety signs? |
 | M2_UI_read-the-first-two-paragraphs-then-look_25c7df9d.mp3 | NAR | am_michael | 5.7 s | 115 wpm | Read the first two paragraphs. Then look quickly at the list. |
 | M2_UI_safety-signs-help-stop-accidents-and-sho_886ab0bf.mp3 | NAR | am_michael | 10.1 s | 101 wpm | Safety signs help stop accidents and show people what to do. Employers must explain them to workers. |
@@ -86,11 +87,11 @@ To replace one, drop the recorded file here with the same name.
 | M2_UI_what-does-each-new-sign-tell-you-drag-it_133447f4.mp3 | NAR | am_michael | 9.4 s | 128 wpm | What does each new sign tell you? Drag it to its meaning. Or tap a sign, then tap a meaning. |
 | M2_UI_right-a-blue-circle-means-you-must_08c48252.mp3 | NAR | am_michael | 4.1 s | 116 wpm | Right — a blue circle means you must. |
 | M2_UI_look-again-at-the-article-what-does-a-bl_f5a911ea.mp3 | NAR | am_michael | 5.5 s | 120 wpm | Look again at the article: what does a blue circle mean? |
-| M2_UI_right-a-yellow-triangle-means-be-careful_6ef32b3d.mp3 | NAR | am_michael | 4.9 s | 98 wpm | Right — a yellow triangle means be careful. |
+| M2_UI_right-a-yellow-triangle-means-caution_ec1a7059.mp3 | NAR | am_michael | 4.6 s | 90 wpm | Right — a yellow triangle means caution. |
 | M2_UI_look-again-at-the-article-what-does-a-ye_b055648e.mp3 | NAR | am_michael | 6.1 s | 109 wpm | Look again at the article: what does a yellow triangle mean? |
 | M2_UI_right-a-green-rectangle-means-safe-way_0c83e4da.mp3 | NAR | am_michael | 4.7 s | 101 wpm | Right — a green rectangle means safe way. |
 | M2_UI_look-again-at-the-article-what-does-a-gr_9cc1251c.mp3 | NAR | am_michael | 5.9 s | 112 wpm | Look again at the article: what does a green rectangle mean? |
 | M2_UI_right-a-red-circle-means-do-not_a1b76edb.mp3 | NAR | am_michael | 4.2 s | 113 wpm | Right — a red circle means do not. |
 | M2_UI_look-again-at-the-article-what-does-a-re_9afc34f3.mp3 | NAR | am_michael | 5.6 s | 119 wpm | Look again at the article: what does a red circle mean? |
-| M2_UI_right-a-red-square-means-fire-equipment_23915050.mp3 | NAR | am_michael | 4.5 s | 106 wpm | Right — a red square means fire equipment. |
+| M2_UI_right-a-red-square-means-fire-safety_48336b4e.mp3 | NAR | am_michael | 4.5 s | 108 wpm | Right — a red square means fire safety. |
 | M2_UI_look-again-at-the-article-what-does-a-re_ddfde8f8.mp3 | NAR | am_michael | 5.4 s | 123 wpm | Look again at the article: what does a red square mean? |

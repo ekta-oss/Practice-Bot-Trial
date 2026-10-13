@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { recordHeard } from "./audioLibrary";
 import type { Line } from "@/content/segment1";
 import { AUDIO_DIR, assetExists, fastMedia, lineDurationMs, standInVoiceEnabled } from "./media";
 import { uiAudioFile } from "./uiAudio";
@@ -84,6 +85,7 @@ async function playOne(line: Line, signal: AbortSignal, onInfo: (n: NowPlaying) 
   const src = AUDIO_DIR + line.file;
   const exists = await assetExists(src);
   if (signal.aborted) throw new Aborted();
+  if (exists) recordHeard({ file: line.file, text: line.text, role: line.role });
 
   // ?fastmedia=1 (automated tests) skips real audio so runs stay quick.
   if (exists && !fastMedia()) {
@@ -280,7 +282,9 @@ export function setUiBlocked(blocked: boolean) {
 
 function playUiQueue(texts: string[]) {
   stopUi();
-  if (uiBlocked || fastMedia()) return;
+  if (uiBlocked) return;
+  for (const t of texts) recordHeard({ file: uiAudioFile(t), text: t, role: "UI" });
+  if (fastMedia()) return;
   uiQueue = [...texts];
   playNextUi();
 }

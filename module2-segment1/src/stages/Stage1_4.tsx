@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { S1_4, UI } from "@/content/segment1";
+import { readReflection } from "@/lib/reflection";
 import { useLinePlayer, useRestartsOnResume, useRuntime, useSay } from "@/lib/runtime";
 import { OpenArticleButton } from "@/components/ArticleLink";
 import { QuizQuestion } from "@/components/QuizQuestion";
@@ -19,6 +20,8 @@ type Step = { kind: "prompt"; opened: boolean } | { kind: "backup" } | { kind: "
 export function Stage1_4({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState<Step>({ kind: "prompt", opened: false });
   const [usedBackup, setUsedBackup] = useState(false);
+  // What the learner said in 1.3, so they read to check it.
+  const [guess] = useState(() => readReflection());
   const nar = useLinePlayer();
   const { resumeToken } = useRuntime();
   useRestartsOnResume(step.kind === "prompt" ? nar.playing : step.kind === "question");
@@ -62,6 +65,11 @@ export function Stage1_4({ onComplete }: { onComplete: () => void }) {
           <article className="card space-y-4" data-testid="reading-prompt">
             <p className="text-lg text-[var(--body)]">{S1_4.predictionLabel}</p>
             <p className="text-3xl font-bold leading-snug text-[var(--heading)]">{S1_4.predictionQuestion}</p>
+            {guess && (
+              <p className="rounded-xl bg-[var(--blue-tonal-bg)] px-4 py-3 text-lg text-[var(--heading)] ring-1 ring-[var(--blue-tonal-border)]" data-testid="your-guess">
+                {S1_4.yourGuess(guess)}
+              </p>
+            )}
             <p className="text-xl leading-relaxed text-[var(--heading)]">{S1_4.predictionInstruction}</p>
             <p className="text-base text-[var(--body)]">
               {S1_4.articleSource}, ‘{S1_4.articleTitle}’

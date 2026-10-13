@@ -30,7 +30,11 @@ test.describe("Stage 1.6 What does each colour mean?", () => {
     }
     await expect(page.getByTestId("score-line")).toHaveText("You got 5 of 5 right.");
     await expect(page.getByTestId("segue-line")).toHaveText("Good guessing! Now let’s see what safety experts say about each colour.");
-    await expect(page.getByText("Read about the four colours and the shapes.")).toBeVisible();
+    // Feedback on every guess before the article
+    for (const g of ["g1", "g2", "g3", "g4", "g5"]) await expect(page.getByTestId(`result-${g}`)).toHaveAttribute("data-right", "true");
+    await expect(page.getByTestId("result-g1")).toContainText("Red = stop, do not, fire safety");
+    await page.getByTestId("to-article").click();
+    await expect(page.getByTestId("score-screen").getByText("Read about the four colours and the shapes.")).toBeVisible();
     const popupPromise = context.waitForEvent("page");
     await page.getByTestId("open-article").click();
     const popup = await popupPromise;
@@ -42,15 +46,18 @@ test.describe("Stage 1.6 What does each colour mean?", () => {
 
     await shapeGame(page);
 
-    // Game 2 New Signs: each new sign to what it means (the guessing words), not colour boxes again
+    // Game 2 New Signs: four meaning boxes = the colour key; both red signs share one box
     await expect(page.getByRole("heading", { name: "New Signs" })).toBeVisible();
-    await expect(page.getByTestId("boxes")).not.toContainText("Red");
-    for (const m of RIGHT) await expect(page.getByTestId(`box-means-${m.replace(/ /g, "-")}`)).toContainText(m);
-    await tapPlace(page, "fire-alarm", "means-safe-way");
+    await expect(page.getByTestId("boxes").getByRole("button")).toHaveCount(4);
+    await expect(page.getByTestId("box-means-red")).toContainText("stop, do not, fire safety");
+    await tapPlace(page, "fire-alarm", "means-green");
     await expect(page.getByTestId("game-feedback-wrong")).toHaveText("Look again at the article: what does a red square mean?");
-    await tapPlace(page, "eye", "means-you-must");
+    await tapPlace(page, "fire-alarm", "means-red");
+    await expect(page.getByTestId("game-feedback-right")).toHaveText("Right — a red square means fire safety.");
+    await tapPlace(page, "eye", "means-blue");
     await expect(page.getByTestId("game-feedback-right")).toHaveText("Right — a blue circle means you must.");
-    for (const [id, m] of NEW_SIGN_MEANINGS) if (id !== "eye") await tapPlace(page, id, m);
+    for (const [id, m] of NEW_SIGN_MEANINGS) if (id !== "eye" && id !== "fire-alarm") await tapPlace(page, id, m);
+    await expect(page.getByTestId("box-means-red-items").locator("[data-placed]")).toHaveCount(2);
     await page.getByTestId("continue-button").click();
     await expect(page.getByTestId("end-screen")).toBeVisible();
 
@@ -67,6 +74,9 @@ test.describe("Stage 1.6 What does each colour mean?", () => {
     await page.getByTestId("guess-no entry").click();
     await expect(page.getByTestId("score-line")).toHaveText("You got 0 of 5 right.");
     await expect(page.getByTestId("segue-line")).toHaveText("Colours can be tricky. Let’s find out what each colour means from safety experts.");
+    await expect(page.getByTestId("result-g1")).toContainText("You said: be careful");
+    await expect(page.getByTestId("result-g1")).toContainText("Answer: do not");
+    await page.getByTestId("to-article").click();
     await page.getByTestId("article-did-not-open").click();
     await expect(page.getByTestId("backup-card").locator("[data-sign]")).toHaveCount(12);
     await expect(page.getByTestId("backup-card")).toContainText("Blue = you must");

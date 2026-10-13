@@ -1,36 +1,42 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { S1_3, UI } from "@/content/segment1";
-import { useLinePlayer, useRestartsOnResume, useSay } from "@/lib/runtime";
+import { S1_3, UI, WALK_SIGNS } from "@/content/segment1";
+import { useProgress } from "@/lib/progress";
+import { saveReflection } from "@/lib/reflection";
+import { uiLine } from "@/lib/uiAudio";
+import { useLinePlayer, useRestartsOnResume } from "@/lib/runtime";
 import { SceneFrame } from "@/components/Scene";
-import { MySignsGrid } from "@/components/Notebook";
+import { SignIcon } from "@/components/SignIcon";
 import { FeedbackCard, FooterActions, MainButton, NarrationBar } from "@/components/ui";
 
 /**
- * 1.3 Did you notice the signs?
- * Two taps. Ungraded; nothing is right or wrong; not stored.
- * The second NAR line plays after the taps.
+ * 1.3 Reflection — one calm screen.
+ * The signs the learner saved (a small strip, for context) and one question that
+ * leads into the reading: "What do you think these signs are for?" Ungraded:
+ * every answer gets a kind, honest reply, then the narrator line that opens 1.4.
+ * The answer is shown back in 1.4 ("Your answer in 1.3 …. Read and check.").
  */
-type Step = "q1" | "q2" | "nar2" | "done";
-
 export function Stage1_3({ onComplete }: { onComplete: () => void }) {
-  const [step, setStep] = useState<Step>("q1");
-  const [answer1, setAnswer1] = useState<"yes" | "notReally" | null>(null);
+  const { state } = useProgress();
+  const [answer, setAnswer] = useState<(typeof S1_3.answers)[number] | null>(null);
+  const [done, setDone] = useState(false);
   const nar = useLinePlayer();
   useRestartsOnResume(nar.playing);
-  useSay([answer1 === "yes" ? S1_3.yesFeedback : S1_3.notReallyFeedback, S1_3.q2], { when: step === "q2" });
 
   useEffect(() => {
-    void nar.play([S1_3.nar1]);
+    void nar.play([S1_3.nar1, uiLine(S1_3.q1)]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const pickFirst = () => {
-    // Not stored (script: "not stored").
-    setStep("nar2");
-    void nar.play([S1_3.nar2]).then(() => setStep("done"));
+  const pick = (a: (typeof S1_3.answers)[number]) => {
+    setAnswer(a);
+    saveReflection(a.text);
+    // The reply is read aloud, then the narrator leads straight into the reading.
+    void nar.play([uiLine(a.feedback), S1_3.nar2]).then(() => setDone(true));
   };
+
+  const signs = state.mySigns.map((s) => WALK_SIGNS.find((w) => w.id === s.id)).filter((s) => s !== undefined);
 
   return (
     <div className="relative flex flex-1 flex-col">
@@ -39,70 +45,46 @@ export function Stage1_3({ onComplete }: { onComplete: () => void }) {
         <SceneFrame place="corridor" blur className="h-full !aspect-auto opacity-70" />
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col gap-4 px-3 py-4 sm:px-6">
+      <div className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col gap-5 px-3 py-4 sm:px-6">
         <NarrationBar now={nar.now} onReplay={nar.hasPlayed ? nar.replay : undefined} />
 
-        {step === "q1" && (
-          <section className="card mx-auto mt-6 flex w-full max-w-2xl flex-col items-center gap-4 py-10" aria-labelledby="q1">
-            <p id="q1" className="text-center text-3xl font-semibold text-[var(--heading)]">
-              {S1_3.q1}
-            </p>
-            {/* The answers sit right under the question, where a first-time learner looks. */}
-            <div className="flex flex-wrap justify-center gap-3">
-              <button
-                type="button"
-                className="btn-secondary min-h-14 min-w-32 text-xl"
-                onClick={() => {
-                  setAnswer1("yes");
-                  setStep("q2");
-                }}
-                data-testid="answer-yes"
-              >
-                {S1_3.yes}
-              </button>
-              <button
-                type="button"
-                className="btn-secondary min-h-14 min-w-32 text-xl"
-                onClick={() => {
-                  setAnswer1("notReally");
-                  setStep("q2");
-                }}
-                data-testid="answer-not-really"
-              >
-                {S1_3.notReally}
-              </button>
+        <section className="card mx-auto flex w-full flex-col items-center gap-5 py-8" aria-labelledby="q1" data-testid="reflection">
+          {signs.length > 0 && (
+            <div className="flex w-full flex-col items-center gap-2" data-testid="signs-strip">
+              <p className="text-base font-semibold text-[var(--body)]">{S1_3.signsLabel(signs.length)}</p>
+              <ul className="flex max-w-full flex-wrap justify-center gap-1.5" aria-label="Signs you saved">
+                {signs.map((s) => (
+                  <li key={s.id}>
+                    <SignIcon sign={s} size={44} />
+                  </li>
+                ))}
+              </ul>
             </div>
-          </section>
-        )}
+          )}
 
-        {step !== "q1" && answer1 && (
-          <FeedbackCard kind="info" testId="feedback-q1">
-            {answer1 === "yes" ? S1_3.yesFeedback : S1_3.notReallyFeedback}
-          </FeedbackCard>
-        )}
+          <h2 id="q1" className="text-center text-3xl font-semibold text-[var(--heading)]">
+            {S1_3.q1}
+          </h2>
 
-        {step === "q2" && (
-          <section className="flex flex-col items-center gap-3" aria-labelledby="q2">
-            <p id="q2" className="text-center text-2xl font-semibold text-[var(--heading)]">
-              {S1_3.q2}
-            </p>
-            <button type="button" className="btn-secondary" onClick={pickFirst} data-testid="dont-remember">
-              {S1_3.dontRemember}
-            </button>
-          </section>
-        )}
-        {/* SCREEN: the 'My signs' notebook, open — shown once the learner is asked which sign came first
-            (showing it with the first question would answer it for them). */}
-        {step !== "q1" && (
-          <section className="rounded-3xl bg-[var(--card)] p-4 shadow-lg ring-1 ring-[var(--border)] sm:p-6" aria-label="My signs notebook">
-            <h2 className="mb-3 text-lg font-semibold text-[var(--heading)]">My signs</h2>
-            <MySignsGrid compact onPick={step === "q2" ? pickFirst : undefined} />
-          </section>
-        )}
-
+          {!answer ? (
+            <div className="flex w-full max-w-md flex-col gap-3">
+              {S1_3.answers.map((a) => (
+                <button key={a.id} type="button" className="btn-answer justify-center text-xl" onClick={() => pick(a)} data-testid={`answer-${a.id}`}>
+                  {a.text}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="w-full max-w-md">
+              <FeedbackCard kind="info" testId="feedback-q1">
+                {answer.feedback}
+              </FeedbackCard>
+            </div>
+          )}
+        </section>
       </div>
 
-      {step === "done" && (
+      {done && (
         <FooterActions>
           <MainButton onClick={onComplete} testId="continue-button">
             {UI.continue}

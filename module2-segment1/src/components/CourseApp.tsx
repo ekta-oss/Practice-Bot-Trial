@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { END_OF_SCOPE, MODULE_TITLE, SEGMENT_TITLE, STAGES } from "@/content/segment1";
 import { ProgressProvider, useProgress } from "@/lib/progress";
 import { clearRecordings } from "@/lib/recordings";
+import { clearHeard } from "@/lib/audioLibrary";
 import { setMusicWanted } from "@/lib/music";
 import { StageShell } from "./StageShell";
 import { BrandMark, CheckIcon, ListIcon, OutlinePanel } from "./Brand";
@@ -188,6 +189,7 @@ function Course() {
                   onClick={async () => {
                     reset();
                     await clearRecordings().catch(() => {});
+                    clearHeard();
                     setConfirmReset(false);
                   }}
                 >

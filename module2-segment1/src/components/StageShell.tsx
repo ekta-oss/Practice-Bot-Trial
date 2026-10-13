@@ -5,6 +5,7 @@ import { UI, type StageMeta } from "@/content/segment1";
 import { RuntimeCtx, preloadAudio, setUiBlocked, stopUi } from "@/lib/runtime";
 import { ALL_AUDIO_FILES } from "@/content/audioFiles";
 import { timeScale } from "@/lib/media";
+import { setHeardStage } from "@/lib/audioLibrary";
 import { setMusicEnabled, setMusicPaused, useMusicEnabled } from "@/lib/music";
 import { Notebook } from "./Notebook";
 import { BrandMark, CloseIcon, ListIcon, OutlinePanel } from "./Brand";
@@ -59,6 +60,8 @@ export function StageShell({
     setMusicPaused(paused);
   }, [paused]);
   const music = useMusicEnabled();
+  // Lines heard from here on are filed under this stage in the notebook's Audio tab.
+  useEffect(() => setHeardStage(meta.id), [meta.id]);
   useEffect(() => () => stopUi(), []);
   // Load the course audio in the background so every line starts without delay (runs once per page).
   useEffect(() => {

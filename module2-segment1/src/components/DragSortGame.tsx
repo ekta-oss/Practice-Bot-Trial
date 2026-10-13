@@ -64,8 +64,8 @@ export function DragSortGame({
   targets: GameTarget[];
   feedback: GameFeedback;
   onDone: () => void;
-  /** Cards on top, boxes below: 4 boxes (colours), 3 in a row (meanings), or 5 (new signs). */
-  layout?: "pileTop" | "row3" | "row5";
+  /** Cards on top, boxes below: 4 boxes, or 3 in a row (Shape Match). */
+  layout?: "pileTop" | "row3";
 }) {
   useRestartsOnResume(false);
   useSay([howTo], { afterFlow: true });
@@ -217,7 +217,6 @@ export function DragSortGame({
 const BOX_GRID = {
   pileTop: "grid grid-cols-2 gap-3 md:grid-cols-4",
   row3: "grid grid-cols-1 gap-3 sm:grid-cols-3",
-  row5: "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5",
 } as const;
 
 function PileCard({ item, tilt, selected, bouncing, hidden, onSelect }: { item: GameItem; tilt: number; selected: boolean; bouncing: boolean; hidden: boolean; onSelect: () => void }) {
