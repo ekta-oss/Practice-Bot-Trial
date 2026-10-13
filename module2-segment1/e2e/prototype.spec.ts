@@ -34,7 +34,7 @@ test("hosted prototype: full journey 1.1 → 1.6 with the hosted page's limits",
   await expect(page).toHaveTitle("Your First Morning");
   await expect(page.getByTestId("home")).toBeVisible();
   // Styles and the course font loaded from the page's own files
-  expect(await page.evaluate(() => getComputedStyle(document.body).fontFamily)).toContain("Noto");
+  expect(await page.evaluate(() => getComputedStyle(document.body).fontFamily)).toContain("Instrument");
   expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(247, 244, 238)");
 
   // Start over asks on the page itself (confirm() is unavailable)
@@ -62,6 +62,8 @@ test("hosted prototype: full journey 1.1 → 1.6 with the hosted page's limits",
   await page.getByTestId("continue-button").click();
 
   // 1.2
+
+  await page.getByTestId("next-stage").click();
   const order = [["no-smoking", "assembly-point"], ["no-entry-staff-only", "wear-gloves", "electrical-hazard", "fire-extinguisher"], ["wash-hands", "hot-water", "wet-floor", "first-aid"], ["fire-exit", "keep-fire-door-shut"]];
   for (const [i, ids] of order.entries()) {
     for (const id of ids) {
@@ -74,11 +76,15 @@ test("hosted prototype: full journey 1.1 → 1.6 with the hosted page's limits",
   await page.getByTestId("continue-button").click();
 
   // 1.3
+
+  await page.getByTestId("next-stage").click();
   await page.getByTestId("answer-yes").click();
   await page.getByTestId("dont-remember").click();
   await page.getByTestId("continue-button").click();
 
   // 1.4 — the article button is a real link to the article in a new tab
+
+  await page.getByTestId("next-stage").click();
   await expect(page.getByTestId("open-article")).toHaveAttribute("href", "https://www.signs.com/blog/common-safety-signs-and-what-they-really-mean/");
   await expect(page.getByTestId("open-article")).toHaveAttribute("target", "_blank");
   const popup = context.waitForEvent("page");
@@ -92,10 +98,14 @@ test("hosted prototype: full journey 1.1 → 1.6 with the hosted page's limits",
   }
 
   // 1.5
+
+  await page.getByTestId("next-stage").click();
   for (const id of ALL_SIGNS) await tapPlace(page, id, COLOUR_OF[id]);
   await page.getByTestId("continue-button").click();
 
   // 1.6 (backup card path)
+
+  await page.getByTestId("next-stage").click();
   for (const g of ["do not", "be careful", "you must", "safe way", "fire equipment"]) await page.getByTestId(`guess-${g}`).click();
   await page.getByTestId("article-did-not-open").click();
   await page.getByTestId("continue-button").click();

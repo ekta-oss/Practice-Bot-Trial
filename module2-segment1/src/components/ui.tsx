@@ -15,7 +15,7 @@ function ReplayButton({ onReplay, overlay }: { onReplay: () => void; overlay?: b
       onClick={onReplay}
       aria-label="Replay from the beginning"
       data-testid="replay"
-      className={`grid h-11 w-11 place-items-center rounded-full bg-white text-teal-800 shadow ring-1 ring-teal-200 hover:bg-teal-50 focus-visible:outline focus-visible:outline-4 focus-visible:outline-amber-400 ${overlay ? "pointer-events-auto absolute bottom-2 right-2 z-10" : ""}`}
+      className={`grid h-11 w-11 place-items-center rounded-full bg-[var(--card)] text-[var(--blue)] shadow ring-1 ring-[var(--blue-tonal-border)] hover:bg-[var(--blue-tonal-bg)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--blue)] ${overlay ? "pointer-events-auto absolute bottom-2 right-2 z-10" : ""}`}
     >
       <ReplayIcon />
     </button>
@@ -69,11 +69,11 @@ export function FeedbackCard({ kind, children, testId, speak }: { kind: Feedback
   // Read the card aloud (narrator voice) when it appears.
   useSay([speak && typeof children === "string" ? children : null]);
   const styles: Record<FeedbackKind, string> = {
-    right: "bg-emerald-50 text-emerald-900 ring-emerald-300",
-    wrong: "bg-amber-50 text-amber-950 ring-amber-300 animate-[shake_0.4s_ease-in-out]",
-    hint: "bg-yellow-50 text-yellow-950 ring-yellow-300",
-    info: "bg-teal-50 text-teal-950 ring-teal-200",
-    reveal: "bg-sky-50 text-sky-950 ring-sky-300",
+    right: "bg-[var(--success-tonal-bg)] text-[var(--heading)] ring-[var(--success-tonal-border)]",
+    wrong: "bg-[var(--amber-tonal-bg)] text-[var(--heading)] ring-[var(--amber-tonal-border)] animate-[shake_0.4s_ease-in-out]",
+    hint: "bg-[var(--blue-tonal-bg)] text-[var(--heading)] ring-[var(--blue-tonal-border)]",
+    info: "bg-[var(--card)] text-[var(--heading)] ring-[var(--border)]",
+    reveal: "bg-[var(--blue-tonal-bg)] text-[var(--heading)] ring-[var(--blue-tonal-border)]",
   };
   useEffect(() => {
     ref.current?.focus({ preventScroll: true });
@@ -86,7 +86,7 @@ export function FeedbackCard({ kind, children, testId, speak }: { kind: Feedback
       aria-live="polite"
       data-testid={testId ?? `feedback-${kind}`}
       data-kind={kind}
-      className={`flex items-start gap-3 rounded-2xl px-5 py-4 text-lg ring-2 outline-none ${styles[kind]}`}
+      className={`flex items-start gap-3 rounded-[16px] px-5 py-4 text-lg ring-1 outline-none ${styles[kind]}`}
     >
       {kind === "right" && <TickIcon />}
       {kind === "hint" && <BulbIcon glowing />}
@@ -105,8 +105,8 @@ export function HintBulb({ glowing, onClick, open }: { glowing: boolean; onClick
       aria-expanded={open}
       data-testid="hint-bulb"
       data-glowing={glowing}
-      className={`grid h-12 w-12 place-items-center rounded-full transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-amber-400 ${
-        glowing ? "bg-yellow-200 text-yellow-700 shadow-[0_0_18px_4px_rgba(250,204,21,0.7)]" : "bg-slate-100 text-slate-400"
+      className={`grid h-12 w-12 place-items-center rounded-full transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--blue)] ${
+        glowing ? "border border-[var(--blue-tonal-border)] bg-[var(--blue-tonal-bg)] text-[var(--blue)] shadow-[0_0_18px_4px_rgba(255,193,104,0.55)]" : "border border-[var(--border)] bg-[var(--card)] text-[var(--muted)]"
       }`}
     >
       <BulbIcon glowing={glowing} />
@@ -116,7 +116,7 @@ export function HintBulb({ glowing, onClick, open }: { glowing: boolean; onClick
 
 export function TickIcon({ className = "h-7 w-7" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={`${className} shrink-0 text-emerald-600`} aria-hidden>
+    <svg viewBox="0 0 24 24" className={`${className} shrink-0 text-[var(--success)]`} aria-hidden>
       <circle cx="12" cy="12" r="11" fill="currentColor" />
       <path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>

@@ -8,9 +8,10 @@ import { ExternalIcon } from "./ui";
  * allowed (for example a Claude-hosted page). If the article does not open,
  * the stage offers its backup card through "The article did not open".
  */
-export function OpenArticleButton({ label, url, onOpened }: { label: string; url: string; onOpened: () => void }) {
+/** `primary`: amber until the article is opened; then "Back to the course" becomes the primary action. */
+export function OpenArticleButton({ label, url, onOpened, primary = true }: { label: string; url: string; onOpened: () => void; primary?: boolean }) {
   return (
-    <a href={url} target="_blank" rel="noopener noreferrer" onClick={onOpened} className="btn-main !text-2xl" data-testid="open-article">
+    <a href={url} target="_blank" rel="noopener noreferrer" onClick={onOpened} className={primary ? "btn-main !text-xl" : "btn-secondary"} data-testid="open-article">
       {label} <ExternalIcon />
       <span className="sr-only"> (opens in a new tab)</span>
     </a>

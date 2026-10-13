@@ -174,7 +174,7 @@ export function DragSortGame({
     <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
       <div className="flex flex-col gap-4" data-testid="drag-game">
         <div className="flex items-center justify-between gap-3">
-          {title ? <h2 className="text-2xl font-bold text-slate-900">{title}</h2> : <span />}
+          {title ? <h2 className="text-2xl font-bold text-[var(--heading)]">{title}</h2> : <span />}
           <HintBulb glowing={bulb.glowing} open={bulb.open} onClick={() => {
             setBulb((b) => ({ ...b, open: !b.open }));
             setStamp((n) => n + 1);
@@ -228,8 +228,8 @@ function PileCard({ item, tilt, selected, bouncing, hidden, onSelect }: { item: 
         aria-pressed={selected}
         aria-label={`${item.label}${selected ? " (selected — now choose a box)" : ""}`}
         data-testid={`card-${item.id}`}
-        className={`touch-none select-none rounded-xl transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-400 ${
-          selected ? "ring-4 ring-teal-600" : ""
+        className={`touch-none select-none rounded-xl transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[var(--blue)] ${
+          selected ? "ring-4 ring-[var(--blue-tonal-border)]" : ""
         } ${bouncing ? "animate-[slide-back_0.45s_ease-out]" : ""} cursor-grab`}
       >
         {item.render("pile")}
@@ -241,14 +241,14 @@ function PileCard({ item, tilt, selected, bouncing, hidden, onSelect }: { item: 
 function DropBox({ target, selecting, onChoose, placedItems }: { target: GameTarget; selecting: boolean; onChoose: () => void; placedItems: GameItem[] }) {
   const { isOver, setNodeRef } = useDroppable({ id: target.id });
   return (
-    <div ref={setNodeRef} className={`rounded-2xl ${isOver ? "ring-4 ring-teal-500" : ""}`}>
+    <div ref={setNodeRef} className={`rounded-2xl ${isOver ? "ring-4 ring-[var(--blue-tonal-border)]" : ""}`}>
       <button
         type="button"
         onClick={onChoose}
         aria-disabled={!selecting}
         data-testid={`box-${target.id}`}
         aria-label={`${target.label} box${placedItems.length ? `, has ${placedItems.map((p) => p.label).join(", ")}` : ""}`}
-        className={`flex min-h-36 w-full flex-col items-center gap-2 rounded-2xl p-3 text-left transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-400 ${target.className ?? "bg-white ring-2 ring-slate-300"} ${
+        className={`flex min-h-36 w-full flex-col items-center gap-2 rounded-2xl p-3 text-left transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[var(--blue)] ${target.className ?? "bg-[var(--card)] ring-2 ring-[var(--border)]"} ${
           selecting ? "cursor-pointer hover:brightness-95" : "cursor-default"
         }`}
       >

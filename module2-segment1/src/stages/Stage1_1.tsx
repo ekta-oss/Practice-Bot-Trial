@@ -88,7 +88,7 @@ export function Stage1_1({ onComplete }: { onComplete: () => void }) {
         imageOverride={pic.file}
         artAspect={pic.aspect}
         withPic={step === "line2" ? "point" : "stand"}
-        className={`mx-auto w-full rounded-2xl shadow transition-[max-width] duration-500 ${showStill ? "max-w-[calc(24vh*16/9)]" : "max-w-[calc(44vh*16/9)]"}`}>
+        className={`mx-auto w-full rounded-2xl shadow transition-[max-width] duration-500 ${showStill ? "max-w-[calc(26vh*16/9)]" : "max-w-[calc(44vh*16/9)]"}`}>
         {!showStill && clip.video}
         <Subtitles now={now} />
         <div className="absolute left-2 top-2">{clip.missingBadge}</div>
@@ -96,7 +96,7 @@ export function Stage1_1({ onComplete }: { onComplete: () => void }) {
 
       {step === "record1" && (
         <section className="flex w-full flex-col items-center gap-4" aria-labelledby="prompt1">
-          <p id="prompt1" className="text-center text-2xl font-semibold text-slate-900" data-testid="prompt">
+          <p id="prompt1" className="text-center text-2xl font-semibold text-[var(--heading)]" data-testid="prompt">
             {S1_1.prompt}
           </p>
           <Recorder
@@ -122,10 +122,10 @@ export function Stage1_1({ onComplete }: { onComplete: () => void }) {
           <KeptRecordingPlayer rec={rec1} />
           {rating1 && <IntroRating transcript={rec1.transcript!} rating={rating1} />}
           {S1_1.checks.map((label, i) => (
-            <label key={label} className="flex min-h-14 cursor-pointer items-center gap-4 rounded-2xl bg-white px-5 text-xl ring-2 ring-slate-200 has-[:checked]:ring-teal-600 has-[:focus-visible]:outline has-[:focus-visible]:outline-4 has-[:focus-visible]:outline-amber-400">
+            <label key={label} className="flex min-h-14 cursor-pointer items-center gap-4 rounded-2xl bg-[var(--card)] px-5 text-xl ring-2 ring-[var(--border)] has-[:checked]:ring-[var(--blue-tonal-border)] has-[:focus-visible]:outline has-[:focus-visible]:outline-4 has-[:focus-visible]:outline-[var(--blue)]">
               <input
                 type="checkbox"
-                className="h-7 w-7 accent-teal-700"
+                className="h-7 w-7 accent-[var(--blue)]"
                 checked={ticks[i]}
                 onChange={(e) => setTicks((t) => t.map((v, j) => (j === i ? e.target.checked : v)))}
                 data-testid={`selfcheck-${i}`}
@@ -133,7 +133,7 @@ export function Stage1_1({ onComplete }: { onComplete: () => void }) {
               {label}
             </label>
           ))}
-          {rating1 && <p className="text-base text-slate-600">{S1_1.checkNote}</p>}
+          {rating1 && <p className="text-base text-[var(--body)]">{S1_1.checkNote}</p>}
           <FooterActions>
             <MainButton onClick={check} testId="check-button">
               {UI.check}
@@ -150,7 +150,7 @@ export function Stage1_1({ onComplete }: { onComplete: () => void }) {
 
       {step === "record2" && (
         <section className="flex w-full flex-col items-center gap-4" aria-labelledby="prompt2">
-          <p id="prompt2" className="text-center text-2xl font-semibold text-slate-900" data-testid="prompt">
+          <p id="prompt2" className="text-center text-2xl font-semibold text-[var(--heading)]" data-testid="prompt">
             {S1_1.secondPrompt}
           </p>
           <Recorder
@@ -194,24 +194,24 @@ export function Stage1_1({ onComplete }: { onComplete: () => void }) {
 /** 'What the system heard' + the three cues it found ("2 of 3 heard"). */
 function IntroRating({ transcript, rating }: { transcript: string; rating: IntroCheck }) {
   return (
-    <div className="flex flex-col gap-3 rounded-2xl bg-white p-4 ring-1 ring-slate-200" data-testid="intro-rating" data-heard={rating.heard}>
+    <div className="flex flex-col gap-3 rounded-2xl bg-[var(--card)] p-4 ring-1 ring-[var(--border)]" data-testid="intro-rating" data-heard={rating.heard}>
       <div>
-        <p className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-600">What the system heard</p>
-        <p className="text-xl text-slate-900" data-testid="heard-text">
-          {transcript.trim() || <span className="text-amber-900">No words were heard.</span>}
+        <p className="mb-1 text-sm font-semibold uppercase tracking-wide text-[var(--body)]">What the system heard</p>
+        <p className="text-xl text-[var(--heading)]" data-testid="heard-text">
+          {transcript.trim() || <span className="text-[var(--heading)]">No words were heard.</span>}
         </p>
       </div>
       <div>
-        <p className="mb-2 text-lg font-semibold text-slate-900" data-testid="rating-score">
+        <p className="mb-2 text-lg font-semibold text-[var(--heading)]" data-testid="rating-score">
           {rating.heard} of 3 heard
         </p>
         <ul className="flex flex-col gap-1.5">
           {(["hello", "name", "job"] as const).map((k) => (
             <li key={k} className="flex items-center gap-2 text-lg" data-testid={`cue-${k}`} data-heard={rating[k]}>
-              {rating[k] ? <TickIcon className="h-6 w-6" /> : <span className="grid h-6 w-6 place-items-center rounded-full bg-amber-200 text-sm font-bold text-amber-900" aria-hidden>?</span>}
+              {rating[k] ? <TickIcon className="h-6 w-6" /> : <span className="grid h-6 w-6 place-items-center rounded-full bg-[var(--amber-tonal-bg)] text-sm font-bold text-[var(--heading)]" aria-hidden>?</span>}
               <span>
                 {rating[k] ? `You said ${CUE_LABEL[k]}` : `The system did not hear ${CUE_LABEL[k]}`}
-                {rating.evidence[k] && <span className="text-slate-600"> — “{rating.evidence[k]}”</span>}
+                {rating.evidence[k] && <span className="text-[var(--body)]"> — “{rating.evidence[k]}”</span>}
               </span>
             </li>
           ))}

@@ -44,6 +44,8 @@ test.describe("Stage 1.2 Walk round your new workplace", () => {
     await expect(page.getByTestId("my-signs-grid").locator("li")).toHaveCount(12);
     await page.getByRole("button", { name: "Close notebook" }).click();
     await page.getByTestId("continue-button").click();
+    await expect(page.getByTestId("segment-complete")).toBeVisible();
+    await page.getByTestId("next-stage").click();
     await expect(page.getByTestId("stage-title")).toContainText("1.3");
   });
 

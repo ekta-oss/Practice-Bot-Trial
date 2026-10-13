@@ -112,7 +112,7 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
         an.getByteTimeDomainData(data);
         g.clearRect(0, 0, c.width, c.height);
         g.lineWidth = 2;
-        g.strokeStyle = "#0f766e";
+        g.strokeStyle = "#5b76ff";
         g.beginPath();
         for (let i = 0; i < data.length; i++) {
           const x = (i / (data.length - 1)) * c.width;
@@ -284,12 +284,12 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
     mode === "practice" ? (
       <div className="flex items-center gap-2" data-testid="practice-badge">
         <span className="rounded-full bg-blue-600 px-3 py-1 text-sm font-semibold text-white">{UI.practiceBadge}</span>
-        <span className="text-base text-slate-700">{UI.practiceLine}</span>
+        <span className="text-base text-[var(--body)]">{UI.practiceLine}</span>
       </div>
     ) : (
       <div className="flex items-center gap-2" data-testid="assessment-badge">
         <span className="rounded-md bg-orange-500 px-3 py-1 text-sm font-bold uppercase tracking-wide text-white">{UI.assessmentBadge}</span>
-        <span className="text-base text-slate-800">{UI.assessmentLine}</span>
+        <span className="text-base text-[var(--heading)]">{UI.assessmentLine}</span>
       </div>
     );
 
@@ -297,7 +297,7 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
     <div className="flex flex-col items-center gap-4" data-testid="recorder" data-phase={phase}>
       {badge}
       {recognize && (
-        <p className="max-w-md text-center text-sm text-slate-600" data-testid="speech-note">
+        <p className="max-w-md text-center text-sm text-[var(--body)]" data-testid="speech-note">
           {speechOk && speechCheckAvailable()
             ? "To check your words, your speech is sent to your browser's speech service. Your recording stays on this device."
             : "The automatic check does not work in this browser. Your recording still works — check it yourself with the boxes."}
@@ -310,7 +310,7 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
           onClick={start}
           disabled={phase === "requesting"}
           aria-label={label ?? "Start recording"}
-          className="grid h-24 w-24 place-items-center rounded-full bg-teal-700 text-white shadow-lg transition hover:bg-teal-800 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-amber-400 disabled:opacity-60"
+          className="btn-mic grid h-24 w-24 place-items-center rounded-full transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[var(--blue)] disabled:opacity-60"
         >
           <MicIcon />
         </button>
@@ -322,18 +322,18 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
             type="button"
             onClick={stop}
             aria-label="Stop recording"
-            className="relative grid h-24 w-24 place-items-center rounded-full bg-teal-700 text-white shadow-lg focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-amber-400"
+            className="btn-mic relative grid h-24 w-24 place-items-center rounded-full focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[var(--blue)]"
           >
-            <span className="absolute inset-0 animate-[pulse-ring_1.6s_ease-out_infinite] rounded-full ring-8 ring-teal-400/60" aria-hidden />
-            <span className="h-7 w-7 rounded-md bg-white" aria-hidden />
+            <span className="absolute inset-0 animate-[pulse-ring_1.6s_ease-out_infinite] rounded-full ring-8 ring-[rgba(243,171,49,0.45)]" aria-hidden />
+            <span className="h-7 w-7 rounded-md bg-[var(--amber-ink)]" aria-hidden />
           </button>
           <canvas ref={canvasRef} width={240} height={36} className="h-9 w-60" aria-hidden />
-          <p className="text-xl font-semibold tabular-nums text-teal-800" aria-live="off" data-testid="rec-time">
-            {fmt(elapsed)} <span className="text-base font-normal text-slate-600">/ {fmt(maxSeconds * 1000)}</span>
+          <p className="text-xl font-semibold tabular-nums text-[var(--blue)]" aria-live="off" data-testid="rec-time">
+            {fmt(elapsed)} <span className="text-base font-normal text-[var(--body)]">/ {fmt(maxSeconds * 1000)}</span>
           </p>
           {recognize && speechOk && (
-            <p className="min-h-7 max-w-xl text-center text-lg text-slate-700" data-testid="live-transcript">
-              <span className="mr-2 inline-block h-2 w-2 animate-pulse rounded-full bg-teal-600 align-middle" aria-hidden />
+            <p className="min-h-7 max-w-xl text-center text-lg text-[var(--body)]" data-testid="live-transcript">
+              <span className="mr-2 inline-block h-2 w-2 animate-pulse rounded-full bg-[var(--blue)] align-middle" aria-hidden />
               {liveText || "Listening to you…"}
             </p>
           )}
@@ -344,16 +344,16 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
       )}
 
       {phase === "checking" && (
-        <p className="text-lg text-slate-700" role="status" data-testid="checking">
+        <p className="text-lg text-[var(--body)]" role="status" data-testid="checking">
           Checking what you said…
         </p>
       )}
 
       {phase === "review" && recognize && transcript !== null && (
-        <div className="w-full max-w-xl rounded-2xl bg-white p-4 ring-1 ring-slate-200" data-testid="heard-box">
-          <p className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-600">What the system heard</p>
-          <p className="text-xl text-slate-900" data-testid="heard-text">
-            {transcript.trim() ? transcript : <span className="text-amber-900">No words were heard. Speak a little louder and closer to the microphone, then record again.</span>}
+        <div className="w-full max-w-xl rounded-2xl bg-[var(--card)] p-4 ring-1 ring-[var(--border)]" data-testid="heard-box">
+          <p className="mb-1 text-sm font-semibold uppercase tracking-wide text-[var(--body)]">What the system heard</p>
+          <p className="text-xl text-[var(--heading)]" data-testid="heard-text">
+            {transcript.trim() ? transcript : <span className="text-[var(--heading)]">No words were heard. Speak a little louder and closer to the microphone, then record again.</span>}
           </p>
         </div>
       )}
@@ -367,7 +367,7 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
           <button type="button" onClick={recordAgain} className="btn-secondary" data-testid="rec-again">
             <ReplayIcon /> {UI.recordAgain}
           </button>
-          <button type="button" onClick={keep} disabled={saving} className="btn-primary" data-testid="rec-keep">
+          <button type="button" onClick={keep} disabled={saving} className="btn-main" data-testid="rec-keep">
             {mode === "practice" ? UI.keep : UI.submit}
           </button>
         </div>
@@ -375,24 +375,24 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
       {phase === "review" && playing && <WaveLine />}
 
       {phase === "error" && error && (
-        <p role="alert" className="max-w-md rounded-xl bg-amber-50 px-4 py-3 text-center text-lg text-amber-900 ring-1 ring-amber-300">
+        <p role="alert" className="max-w-md rounded-[16px] bg-[var(--amber-tonal-bg)] px-4 py-3 text-center text-lg text-[var(--heading)] ring-1 ring-[var(--amber-tonal-border)]">
           {error}
         </p>
       )}
       {phase === "error" && (
-        <label className="btn-secondary cursor-pointer has-[:focus-visible]:outline has-[:focus-visible]:outline-4 has-[:focus-visible]:outline-amber-400" data-testid="upload-label">
+        <label className="btn-secondary cursor-pointer has-[:focus-visible]:outline has-[:focus-visible]:outline-4 has-[:focus-visible]:outline-[var(--blue)]" data-testid="upload-label">
           <input type="file" accept="audio/*,.mp3,.m4a,.wav,.webm,.ogg,.aac" className="sr-only" data-testid="upload-input" onChange={(e) => void onUpload(e.target.files?.[0])} />
           Upload a recording
         </label>
       )}
-      {phase === "review" && uploaded && <p className="text-base text-slate-600" data-testid="uploaded-note">You uploaded this recording. Play it to check it is the right one.</p>}
+      {phase === "review" && uploaded && <p className="text-base text-[var(--body)]" data-testid="uploaded-note">You uploaded this recording. Play it to check it is the right one.</p>}
     </div>
   );
 }
 
 export function WaveLine() {
   return (
-    <svg viewBox="0 0 120 20" className="h-5 w-32 text-teal-700" aria-hidden data-testid="wave-line">
+    <svg viewBox="0 0 120 20" className="h-5 w-32 text-[var(--blue)]" aria-hidden data-testid="wave-line">
       <path d="M0 10 Q 7.5 0 15 10 T 30 10 T 45 10 T 60 10 T 75 10 T 90 10 T 105 10 T 120 10" fill="none" stroke="currentColor" strokeWidth="2" className="animate-[wave_1s_linear_infinite]" />
     </svg>
   );
@@ -441,13 +441,13 @@ export function KeptRecordingPlayer({ rec, label = "Your recording" }: { rec: Ke
   // Recorded by this browser: webm (Chrome, Edge, Firefox) or mp4 (Safari). Uploaded files are already the learner's own.
   const ext = rec.uploaded ? null : rec.blob.type.includes("mp4") ? "mp4" : rec.blob.type.includes("webm") ? "webm" : null;
   return (
-    <div className="flex w-full max-w-xl flex-wrap items-center gap-3 rounded-2xl bg-white p-3 ring-1 ring-slate-200" data-testid="kept-recording">
-      <span className="text-base text-slate-700">
+    <div className="flex w-full max-w-xl flex-wrap items-center gap-3 rounded-2xl bg-[var(--card)] p-3 ring-1 ring-[var(--border)]" data-testid="kept-recording">
+      <span className="text-base text-[var(--body)]">
         {label} · {fmt(Math.max(1000, Math.round(rec.durationMs / 1000) * 1000))}
       </span>
       {url && <audio controls src={url} className="h-10 min-w-0 flex-1" data-testid="kept-audio" />}
       {url && ext && (
-        <button type="button" onClick={() => void saveFile(rec.blob, `my-recording.${ext}`)} className="text-base text-teal-800 underline underline-offset-4" data-testid="kept-download">
+        <button type="button" onClick={() => void saveFile(rec.blob, `my-recording.${ext}`)} className="text-base text-[var(--blue)] underline underline-offset-4" data-testid="kept-download">
           Download
         </button>
       )}

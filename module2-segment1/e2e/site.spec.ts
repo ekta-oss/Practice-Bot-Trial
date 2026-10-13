@@ -18,7 +18,7 @@ test("static site: full journey with real recording, speech check, playback and 
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await expect(page).toHaveTitle("Your First Morning");
-  expect(await page.evaluate(() => getComputedStyle(document.body).fontFamily)).toContain("Noto");
+  expect(await page.evaluate(() => getComputedStyle(document.body).fontFamily)).toContain("Instrument");
 
   // 1.1 — record with the microphone, see what the system heard, rating, kept recording
   await page.getByTestId("start-button").click();
@@ -38,6 +38,8 @@ test("static site: full journey with real recording, speech check, playback and 
   await page.getByTestId("continue-button").click();
 
   // 1.2
+
+  await page.getByTestId("next-stage").click();
   const order = [["no-smoking", "assembly-point"], ["no-entry-staff-only", "wear-gloves", "electrical-hazard", "fire-extinguisher"], ["wash-hands", "hot-water", "wet-floor", "first-aid"], ["fire-exit", "keep-fire-door-shut"]];
   for (const [i, ids] of order.entries()) {
     for (const id of ids) {
@@ -51,11 +53,15 @@ test("static site: full journey with real recording, speech check, playback and 
   await page.getByTestId("continue-button").click();
 
   // 1.3
+
+  await page.getByTestId("next-stage").click();
   await page.getByTestId("answer-yes").click();
   await page.getByTestId("my-sign-first-aid").getByRole("button").click();
   await page.getByTestId("continue-button").click();
 
   // 1.4
+
+  await page.getByTestId("next-stage").click();
   const popup = context.waitForEvent("page");
   await page.getByTestId("open-article").click();
   await (await popup).close();
@@ -67,11 +73,15 @@ test("static site: full journey with real recording, speech check, playback and 
   }
 
   // 1.5
+
+  await page.getByTestId("next-stage").click();
   for (const id of ALL_SIGNS) await tapPlace(page, id, COLOUR_OF[id]);
   await expect(page.getByTestId("done-feedback")).toBeVisible();
   await page.getByTestId("continue-button").click();
 
   // 1.6
+
+  await page.getByTestId("next-stage").click();
   for (const g of ["do not", "be careful", "you must", "safe way", "fire equipment"]) await page.getByTestId(`guess-${g}`).click();
   await expect(page.getByTestId("score-big")).toHaveText("5 / 5");
   await page.getByTestId("article-did-not-open").click();

@@ -23,6 +23,8 @@ test.describe("Stage 1.1 Greet and get your task", () => {
     expect(recs.map((r) => r.key)).toEqual(["1.1:intro-1"]);
     expect(recs[0].size).toBeGreaterThan(1000);
     await page.getByTestId("continue-button").click();
+    await expect(page.getByTestId("segment-complete")).toBeVisible();
+    await page.getByTestId("next-stage").click();
     await expect(page.getByTestId("stage-title")).toContainText("1.2");
   });
 

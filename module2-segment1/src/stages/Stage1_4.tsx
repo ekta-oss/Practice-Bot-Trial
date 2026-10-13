@@ -60,22 +60,22 @@ export function Stage1_4({ onComplete }: { onComplete: () => void }) {
       {step.kind === "prompt" && (
         <>
           <article className="card space-y-4" data-testid="reading-prompt">
-            <p className="text-lg text-slate-600">{S1_4.predictionLabel}</p>
-            <p className="text-3xl font-bold leading-snug text-slate-900">{S1_4.predictionQuestion}</p>
-            <p className="text-xl leading-relaxed text-slate-800">{S1_4.predictionInstruction}</p>
-            <p className="text-base text-slate-600">
+            <p className="text-lg text-[var(--body)]">{S1_4.predictionLabel}</p>
+            <p className="text-3xl font-bold leading-snug text-[var(--heading)]">{S1_4.predictionQuestion}</p>
+            <p className="text-xl leading-relaxed text-[var(--heading)]">{S1_4.predictionInstruction}</p>
+            <p className="text-base text-[var(--body)]">
               {S1_4.articleSource}, ‘{S1_4.articleTitle}’
             </p>
           </article>
           <div className="flex flex-col items-center gap-3">
-            <OpenArticleButton
+            <OpenArticleButton primary={!step.opened}
               label={S1_4.openArticle}
               url={S1_4.articleUrl}
               onOpened={() => setStep({ kind: "prompt", opened: true })}
             />
             <button
               type="button"
-              className="text-base text-slate-600 underline underline-offset-4 hover:text-slate-900"
+              className="text-base text-[var(--body)] underline underline-offset-4 hover:text-[var(--heading)]"
               onClick={() => {
                 setUsedBackup(true);
                 setStep({ kind: "backup" });

@@ -115,15 +115,19 @@ export interface StageMeta {
   aboutMinutes: number;
   /** Maximum time in minutes – after this the gentle "time" card appears. */
   maxMinutes: number;
+  /** Eyebrow label from the script's asset type (platform frame). BUILD-WORDING */
+  kind: string;
+  /** Platform rule: video screens use the dark theme, everything else light. */
+  theme: "light" | "dark";
 }
 
 export const STAGES: StageMeta[] = [
-  { id: "1.1", number: "1.1", title: "Greet and get your task", aboutMinutes: 3, maxMinutes: 5 },
-  { id: "1.2", number: "1.2", title: "Walk round your new workplace", aboutMinutes: 7, maxMinutes: 9 },
-  { id: "1.3", number: "1.3", title: "Did you notice the signs?", aboutMinutes: 2, maxMinutes: 3 },
-  { id: "1.4", number: "1.4", title: "Read online: why workplaces have safety signs", aboutMinutes: 7, maxMinutes: 9 },
-  { id: "1.5", number: "1.5", title: "Sort the signs by colour", aboutMinutes: 5, maxMinutes: 7 },
-  { id: "1.6", number: "1.6", title: "What does each colour mean?", aboutMinutes: 10, maxMinutes: 12 },
+  { id: "1.1", number: "1.1", title: "Greet and get your task", aboutMinutes: 3, maxMinutes: 5, kind: "Video · Speaking", theme: "dark" },
+  { id: "1.2", number: "1.2", title: "Walk round your new workplace", aboutMinutes: 7, maxMinutes: 9, kind: "Interactive", theme: "light" },
+  { id: "1.3", number: "1.3", title: "Did you notice the signs?", aboutMinutes: 2, maxMinutes: 3, kind: "Reflection", theme: "light" },
+  { id: "1.4", number: "1.4", title: "Read online: why workplaces have safety signs", aboutMinutes: 7, maxMinutes: 9, kind: "Reading · Quiz", theme: "light" },
+  { id: "1.5", number: "1.5", title: "Sort the signs by colour", aboutMinutes: 5, maxMinutes: 7, kind: "Game", theme: "light" },
+  { id: "1.6", number: "1.6", title: "What does each colour mean?", aboutMinutes: 10, maxMinutes: 12, kind: "Quiz · Reading · Games", theme: "light" },
 ];
 
 /* ------------------------------------------------------------------ */

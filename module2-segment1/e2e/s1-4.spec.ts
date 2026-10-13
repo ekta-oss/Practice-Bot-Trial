@@ -43,6 +43,8 @@ test.describe("Stage 1.4 Read online", () => {
     await expect(page.getByText("Question 4 of 4")).toBeVisible();
     await page.getByTestId("option-0").click();
     await page.getByTestId("continue-button").click();
+    await expect(page.getByTestId("segment-complete")).toBeVisible();
+    await page.getByTestId("next-stage").click();
     await expect(page.getByTestId("stage-title")).toContainText("1.5");
   });
 
@@ -56,6 +58,8 @@ test.describe("Stage 1.4 Read online", () => {
     await page.getByTestId("continue-button").click();
     await page.getByTestId("option-1").click();
     await page.getByTestId("continue-button").click();
+    await expect(page.getByTestId("segment-complete")).toBeVisible();
+    await page.getByTestId("next-stage").click();
     await expect(page.getByTestId("stage-title")).toContainText("1.5");
   });
 

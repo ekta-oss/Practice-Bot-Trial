@@ -65,10 +65,10 @@ export function QuizQuestion({
     <section className="mx-auto flex w-full max-w-3xl flex-col gap-5" aria-labelledby={`q-${number}`} data-testid="quiz-question" data-state={state}>
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-base text-slate-600">
+          <p className="text-base text-[var(--body)]">
             Question {number} of {total}
           </p>
-          <h2 id={`q-${number}`} className="text-2xl font-semibold text-slate-900">
+          <h2 id={`q-${number}`} className="text-2xl font-semibold text-[var(--heading)]">
             {question}
           </h2>
         </div>
@@ -85,11 +85,11 @@ export function QuizQuestion({
               type="button"
               onClick={() => pick(i)}
               disabled={finished || isWrong}
-              className={`btn-answer ${showRight ? "!ring-4 !ring-emerald-500 bg-emerald-50" : ""} ${isWrong ? "bg-amber-50 !ring-amber-300 opacity-70" : ""}`}
+              className={`btn-answer ${showRight ? "!border-[var(--success)] !bg-[var(--success-tonal-bg)]" : ""} ${isWrong ? "!border-[var(--amber-tonal-border)] !bg-[var(--amber-tonal-bg)] opacity-70" : ""}`}
               data-testid={`option-${i}`}
               data-correct={showRight || undefined}
             >
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-slate-100 text-lg font-semibold text-slate-700">{letters[i]}</span>
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--blue-tonal-bg)] text-lg font-semibold text-[var(--body)]">{letters[i]}</span>
               <span>{opt}</span>
             </button>
           );

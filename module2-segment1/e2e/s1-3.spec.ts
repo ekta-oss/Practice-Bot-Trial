@@ -13,6 +13,8 @@ test.describe("Stage 1.3 Did you notice the signs?", () => {
     await page.getByTestId("my-sign-first-aid").getByRole("button").click();
     await expect(page.getByTestId("continue-button")).toBeVisible();
     await page.getByTestId("continue-button").click();
+    await expect(page.getByTestId("segment-complete")).toBeVisible();
+    await page.getByTestId("next-stage").click();
     await expect(page.getByTestId("stage-title")).toContainText("1.4");
   });
 

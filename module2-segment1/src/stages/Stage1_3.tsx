@@ -44,14 +44,14 @@ export function Stage1_3({ onComplete }: { onComplete: () => void }) {
 
         {step === "q1" && (
           <section className="flex flex-col items-center gap-4" aria-labelledby="q1">
-            <p id="q1" className="text-center text-2xl font-semibold text-slate-900">
+            <p id="q1" className="text-center text-2xl font-semibold text-[var(--heading)]">
               {S1_3.q1}
             </p>
             <FooterActions>
             <div className="flex gap-3">
               <button
                 type="button"
-                className="btn-main"
+                className="btn-secondary min-h-14 min-w-32 text-xl"
                 onClick={() => {
                   setAnswer1("yes");
                   setStep("q2");
@@ -62,7 +62,7 @@ export function Stage1_3({ onComplete }: { onComplete: () => void }) {
               </button>
               <button
                 type="button"
-                className="btn-main"
+                className="btn-secondary min-h-14 min-w-32 text-xl"
                 onClick={() => {
                   setAnswer1("notReally");
                   setStep("q2");
@@ -84,7 +84,7 @@ export function Stage1_3({ onComplete }: { onComplete: () => void }) {
 
         {step === "q2" && (
           <section className="flex flex-col items-center gap-3" aria-labelledby="q2">
-            <p id="q2" className="text-center text-2xl font-semibold text-slate-900">
+            <p id="q2" className="text-center text-2xl font-semibold text-[var(--heading)]">
               {S1_3.q2}
             </p>
             <button type="button" className="btn-secondary" onClick={pickFirst} data-testid="dont-remember">
@@ -93,8 +93,8 @@ export function Stage1_3({ onComplete }: { onComplete: () => void }) {
           </section>
         )}
         {/* SCREEN: the 'My signs' notebook, open. */}
-        <section className="rounded-3xl bg-amber-50/95 p-4 shadow-lg ring-1 ring-amber-200 sm:p-6" aria-label="My signs notebook">
-          <h2 className="mb-3 text-lg font-semibold text-amber-950">My signs</h2>
+        <section className="rounded-3xl bg-[var(--card)] p-4 shadow-lg ring-1 ring-[var(--border)] sm:p-6" aria-label="My signs notebook">
+          <h2 className="mb-3 text-lg font-semibold text-[var(--heading)]">My signs</h2>
           <MySignsGrid compact onPick={step === "q2" ? pickFirst : undefined} />
         </section>
 

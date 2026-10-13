@@ -6,10 +6,14 @@ import { RuntimeCtx, preloadAudio, setUiBlocked, stopUi } from "@/lib/runtime";
 import { ALL_AUDIO_FILES } from "@/content/audioFiles";
 import { timeScale } from "@/lib/media";
 import { Notebook } from "./Notebook";
+import { BrandMark, CloseIcon, ListIcon, OutlinePanel } from "./Brand";
 
 /**
- * Task-screen frame (Visual & Context Reference A):
- *  - Top bar: stage title (left), expected-time clock (centre), pause button (right).
+ * Task-screen frame, in the Swift AI Academy platform style:
+ *  - Header: logo (left); pause, course outline and Close (right). Position in the
+ *    course is shown only in the outline drawer (platform rule).
+ *  - Eyebrow "<asset type> · About N minutes" (the script's expected-time clock) and the stage title.
+ *  - Light theme, or dark for video stages; amber = the one primary action.
  *  - Main button bottom-right, large (stages portal it in with <FooterActions>).
  *  - Clock: 'About N minutes', soft teal, never counts down, never red, never ticks.
  *    When the maximum time is reached: a gentle card with 'Start again' and 'Pause'.
@@ -24,17 +28,19 @@ interface Slots {
 const SlotsCtx = createContext<Slots>({ footerRight: null, footerLeft: null });
 export const useShellSlots = () => useContext(SlotsCtx);
 
-type Overlay = null | "pause" | "time";
+type Overlay = null | "pause" | "time" | "outline";
 
 export function StageShell({
   meta,
   onRestart,
   onMenu,
+  onOpenStage,
   children,
 }: {
   meta: StageMeta;
   onRestart: () => void;
   onMenu: () => void;
+  onOpenStage: (index: number) => void;
   children: React.ReactNode;
 }) {
   const [overlay, setOverlay] = useState<Overlay>(null);
@@ -96,90 +102,120 @@ export function StageShell({
     return () => window.removeEventListener("keydown", onKey);
   }, [overlay]);
 
+  const iconBtn =
+    "grid h-11 w-11 place-items-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--heading)] transition hover:border-[var(--blue-tonal-border)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--blue)]";
+
   return (
     <RuntimeCtx.Provider value={runtime}>
       <SlotsCtx.Provider value={slots}>
-        <div className="flex min-h-dvh flex-col bg-[var(--page)]" data-testid={`stage-${meta.id}`}>
-          <header className="shell-bar sticky top-0 z-30 grid grid-cols-[1fr_auto_auto] items-center gap-2 bg-[var(--bar)] px-4 py-2 text-white shadow-md sm:grid-cols-[1fr_auto_1fr] sm:px-6">
-            <h1 className="line-clamp-2 min-w-0 text-base font-bold leading-tight text-white sm:text-2xl" data-testid="stage-title">
-              <span className="text-[#9fd8e6]">{meta.number}</span> {meta.title}
-            </h1>
-            <div className="flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-base text-white" data-testid="expected-time" aria-label={`Expected time: ${UI.aboutMinutes(meta.aboutMinutes)}`}>
-              <ClockIcon />
-              <span>{UI.aboutMinutes(meta.aboutMinutes)}</span>
-            </div>
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => setOverlay("pause")}
-                className="grid h-12 w-12 place-items-center rounded-full text-white ring-2 ring-white/80 hover:bg-white/15 focus-visible:outline focus-visible:outline-4 focus-visible:outline-amber-400"
-                data-testid="pause-button"
-                aria-label={UI.pause}
-              >
-                <PauseIcon />
-              </button>
-            </div>
-          </header>
+        <div className={meta.theme === "dark" ? "theme-dark" : ""}>
+          <div className="flex min-h-dvh flex-col" style={{ background: "var(--page-grad)" }} data-testid={`stage-${meta.id}`}>
+            <header className="sticky top-0 z-30 flex items-center justify-between gap-3 px-4 py-3 backdrop-blur sm:px-8" style={{ background: "color-mix(in srgb, var(--page) 82%, transparent)" }}>
+              <BrandMark />
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => setOverlay("pause")} className={iconBtn} data-testid="pause-button" aria-label={UI.pause}>
+                  <PauseIcon />
+                </button>
+                <button type="button" onClick={() => setOverlay("outline")} className={iconBtn} aria-label="Course outline" data-testid="outline-button">
+                  <ListIcon />
+                </button>
+                <button
+                  type="button"
+                  onClick={onMenu}
+                  className="hidden h-11 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card)] px-4 text-sm font-semibold text-[var(--body)] transition hover:border-[var(--blue-tonal-border)] sm:flex"
+                  data-testid="close-button"
+                >
+                  <CloseIcon /> Close
+                </button>
+              </div>
+            </header>
 
-          <main className="relative flex flex-1 flex-col" aria-hidden={paused || undefined} inert={paused || undefined}>
-            {children}
-          </main>
+            <main className="relative flex flex-1 flex-col" aria-hidden={paused || undefined} inert={paused || undefined}>
+              <div className="mx-auto w-full max-w-6xl px-4 pt-2 sm:px-8">
+                <p className="eyebrow flex flex-wrap items-center gap-x-2">
+                  <span aria-hidden className="inline-block h-px w-6 bg-current opacity-70" />
+                  <span>{meta.kind}</span>
+                  <span aria-hidden>·</span>
+                  <span data-testid="expected-time" aria-label={`Expected time: ${UI.aboutMinutes(meta.aboutMinutes)}`}>
+                    {UI.aboutMinutes(meta.aboutMinutes)}
+                  </span>
+                </p>
+                <h1 className="mt-1 text-2xl font-bold leading-tight text-[var(--heading)] sm:text-3xl" data-testid="stage-title">
+                  <span className="sr-only">Stage {meta.number}: </span>
+                  <span hidden>{meta.number} </span>
+                  {meta.title}
+                </h1>
+              </div>
+              {children}
+            </main>
 
-          <footer className="shell-bar sticky bottom-0 z-20 flex flex-wrap items-center justify-between gap-3 bg-[var(--bar)] px-4 py-3 shadow-[0_-2px_8px_rgba(0,0,0,0.15)] sm:px-6" inert={paused || undefined}>
-            <div className="flex flex-wrap items-center gap-2">
-              <Notebook />
-              <div ref={setFooterLeft} className="contents" />
-            </div>
-            <div ref={setFooterRight} className="ml-auto flex flex-wrap items-center justify-end gap-3" />
-          </footer>
-        </div>
-
-        {overlay && (
-          <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/40 p-4" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
-            <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl" data-testid={overlay === "time" ? "time-card" : "pause-card"}>
-              {overlay === "time" ? (
-                <>
-                  <div className="mb-3 flex items-center gap-2 text-teal-700">
-                    <ClockIcon />
-                  </div>
-                  <p id="overlay-title" className="mb-6 text-xl text-slate-900">
-                    {UI.timeCard}
-                  </p>
-                  <div className="flex flex-wrap justify-end gap-3">
-                    <button type="button" className="btn-secondary" onClick={() => setOverlay("pause")} data-testid="time-pause">
-                      {UI.pause}
-                    </button>
-                    <button type="button" className="btn-primary" onClick={onRestart} data-testid="time-start-again" autoFocus>
-                      {UI.startAgain}
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <h2 id="overlay-title" className="mb-4 text-2xl font-semibold text-slate-900">
-                    {UI.pause}
-                  </h2>
-                  {(restartsOnResume || lapsed) && (
-                    <p className="mb-4 text-lg text-slate-700" data-testid="resume-note">
-                      {UI.resumeNote}
-                    </p>
-                  )}
-                  <div className="flex flex-wrap justify-end gap-3">
-                    <button type="button" className="btn-secondary" onClick={onRestart} data-testid="pause-start-again">
-                      {UI.startAgain}
-                    </button>
-                    <button type="button" className="btn-primary" onClick={resume} data-testid="pause-resume" autoFocus>
-                      {UI.resume}
-                    </button>
-                  </div>
-                  <button type="button" onClick={onMenu} className="mt-6 text-base text-slate-600 underline underline-offset-4 hover:text-slate-800" data-testid="pause-menu">
-                    Course menu
-                  </button>
-                </>
-              )}
-            </div>
+            <footer
+              className="sticky bottom-0 z-20 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)] px-4 py-3 sm:px-8"
+              style={{ background: "color-mix(in srgb, var(--page) 92%, transparent)" }}
+              inert={paused || undefined}
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <Notebook />
+                <div ref={setFooterLeft} className="contents" />
+              </div>
+              <div ref={setFooterRight} className="ml-auto flex flex-wrap items-center justify-end gap-3" />
+            </footer>
           </div>
-        )}
+
+          {overlay === "outline" && <OutlinePanel currentId={meta.id} onClose={() => setOverlay(null)} onOpenStage={onOpenStage} />}
+
+          {(overlay === "pause" || overlay === "time") && (
+            <div className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay)] p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
+              <div
+                className="w-full max-w-md rounded-[24px] border border-[var(--border)] p-7 shadow-2xl"
+                style={{ background: meta.theme === "dark" ? "rgba(14,20,48,0.92)" : "#ffffff" }}
+                data-testid={overlay === "time" ? "time-card" : "pause-card"}
+              >
+                {overlay === "time" ? (
+                  <>
+                    <div className="mb-3 flex items-center gap-2 text-[var(--blue)]">
+                      <ClockIcon />
+                    </div>
+                    <p id="overlay-title" className="mb-6 text-xl text-[var(--heading)]">
+                      {UI.timeCard}
+                    </p>
+                    <div className="flex flex-wrap justify-end gap-3">
+                      <button type="button" className="btn-secondary" onClick={() => setOverlay("pause")} data-testid="time-pause">
+                        {UI.pause}
+                      </button>
+                      <button type="button" className="btn-main" onClick={onRestart} data-testid="time-start-again" autoFocus>
+                        {UI.startAgain}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="eyebrow mb-1">Paused</p>
+                    <h2 id="overlay-title" className="mb-4 text-2xl font-bold text-[var(--heading)]">
+                      {meta.title}
+                    </h2>
+                    {(restartsOnResume || lapsed) && (
+                      <p className="mb-4 text-lg text-[var(--body)]" data-testid="resume-note">
+                        {UI.resumeNote}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap justify-end gap-3">
+                      <button type="button" className="btn-secondary" onClick={onRestart} data-testid="pause-start-again">
+                        {UI.startAgain}
+                      </button>
+                      <button type="button" className="btn-main" onClick={resume} data-testid="pause-resume" autoFocus>
+                        {UI.resume}
+                      </button>
+                    </div>
+                    <button type="button" onClick={onMenu} className="mt-6 text-base font-semibold text-[var(--blue)] underline-offset-4 hover:underline" data-testid="pause-menu">
+                      Course menu
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </SlotsCtx.Provider>
     </RuntimeCtx.Provider>
   );

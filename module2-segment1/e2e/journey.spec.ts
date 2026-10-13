@@ -21,6 +21,8 @@ test("full learner journey 1.1 → 1.6 (with retries along the way)", async ({ p
   await page.getByTestId("continue-button").click();
 
   // 1.2 — walk all four places, tap every sign (on a phone the picture scrolls sideways)
+
+  await page.getByTestId("next-stage").click();
   const order = [["no-smoking", "assembly-point"], ["no-entry-staff-only", "wear-gloves", "electrical-hazard", "fire-extinguisher"], ["wash-hands", "hot-water", "wet-floor", "first-aid"], ["fire-exit", "keep-fire-door-shut"]];
   for (const [i, ids] of order.entries()) {
     for (const id of ids) {
@@ -38,12 +40,14 @@ test("full learner journey 1.1 → 1.6 (with retries along the way)", async ({ p
   const noSideScroll = async () => expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
   await noSideScroll();
   // 1.3
+  await page.getByTestId("next-stage").click();
   await page.getByTestId("answer-not-really").click();
   await page.getByTestId("my-sign-no-smoking").getByRole("button").click();
   await page.getByTestId("continue-button").click();
 
   await noSideScroll();
   // 1.4 — open the article, come back, answer with one wrong try
+  await page.getByTestId("next-stage").click();
   const popupPromise = context.waitForEvent("page");
   await page.getByTestId("open-article").click();
   await (await popupPromise).close();
@@ -59,6 +63,8 @@ test("full learner journey 1.1 → 1.6 (with retries along the way)", async ({ p
   }
 
   // 1.5
+
+  await page.getByTestId("next-stage").click();
   await expect(page.getByRole("heading", { name: "Colour Sort" })).toBeVisible();
   await tapPlace(page, "assembly-point", "red");
   await expect(page.getByTestId("game-feedback-wrong")).toHaveText("Look at the colour again.");
@@ -68,6 +74,7 @@ test("full learner journey 1.1 → 1.6 (with retries along the way)", async ({ p
 
   await noSideScroll();
   // 1.6
+  await page.getByTestId("next-stage").click();
   for (const g of ["do not", "be careful", "safe way", "do not", "no entry"]) await page.getByTestId(`guess-${g}`).click();
   await expect(page.getByTestId("score-big")).toHaveText("2 / 5");
   await expect(page.getByTestId("segue-line")).toHaveText("Colours can be tricky. Let’s find out what each colour means from safety experts.");

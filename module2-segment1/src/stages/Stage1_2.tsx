@@ -82,7 +82,7 @@ export function Stage1_2({ onComplete }: { onComplete: () => void }) {
       {/* Top: 'My signs: 0' (counts up; no target number is shown). */}
       <div className="flex items-center justify-between gap-3">
         {art ? <span /> : <MiniMap current={placeIdx} />}
-        <p className="rounded-full bg-white px-4 py-1.5 text-lg font-semibold text-slate-900 shadow-sm ring-1 ring-slate-300" data-testid="my-signs-counter" aria-live="polite">
+        <p className="rounded-full bg-[var(--card)] px-4 py-1.5 text-lg font-semibold text-[var(--heading)] shadow-sm ring-1 ring-[var(--border)]" data-testid="my-signs-counter" aria-live="polite">
           {S1_2.counter(state.mySigns.length)}
         </p>
       </div>
@@ -103,7 +103,7 @@ export function Stage1_2({ onComplete }: { onComplete: () => void }) {
                 <MiniMap current={placeIdx} card />
               </div>
               {art.counter && (
-                <div className="absolute grid place-items-center rounded-full bg-white text-[clamp(9px,1.2vw,18px)] font-semibold text-slate-900 ring-1 ring-slate-300" style={at(art.counter)} aria-hidden>
+                <div className="absolute grid place-items-center rounded-full bg-[var(--card)] text-[clamp(9px,1.2vw,18px)] font-semibold text-[var(--heading)] ring-1 ring-[var(--border)]" style={at(art.counter)} aria-hidden>
                   {S1_2.counter(state.mySigns.length)}
                 </div>
               )}
@@ -120,11 +120,11 @@ export function Stage1_2({ onComplete }: { onComplete: () => void }) {
                   data-saved={saved}
                   onClick={() => tapSign(s)}
                   aria-label={`${s.word} sign. ${s.placement}${saved ? " Saved." : ""}`}
-                  className="absolute min-h-11 min-w-11 rounded-lg transition hover:bg-white/15 hover:ring-4 hover:ring-amber-300 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-400"
+                  className="absolute min-h-11 min-w-11 rounded-lg transition hover:bg-white/15 hover:ring-4 hover:ring-[var(--blue-tonal-border)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[var(--blue)]"
                   style={at(art.signs[s.id])}
                 >
                   {saved && (
-                    <span className="absolute -right-2 -top-2 rounded-full bg-white shadow" aria-hidden>
+                    <span className="absolute -right-2 -top-2 rounded-full bg-[var(--card)] shadow" aria-hidden>
                       <TickIcon className="h-6 w-6" />
                     </span>
                   )}
@@ -142,7 +142,7 @@ export function Stage1_2({ onComplete }: { onComplete: () => void }) {
                 data-saved={saved}
                 onClick={() => tapSign(s)}
                 aria-label={`${s.word} sign. ${s.placement}${saved ? " Saved." : ""}`}
-                className="absolute flex min-h-11 min-w-11 items-center justify-center rounded-md transition hover:scale-105 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-amber-400"
+                className="absolute flex min-h-11 min-w-11 items-center justify-center rounded-md transition hover:scale-105 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[var(--blue)]"
                 style={{ left: `${pos.left}%`, top: `${pos.top}%`, width: `${pos.width}%` }}
               >
                 <SignIcon sign={s} size="fill" />
@@ -156,7 +156,7 @@ export function Stage1_2({ onComplete }: { onComplete: () => void }) {
 
       {big && (
         <div
-          className="fixed inset-0 z-40 grid place-items-center bg-slate-900/30"
+          className="fixed inset-0 z-40 grid place-items-center bg-[var(--overlay)]"
           onClick={() => finishBig(big.sign, big.isNewSave)}
           data-testid="big-sign"
           role="dialog"
@@ -164,7 +164,7 @@ export function Stage1_2({ onComplete }: { onComplete: () => void }) {
           aria-label={savedSignLabel(big.sign)}
         >
           <div
-            className="flex flex-col items-center gap-3 rounded-3xl bg-white p-6 shadow-2xl"
+            className="flex flex-col items-center gap-3 rounded-3xl bg-[var(--card)] p-6 shadow-2xl"
             style={
               big.flying && big.fly
                 ? ({ "--fly-x": `${big.fly.x}px`, "--fly-y": `${big.fly.y}px`, animation: "fly-to-notebook 0.65s ease-in forwards" } as React.CSSProperties)
@@ -174,14 +174,14 @@ export function Stage1_2({ onComplete }: { onComplete: () => void }) {
             <div className="relative">
               <SignIcon sign={big.sign} size={240} />
               {big.isNewSave && (
-                <span className="absolute -right-4 -top-4 rounded-full bg-white p-1 shadow" data-testid="saved-tick">
+                <span className="absolute -right-4 -top-4 rounded-full bg-[var(--card)] p-1 shadow" data-testid="saved-tick">
                   <TickIcon className="h-10 w-10" />
                 </span>
               )}
             </div>
-            <p className="text-xl font-semibold text-slate-800">{savedSignLabel(big.sign)}</p>
+            <p className="text-xl font-semibold text-[var(--heading)]">{savedSignLabel(big.sign)}</p>
             {big.isNewSave && (
-              <p className="text-lg text-emerald-800" role="status" data-testid="saved-toast">
+              <p className="text-lg text-[var(--success)]" role="status" data-testid="saved-toast">
                 {S1_2.saved}
               </p>
             )}
@@ -256,16 +256,16 @@ function MiniMap({ current, card }: { current: number; card?: boolean }) {
   if (card) {
     // 2 × 2 map card, like the illustrator's: the current place in yellow with a pin.
     return (
-      <ol className="grid h-full w-full grid-cols-2 gap-[4%] rounded-lg bg-white p-[3%] text-[clamp(8px,1vw,15px)] shadow ring-1 ring-slate-300" aria-label="Map of the work area" data-testid="mini-map">
+      <ol className="grid h-full w-full grid-cols-2 gap-[4%] rounded-lg bg-[var(--card)] p-[3%] text-[clamp(8px,1vw,15px)] shadow ring-1 ring-[var(--border)]" aria-label="Map of the work area" data-testid="mini-map">
         {PLACES.map((p, i) => (
           <li
             key={p.id}
             aria-current={i === current ? "location" : undefined}
-            className={`flex items-center justify-center rounded-md text-center font-semibold leading-tight ring-1 ${i === current ? "bg-[#fed835] text-slate-900 ring-amber-500" : "bg-slate-100 text-slate-700 ring-slate-300"}`}
+            className={`flex items-center justify-center rounded-md text-center font-semibold leading-tight ring-1 ${i === current ? "bg-[var(--blue-tonal-bg)] text-[var(--blue)] ring-[var(--blue)]" : "bg-[var(--card)] text-[var(--body)] ring-[var(--border)]"}`}
           >
             {i === current && (
               <svg viewBox="0 0 24 24" className="mr-[0.3em] h-[1.3em] w-[1.3em] shrink-0" aria-hidden>
-                <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" fill="#dc2626" />
+                <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" fill="#3c59f6" />
                 <circle cx="12" cy="9" r="2.6" fill="white" />
               </svg>
             )}
@@ -280,12 +280,12 @@ function MiniMap({ current, card }: { current: number; card?: boolean }) {
       {PLACES.map((p, i) => (
         <li key={p.id} className="flex items-center gap-1">
           <span
-            className={`rounded-md px-2 py-1 text-sm sm:text-base ${i === current ? "bg-teal-700 font-semibold text-white" : "bg-white text-slate-600 ring-1 ring-slate-300"}`}
+            className={`rounded-md px-2 py-1 text-sm sm:text-base ${i === current ? "bg-[var(--blue)] font-semibold text-white" : "bg-[var(--card)] text-[var(--body)] ring-1 ring-[var(--border)]"}`}
             aria-current={i === current ? "location" : undefined}
           >
             {p.name}
           </span>
-          {i < PLACES.length - 1 && <span className="text-slate-400" aria-hidden>→</span>}
+          {i < PLACES.length - 1 && <span className="text-[var(--muted)]" aria-hidden>→</span>}
         </li>
       ))}
     </ol>

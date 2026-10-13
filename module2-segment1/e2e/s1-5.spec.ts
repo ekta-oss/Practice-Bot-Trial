@@ -41,6 +41,8 @@ test.describe("Stage 1.5 Colour Sort", () => {
     await expect(page.getByTestId("done-feedback")).toHaveText("Three of each colour. Now, what does each colour mean?");
     for (const c of ["red", "yellow", "blue", "green"]) await expect(page.getByTestId(`box-${c}-items`).locator("[data-placed]")).toHaveCount(3);
     await page.getByTestId("continue-button").click();
+    await expect(page.getByTestId("segment-complete")).toBeVisible();
+    await page.getByTestId("next-stage").click();
     await expect(page.getByTestId("stage-title")).toContainText("1.6");
   });
 });

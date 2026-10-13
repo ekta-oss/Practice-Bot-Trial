@@ -72,21 +72,21 @@ export function Stage1_6({ onComplete }: { onComplete: () => void }) {
 
       {step.kind === "score" && (
         <section className="mx-auto flex w-full max-w-2xl flex-col items-center gap-5 text-center" data-testid="score-screen">
-          <p className="text-7xl font-extrabold text-teal-800" data-testid="score-big">
+          <p className="text-7xl font-extrabold text-[var(--blue)]" data-testid="score-big">
             {score} / 5
           </p>
-          <p className="text-2xl text-slate-900" data-testid="score-line">
+          <p className="text-2xl text-[var(--heading)]" data-testid="score-line">
             {S1_6.score(score)}
           </p>
-          <p className="text-xl text-slate-700" data-testid="segue-line">
+          <p className="text-xl text-[var(--body)]" data-testid="segue-line">
             {score >= 3 ? S1_6.nar2.text : S1_6.nar3.text}
           </p>
-          <p className="text-xl font-semibold text-slate-900">{S1_6.readPrompt}</p>
-          <OpenArticleButton label={S1_6.openArticle} url={S1_6.articleUrl} onOpened={() => setStep({ kind: "score", opened: true })} />
-          <p className="text-base text-slate-600">
+          <p className="text-xl font-semibold text-[var(--heading)]">{S1_6.readPrompt}</p>
+          <OpenArticleButton primary={!step.opened} label={S1_6.openArticle} url={S1_6.articleUrl} onOpened={() => setStep({ kind: "score", opened: true })} />
+          <p className="text-base text-[var(--body)]">
             {S1_6.articleSource}, ‘{S1_6.articleTitle}’
           </p>
-          <button type="button" className="text-base text-slate-600 underline underline-offset-4 hover:text-slate-900" onClick={() => setStep({ kind: "backup" })} data-testid="article-did-not-open">
+          <button type="button" className="text-base text-[var(--body)] underline underline-offset-4 hover:text-[var(--heading)]" onClick={() => setStep({ kind: "backup" })} data-testid="article-did-not-open">
             {S1_6.articleDidNotOpen}
           </button>
           {step.opened && (
@@ -151,11 +151,11 @@ function GuessScreen({ index, onPick }: { index: number; onPick: (answer: string
   useSay([g.prompt], { afterFlow: true });
   return (
     <section className="mx-auto flex w-full max-w-2xl flex-col items-center gap-6" aria-labelledby="guess-q" data-testid="guess-screen" data-guess={g.id}>
-      <p className="text-base text-slate-600">
+      <p className="text-base text-[var(--body)]">
         {index + 1} / {S1_6.guesses.length}
       </p>
       <Swatch kind={g.swatch} className="h-40 w-40 sm:h-52 sm:w-52" />
-      <h2 id="guess-q" className="text-3xl font-semibold text-slate-900">
+      <h2 id="guess-q" className="text-3xl font-semibold text-[var(--heading)]">
         {g.prompt}
       </h2>
       <div className={`grid w-full gap-3 ${g.options.length === 4 ? "grid-cols-2" : "grid-cols-1 sm:grid-cols-3"}`}>
@@ -179,7 +179,7 @@ function Game1({ onDone }: { onDone: () => void }) {
         label: c.text,
         target: c.target,
         render: (size) => (
-          <span className={`block rounded-xl bg-white text-center font-semibold text-slate-900 shadow ring-1 ring-slate-300 ${size === "placed" ? "px-2 py-1 text-sm" : "px-4 py-3 text-lg"}`}>{c.text}</span>
+          <span className={`block rounded-xl bg-[var(--card)] text-center font-semibold text-[var(--heading)] shadow ring-1 ring-[var(--border)] ${size === "placed" ? "px-2 py-1 text-sm" : "px-4 py-3 text-lg"}`}>{c.text}</span>
         ),
       })),
     [],
@@ -218,8 +218,8 @@ function Game2({ onDone }: { onDone: () => void }) {
       S1_6.game2.shapes.map((s) => ({
         id: `meaning-${s.id}`,
         label: s.meaning,
-        className: "bg-white ring-2 ring-slate-300 !flex-row justify-between",
-        render: () => <span className="text-xl font-semibold text-slate-900">{s.meaning}</span>,
+        className: "bg-[var(--card)] ring-2 ring-[var(--border)] !flex-row justify-between",
+        render: () => <span className="text-xl font-semibold text-[var(--heading)]">{s.meaning}</span>,
       })),
     [],
   );

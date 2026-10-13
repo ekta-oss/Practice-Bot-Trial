@@ -24,22 +24,22 @@ export function Notebook() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="relative flex h-12 items-center gap-2 rounded-xl bg-white px-4 text-base font-semibold text-slate-900 shadow ring-1 ring-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:outline-4 focus-visible:outline-amber-400"
+        className="relative flex h-12 items-center gap-2 rounded-full border border-[var(--blue-tonal-border)] bg-[var(--blue-tonal-bg)] px-4 text-base font-semibold text-[var(--blue)] transition hover:brightness-105 focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--blue)]"
         data-testid="notebook-button"
         aria-label={`My signs: ${count}. Open notebook`}
       >
         <NotebookIcon />
         <span className="hidden sm:inline">My signs</span>
-        <span className="grid h-8 min-w-8 place-items-center rounded-full bg-[#cfe3fb] px-1.5 text-base font-bold text-slate-900" data-testid="notebook-count" id="notebook-target">
+        <span className="grid h-8 min-w-8 place-items-center rounded-full bg-[#cfe3fb] px-1.5 text-base font-bold text-[var(--heading)]" data-testid="notebook-count" id="notebook-target">
           {count}
         </span>
       </button>
 
       {open &&
         createPortal(
-        <div className="fixed inset-0 z-50 flex justify-start bg-slate-900/40" role="dialog" aria-modal="true" aria-label="My notebook" onClick={() => setOpen(false)}>
-          <div className="flex h-full w-full max-w-xl flex-col bg-amber-50 shadow-2xl" onClick={(e) => e.stopPropagation()} data-testid="notebook-panel">
-            <div className="flex items-center justify-between border-b border-amber-200 px-5 py-3">
+        <div className="fixed inset-0 z-50 flex justify-start bg-[var(--overlay)]" role="dialog" aria-modal="true" aria-label="My notebook" onClick={() => setOpen(false)}>
+          <div className="flex h-full w-full max-w-xl flex-col bg-[#fbfbfe] text-[#5c6690] shadow-2xl" onClick={(e) => e.stopPropagation()} data-testid="notebook-panel">
+            <div className="flex items-center justify-between border-b border-[#e4e8f5] px-5 py-3">
               <div role="tablist" className="flex gap-1">
                 {(
                   [
@@ -53,13 +53,13 @@ export function Notebook() {
                     role="tab"
                     aria-selected={tab === id}
                     onClick={() => setTab(id)}
-                    className={`rounded-full px-3 py-2 text-base ${tab === id ? "bg-amber-700 text-white" : "text-amber-950 hover:bg-amber-100"}`}
+                    className={`rounded-full px-3 py-2 text-base ${tab === id ? "bg-[#3c59f6] text-white" : "text-[#0e1a4f] hover:bg-[rgba(60,89,246,0.08)]"}`}
                   >
                     {label}
                   </button>
                 ))}
               </div>
-              <button type="button" onClick={() => setOpen(false)} className="grid h-11 w-11 place-items-center rounded-full text-2xl hover:bg-amber-100" aria-label="Close notebook" autoFocus>
+              <button type="button" onClick={() => setOpen(false)} className="grid h-11 w-11 place-items-center rounded-full text-2xl text-[#0e1a4f] hover:bg-[rgba(60,89,246,0.08)]" aria-label="Close notebook" autoFocus>
                 ×
               </button>
             </div>
@@ -78,7 +78,7 @@ export function Notebook() {
 
 export function MySignsGrid({ onPick, compact }: { onPick?: (id: string) => void; compact?: boolean }) {
   const { state } = useProgress();
-  if (state.mySigns.length === 0) return <p className="text-lg text-slate-600">No signs saved yet.</p>;
+  if (state.mySigns.length === 0) return <p className="text-lg text-[var(--body)]">No signs saved yet.</p>;
   return (
     <ul className={`grid ${compact ? "gap-2" : "gap-3"} ${compact ? "grid-cols-4" : "grid-cols-2 sm:grid-cols-3"}`} data-testid="my-signs-grid">
       {state.mySigns.map((s) => {
@@ -86,18 +86,18 @@ export function MySignsGrid({ onPick, compact }: { onPick?: (id: string) => void
         const inner = (
           <>
             <SignIcon sign={sign} size="fill" className={compact ? "max-w-[64px]" : "max-w-[110px]"} />
-            <span className={`text-center leading-tight text-slate-800 ${compact ? "text-xs sm:text-sm" : "text-sm"}`}>{savedSignLabel(sign)}</span>
-            {s.isNew && <span className="absolute right-1 top-1 rounded-full bg-sky-600 px-2 py-0.5 text-xs font-semibold text-white">{S1_2.newTag}</span>}
+            <span className={`text-center leading-tight text-[var(--heading)] ${compact ? "text-xs sm:text-sm" : "text-sm"}`}>{savedSignLabel(sign)}</span>
+            {s.isNew && <span className="absolute right-1 top-1 rounded-full bg-[var(--blue)] px-2 py-0.5 text-xs font-semibold text-white">{S1_2.newTag}</span>}
           </>
         );
         return (
           <li key={s.id} data-testid={`my-sign-${s.id}`} data-new={s.isNew}>
             {onPick ? (
-              <button type="button" onClick={() => onPick(s.id)} className="relative flex w-full flex-col items-center gap-2 rounded-xl bg-white p-2 ring-1 ring-slate-200 hover:ring-teal-500 focus-visible:outline focus-visible:outline-4 focus-visible:outline-amber-400">
+              <button type="button" onClick={() => onPick(s.id)} className="relative flex w-full flex-col items-center gap-2 rounded-xl bg-[var(--card)] p-2 ring-1 ring-[var(--border)] hover:ring-[var(--blue-tonal-border)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--blue)]">
                 {inner}
               </button>
             ) : (
-              <div className="relative flex flex-col items-center gap-2 rounded-xl bg-white p-2 ring-1 ring-slate-200">{inner}</div>
+              <div className="relative flex flex-col items-center gap-2 rounded-xl bg-[var(--card)] p-2 ring-1 ring-[var(--border)]">{inner}</div>
             )}
           </li>
         );
@@ -108,7 +108,7 @@ export function MySignsGrid({ onPick, compact }: { onPick?: (id: string) => void
 
 export function ColourKeyCard({ compact }: { compact?: boolean }) {
   return (
-    <div className={`rounded-xl bg-white ring-1 ring-slate-300 ${compact ? "p-2 text-sm" : "p-4 text-lg"}`} data-testid="colour-key-card" aria-label="Colour key">
+    <div className={`rounded-xl bg-[var(--card)] ring-1 ring-[var(--border)] ${compact ? "p-2 text-sm" : "p-4 text-lg"}`} data-testid="colour-key-card" aria-label="Colour key">
       <ul className="space-y-1">
         {COLOUR_KEY_LINES.map((l) => (
           <li key={l.colour} className="flex items-center gap-2">
@@ -123,7 +123,7 @@ export function ColourKeyCard({ compact }: { compact?: boolean }) {
 
 function MyNotes() {
   const { state } = useProgress();
-  if (state.myNotes.length === 0) return <p className="text-lg text-slate-600">No notes yet.</p>;
+  if (state.myNotes.length === 0) return <p className="text-lg text-[var(--body)]">No notes yet.</p>;
   return (
     <div className="space-y-4">
       {state.myNotes.map((n) => (n.id === "colour-key" ? <ColourKeyCard key={n.id} /> : null))}
@@ -142,10 +142,10 @@ function MyRecordings() {
   if (!recs) return null;
   return (
     <div className="space-y-3">
-      <p className="flex items-center gap-2 text-base text-slate-700">
+      <p className="flex items-center gap-2 text-base text-[var(--body)]">
         <span className="rounded-full bg-blue-600 px-3 py-1 text-sm font-semibold text-white">Practice</span> Only you can hear this.
       </p>
-      {recs.length === 0 && <p className="text-lg text-slate-600">No recordings kept yet.</p>}
+      {recs.length === 0 && <p className="text-lg text-[var(--body)]">No recordings kept yet.</p>}
       {recs
         .sort((a, b) => a.savedAt - b.savedAt)
         .map((r) => (
@@ -159,7 +159,7 @@ function RecordingRow({ rec }: { rec: StoredRecording }) {
   const [url] = useState(() => URL.createObjectURL(rec.blob));
   useEffect(() => () => URL.revokeObjectURL(url), [url]);
   return (
-    <div className="flex items-center gap-3 rounded-xl bg-white p-3 ring-1 ring-slate-200" data-testid="saved-recording">
+    <div className="flex items-center gap-3 rounded-xl bg-[var(--card)] p-3 ring-1 ring-[var(--border)]" data-testid="saved-recording">
       <SpeakerIcon />
       <span className="flex-1 text-base">
         Stage {rec.stageId} · {Math.round(rec.durationMs / 1000)} s

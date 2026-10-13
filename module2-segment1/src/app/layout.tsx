@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Noto_Sans } from "next/font/google";
+import { Instrument_Sans } from "next/font/google";
 import "./globals.css";
 
-const noto = Noto_Sans({
-  variable: "--font-noto-sans",
+// Swift AI Academy: one family throughout (Instrument Sans).
+const instrument = Instrument_Sans({
+  variable: "--font-instrument",
   subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -20,7 +21,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${noto.variable} h-full antialiased`}>
+    <html lang="en" className={`${instrument.variable} h-full antialiased`}>
       <body className="min-h-full">{children}</body>
     </html>
   );
