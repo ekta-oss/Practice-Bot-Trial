@@ -4,7 +4,7 @@
 14 lines named in the production script, and 61 on-screen instructions and feedback lines (`M2_UI_…`).
 
 Voices:
-- **Person in charge** — `af_heart`, female, energetic; about 150 words per minute while speaking.
+- **Person in charge** — `af_heart`, female, energetic and smiley: voice lifted about one semitone, brighter tone, greetings voiced as exclamations (audio only); about 155 words per minute while speaking.
 - **Narrator** — `am_michael`, male, energetic yet firm; about 140 words per minute. Also reads the instructions and feedback.
 
 Each line is voiced phrase by phrase at one steady speed and joined with pauses (0.45 s between sentences, 0.28 s at dashes, 0.25 s at colons). Loudness is evened out. The Pace column includes the pauses.
@@ -14,8 +14,8 @@ To replace one, drop the recorded file here with the same name.
 
 | File | Role | Voice | Length | Pace | Text |
 |---|---|---|---|---|---|
-| M2_S01_01_PIC_01.mp3 | PIC | af_heart | 5.4 s | 90 wpm | Good morning! Welcome. You must be new here. |
-| M2_S01_01_PIC_02.mp3 | PIC | af_heart | 12 s | 140 wpm | Nice to meet you. Before you start, take a walk round the work area and get to know the place. Come back to me when you are done. |
+| M2_S01_01_PIC_01.mp3 | PIC | af_heart | 5.1 s | 93 wpm | Good morning! Welcome. You must be new here. |
+| M2_S01_01_PIC_02.mp3 | PIC | af_heart | 11.3 s | 148 wpm | Nice to meet you. Before you start, take a walk round the work area and get to know the place. Come back to me when you are done. |
 | M2_S01_01_NAR_FB01.mp3 | NAR | am_michael | 4.9 s | 121 wpm | Great start — you greeted and said who you are. |
 | M2_S01_01_NAR_FB02.mp3 | NAR | am_michael | 6.4 s | 94 wpm | Record again: Say hello. Say your name and your job. |
 | M2_S01_01_NAR_FB03.mp3 | NAR | am_michael | 5.2 s | 127 wpm | Good — now the person in charge knows who you are. |

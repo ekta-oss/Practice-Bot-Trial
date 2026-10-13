@@ -13,10 +13,61 @@ import { uiLine } from "../src/lib/uiAudio";
 
 const OUT = path.resolve(import.meta.dirname, "..", "public", "media", "audio");
 
-// Person in charge: female, energetic. Narrator: male, energetic yet firm (also reads instructions).
-const VOICE: Record<Line["role"], string> = { PIC: "af_heart", NAR: "am_michael", MOD: "af_bella" };
+// Usage:  npx tsx scripts/make-voice.mts                 all lines
+//         npx tsx scripts/make-voice.mts --only=PIC      just the person in charge's lines
+//         npx tsx scripts/make-voice.mts --samples       voice samples to choose from (voice-samples/)
+//         --pic-voice=af_bella                            pick the person in charge's voice
+const arg = (name: string) => process.argv.find((a) => a.startsWith(`--${name}=`))?.split("=")[1];
+const ONLY = arg("only") as Line["role"] | undefined;
+const SAMPLES = process.argv.includes("--samples");
+
+// Person in charge: female, energetic and smiley. Narrator: male, energetic yet firm (also reads instructions).
+const VOICE: Record<Line["role"], string> = { PIC: arg("pic-voice") ?? "af_heart", NAR: "am_michael", MOD: "af_bella" };
 // Speaking rate while talking (pauses come on top). Steady: one speed per voice for every line.
-const TARGET_WPM: Record<Line["role"], number> = { PIC: 150, NAR: 140, MOD: 140 };
+const TARGET_WPM: Record<Line["role"], number> = { PIC: 155, NAR: 140, MOD: 140 };
+
+/**
+ * Voice styling. Kokoro has no emotion control, so the "smile" is made by:
+ *  - pitch: lifting the voice (factor 1.07 ≈ +1.2 semitones) without changing the pace;
+ *  - presence: a gentle boost of the upper range (brighter, more forward);
+ *  - direction: greetings voiced as exclamations (audio only; on-screen text is unchanged).
+ */
+const STYLE: Record<Line["role"], { pitch: number; presence: number; direction?: (t: string) => string }> = {
+  PIC: {
+    pitch: 1.07,
+    presence: 0.35,
+    direction: (t) => t.replace(/\bWelcome\./g, "Welcome!").replace(/\bNice to meet you\./g, "Nice to meet you!"),
+  },
+  NAR: { pitch: 1, presence: 0 },
+  MOD: { pitch: 1, presence: 0 },
+};
+
+/** Raises pitch and pace together by `r` (linear resampling); voices are generated `r` slower to keep the pace. */
+function pitchUp(x: Float32Array, r: number): Float32Array {
+  if (r === 1) return x;
+  const n = Math.floor(x.length / r);
+  const y = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const p = i * r;
+    const j = Math.floor(p);
+    const f = p - j;
+    y[i] = x[j] * (1 - f) + (x[j + 1] ?? x[j]) * f;
+  }
+  return y;
+}
+
+/** Adds `amount` of the signal above ~2.5 kHz back in: brighter, more "smiling" timbre. */
+function presence(x: Float32Array, rate: number, amount: number): Float32Array {
+  if (!amount) return x;
+  const a = Math.exp((-2 * Math.PI * 2500) / rate);
+  const y = new Float32Array(x.length);
+  let low = 0;
+  for (let i = 0; i < x.length; i++) {
+    low = (1 - a) * x[i] + a * low;
+    y[i] = x[i] + amount * (x[i] - low);
+  }
+  return y;
+}
 // Pauses between phrases, in seconds.
 const PAUSE = { sentence: 0.45, exclaim: 0.4, question: 0.45, dash: 0.28, colon: 0.25 };
 
@@ -113,15 +164,17 @@ for (const role of Object.keys(VOICE) as Line["role"][]) {
 }
 console.log("speeds", speed);
 
-/** Voices a line phrase by phrase at one speed, joined with the planned pauses. */
-async function voiceLine(l: Line): Promise<{ samples: Float32Array; rate: number }> {
+/** Voices a line phrase by phrase at one speed, styled, joined with the planned pauses. */
+async function voiceLine(l: Line, voice = VOICE[l.role], spd = speed[l.role]): Promise<{ samples: Float32Array; rate: number }> {
+  const style = STYLE[l.role];
   const parts: Float32Array[] = [];
   let rate = 24000;
-  const ps = phrases(l.text);
+  const ps = phrases(style.direction ? style.direction(l.text) : l.text);
   for (const [i, p] of ps.entries()) {
-    const a = await tts.generate(p.text, { voice: VOICE[l.role] as never, speed: speed[l.role] });
+    // Generated `pitch` times slower, then lifted by `pitch`: higher voice, same pace.
+    const a = await tts.generate(p.text, { voice: voice as never, speed: spd / style.pitch });
     rate = a.sampling_rate;
-    parts.push(trim(a.audio, rate));
+    parts.push(presence(pitchUp(trim(a.audio, rate), style.pitch), rate, style.presence));
     if (i < ps.length - 1) parts.push(new Float32Array(Math.round(rate * p.pause)));
   }
   const joined = new Float32Array(parts.reduce((n, p) => n + p.length, 0));
@@ -133,11 +186,50 @@ async function voiceLine(l: Line): Promise<{ samples: Float32Array; rate: number
   return { samples: joined, rate };
 }
 
+if (SAMPLES) {
+  // The person in charge's two lines in several female voices, same styling, to choose from.
+  const dir = path.resolve(import.meta.dirname, "..", "voice-samples");
+  fs.mkdirSync(dir, { recursive: true });
+  const pic = scriptLines.filter((l) => l.role === "PIC");
+  for (const v of ["af_heart", "af_bella", "af_nova", "af_sky", "af_jessica"]) {
+    const a = await tts.generate(CAL, { voice: v as never, speed: 1 });
+    const spd = +(TARGET_WPM.PIC / ((words(CAL) / (trim(a.audio, a.sampling_rate, 0).length / a.sampling_rate)) * 60)).toFixed(2);
+    const chunks: Float32Array[] = [];
+    let rate = 24000;
+    for (const l of pic) {
+      const r = await voiceLine(l, v, spd);
+      rate = r.rate;
+      chunks.push(polish(r.samples, rate), new Float32Array(Math.round(rate * 0.6)));
+    }
+    const all = new Float32Array(chunks.reduce((n, c) => n + c.length, 0));
+    let o = 0;
+    for (const c of chunks) {
+      all.set(c, o);
+      o += c.length;
+    }
+    fs.writeFileSync(path.join(dir, `person-in-charge_${v}.mp3`), toMp3(all, rate));
+    console.log("sample", v);
+  }
+  process.exit(0);
+}
+
 fs.mkdirSync(OUT, { recursive: true });
-for (const f of fs.readdirSync(OUT)) if (f.endsWith(".mp3")) fs.rmSync(path.join(OUT, f)); // fresh set
+// Fresh set (or just the chosen role's files with --only).
+for (const l of lines) if (!ONLY || l.role === ONLY) fs.rmSync(path.join(OUT, l.file), { force: true });
+
+const prev = new Map<string, { seconds: number; wpm: number }>();
+const prevMd = path.join(OUT, "INTERIM_AUDIO.md");
+if (ONLY && fs.existsSync(prevMd)) {
+  for (const m of fs.readFileSync(prevMd, "utf8").matchAll(/^\| (\S+\.mp3) \| \w+ \| \S+ \| ([\d.]+) s \| (\d+) wpm/gm)) prev.set(m[1], { seconds: +m[2], wpm: +m[3] });
+}
 
 const report: { file: string; role: string; voice: string; seconds: number; wpm: number; text: string }[] = [];
 for (const [i, l] of lines.entries()) {
+  if (ONLY && l.role !== ONLY) {
+    const p = prev.get(l.file);
+    report.push({ file: l.file, role: l.role, voice: VOICE[l.role], seconds: p?.seconds ?? 0, wpm: p?.wpm ?? 0, text: l.text });
+    continue;
+  }
   const v = await voiceLine(l);
   const s = polish(v.samples, v.rate);
   fs.writeFileSync(path.join(OUT, l.file), toMp3(s, v.rate));
@@ -154,7 +246,7 @@ ${report.length} MP3s made with **Kokoro** (open-source neural text-to-speech, A
 ${scriptLines.length} lines named in the production script, and ${report.length - scriptLines.length} on-screen instructions and feedback lines (\`M2_UI_…\`).
 
 Voices:
-- **Person in charge** — \`${VOICE.PIC}\`, female, energetic; about ${TARGET_WPM.PIC} words per minute while speaking.
+- **Person in charge** — \`${VOICE.PIC}\`, female, energetic and smiley: voice lifted about one semitone, brighter tone, greetings voiced as exclamations (audio only); about ${TARGET_WPM.PIC} words per minute while speaking.
 - **Narrator** — \`${VOICE.NAR}\`, male, energetic yet firm; about ${TARGET_WPM.NAR} words per minute. Also reads the instructions and feedback.
 
 Each line is voiced phrase by phrase at one steady speed and joined with pauses (${PAUSE.sentence} s between sentences, ${PAUSE.dash} s at dashes, ${PAUSE.colon} s at colons). Loudness is evened out. The Pace column includes the pauses.
