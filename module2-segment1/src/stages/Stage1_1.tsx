@@ -87,6 +87,9 @@ export function Stage1_1({ onComplete }: { onComplete: () => void }) {
         place="entrance"
         imageOverride={pic.file}
         artAspect={pic.aspect}
+        rig={pic.rig}
+        pushIn={pic.pushIn}
+        speaking={now?.line.role === "PIC"}
         withPic={step === "line2" ? "point" : "stand"}
         className={`mx-auto w-full rounded-2xl shadow transition-[max-width] duration-500 ${showStill ? "max-w-[calc(26vh*16/9)]" : "max-w-[calc(44vh*16/9)]"}`}>
         {!showStill && clip.video}

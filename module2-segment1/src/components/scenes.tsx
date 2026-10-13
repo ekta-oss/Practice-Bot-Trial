@@ -324,8 +324,28 @@ export const ART: Record<PlaceId, { aspect: number; signs: Record<string, Box>; 
 };
 
 /** Stage 1.1 stills from the illustrator (arrival → welcome → pointing down the corridor). */
-export const RECEPTION_ART = {
-  arrival: { file: "M2_S01_01_IMG_01_arrival.webp", aspect: 1672 / 941 },
-  welcome: { file: "M2_S01_01_IMG_02_welcome.webp", aspect: 1383 / 778 },
-  pointing: { file: "M2_S01_01_IMG_03_pointing.webp", aspect: 1324 / 745 },
+/**
+ * A light "rig" for animating the person in charge on a still picture: her
+ * figure breathes, her head nods while she speaks. Boxes are % of the picture;
+ * the pivot is her neck.
+ */
+export interface CharacterRig {
+  figure: Box;
+  head: Box;
+  pivot: { x: number; y: number };
+}
+
+export const RECEPTION_ART: Record<"arrival" | "welcome" | "pointing", { file: string; aspect: number; rig?: CharacterRig; pushIn?: { x: number; y: number } }> = {
+  // Camera moves in through the door towards the reception desk.
+  arrival: { file: "M2_S01_01_IMG_01_arrival.webp", aspect: 1672 / 941, pushIn: { x: 66, y: 34 } },
+  welcome: {
+    file: "M2_S01_01_IMG_02_welcome.webp",
+    aspect: 1383 / 778,
+    rig: { figure: { left: 41, top: 3, width: 47, height: 97 }, head: { left: 58.5, top: 4, width: 18, height: 30 }, pivot: { x: 66.5, y: 33 } },
+  },
+  pointing: {
+    file: "M2_S01_01_IMG_03_pointing.webp",
+    aspect: 1324 / 745,
+    rig: { figure: { left: 43, top: 4, width: 38, height: 96 }, head: { left: 59, top: 5.5, width: 16, height: 31 }, pivot: { x: 66.8, y: 36 } },
+  },
 };

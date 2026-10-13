@@ -5,7 +5,8 @@ import type { Line, PlaceId } from "@/content/segment1";
 import { VIDEO_DIR, assetExists } from "@/lib/media";
 import { useArt } from "@/lib/useArt";
 import { useLinePlayer, useRuntime, type NowPlaying } from "@/lib/runtime";
-import { SCENE_IMAGE, SceneArt } from "./scenes";
+import { SCENE_IMAGE, SceneArt, type CharacterRig } from "./scenes";
+import { AnimatedStill } from "./AnimatedStill";
 import { MissingAssetBadge } from "./ui";
 
 export { useArt };
@@ -22,6 +23,9 @@ export function SceneFrame({
   imageOverride,
   artAspect,
   blur,
+  rig,
+  pushIn,
+  speaking,
 }: {
   place: PlaceId;
   withPic?: "stand" | "point" | false;
@@ -30,7 +34,12 @@ export function SceneFrame({
   imageOverride?: string;
   artAspect?: number;
   blur?: boolean;
+  /** Animate the person in charge on this picture (see AnimatedStill). */
+  rig?: CharacterRig;
+  pushIn?: { x: number; y: number };
+  speaking?: boolean;
 }) {
+  const { paused } = useRuntime();
   const img = useArt(imageOverride ?? SCENE_IMAGE[place]);
   const ratio = img && artAspect ? { aspectRatio: String(artAspect) } : undefined;
   return (
@@ -41,7 +50,9 @@ export function SceneFrame({
       data-art={img ? "final" : "interim"}
     >
       <div className={`absolute inset-0 ${blur ? "scale-105 blur-md" : ""}`}>
-        {img ? (
+        {img && (rig || pushIn) ? (
+          <AnimatedStill src={img} rig={rig} pushIn={pushIn} speaking={speaking} paused={paused} />
+        ) : img ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={img} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
         ) : (
