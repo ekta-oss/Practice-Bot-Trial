@@ -326,13 +326,15 @@ export const ART: Record<PlaceId, { aspect: number; signs: Record<string, Box>; 
 /** Stage 1.1 stills from the illustrator (arrival → welcome → pointing down the corridor). */
 /**
  * A light "rig" for animating the person in charge on a still picture: her
- * figure breathes, her head nods while she speaks. Boxes are % of the picture;
- * the pivot is her neck.
+ * figure breathes, and her lips move with her voice while she speaks. Boxes
+ * are % of the picture. The jaw box covers her lower lip and the skin below it
+ * (its soft edges fall on plain skin); it stretches down from the hinge, the
+ * line where her teeth meet.
  */
 export interface CharacterRig {
   figure: Box;
-  head: Box;
-  pivot: { x: number; y: number };
+  jaw: Box;
+  hinge: { x: number; y: number };
 }
 
 export const RECEPTION_ART: Record<"arrival" | "welcome" | "pointing", { file: string; aspect: number; rig?: CharacterRig; pushIn?: { x: number; y: number } }> = {
@@ -341,11 +343,11 @@ export const RECEPTION_ART: Record<"arrival" | "welcome" | "pointing", { file: s
   welcome: {
     file: "M2_S01_01_IMG_02_welcome.webp",
     aspect: 1383 / 778,
-    rig: { figure: { left: 41, top: 3, width: 47, height: 97 }, head: { left: 58.5, top: 4, width: 18, height: 30 }, pivot: { x: 66.5, y: 33 } },
+    rig: { figure: { left: 41, top: 3, width: 47, height: 97 }, jaw: { left: 64.9, top: 29.4, width: 5.5, height: 3.8 }, hinge: { x: 67.5, y: 29.9 } },
   },
   pointing: {
     file: "M2_S01_01_IMG_03_pointing.webp",
     aspect: 1324 / 745,
-    rig: { figure: { left: 43, top: 4, width: 38, height: 96 }, head: { left: 59, top: 5.5, width: 16, height: 31 }, pivot: { x: 66.8, y: 36 } },
+    rig: { figure: { left: 43, top: 4, width: 38, height: 96 }, jaw: { left: 62.3, top: 29.6, width: 4.5, height: 3.6 }, hinge: { x: 64.1, y: 30.2 } },
   },
 };

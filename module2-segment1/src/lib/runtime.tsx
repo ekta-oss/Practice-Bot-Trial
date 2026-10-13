@@ -57,6 +57,11 @@ function takeAudio(src: string): HTMLAudioElement {
   return a;
 }
 
+/** The audio element a voice line plays through, if it has been loaded (used for lip movement). */
+export function lineAudio(file: string): HTMLAudioElement | undefined {
+  return audioCache.get(AUDIO_DIR + file);
+}
+
 /** Starts loading these audio files in the background (files that do not exist are skipped). */
 export function preloadAudio(files: string[]) {
   if (typeof window === "undefined" || fastMedia()) return;

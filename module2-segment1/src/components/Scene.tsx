@@ -26,6 +26,7 @@ export function SceneFrame({
   rig,
   pushIn,
   speaking,
+  voiceFile,
 }: {
   place: PlaceId;
   withPic?: "stand" | "point" | false;
@@ -38,6 +39,7 @@ export function SceneFrame({
   rig?: CharacterRig;
   pushIn?: { x: number; y: number };
   speaking?: boolean;
+  voiceFile?: string | null;
 }) {
   const { paused } = useRuntime();
   const img = useArt(imageOverride ?? SCENE_IMAGE[place]);
@@ -51,7 +53,7 @@ export function SceneFrame({
     >
       <div className={`absolute inset-0 ${blur ? "scale-105 blur-md" : ""}`}>
         {img && (rig || pushIn) ? (
-          <AnimatedStill src={img} rig={rig} pushIn={pushIn} speaking={speaking} paused={paused} />
+          <AnimatedStill src={img} rig={rig} pushIn={pushIn} speaking={speaking} voiceFile={voiceFile} paused={paused} />
         ) : img ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={img} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />

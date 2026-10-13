@@ -158,13 +158,3 @@ body {
   0%, 100% { transform: translateY(0) scaleY(1); }
   50% { transform: translateY(-0.25%) scaleY(1.005); }
 }
-@keyframes idle-tilt {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(-0.6deg) translateY(0.1%); }
-}
-@keyframes talk-nod {
-  0%, 100% { transform: rotate(0deg) translateY(0); }
-  20% { transform: rotate(-1deg) translateY(0.25%); }
-  45% { transform: rotate(0.6deg) translateY(-0.1%); }
-  70% { transform: rotate(-0.7deg) translateY(0.2%); }
-}
