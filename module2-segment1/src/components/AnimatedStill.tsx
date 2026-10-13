@@ -26,19 +26,27 @@ export function AnimatedStill({
   speaking?: boolean;
   paused?: boolean;
 }) {
-  const play: CSSProperties = { animationPlayState: paused ? "paused" : "running" };
+  // Longhand animation properties only (mixing them with the "animation" shorthand confuses React on re-render).
+  const anim = (name: string, duration: string, timing: string, count: string, fill = "none"): CSSProperties => ({
+    animationName: name,
+    animationDuration: duration,
+    animationTimingFunction: timing,
+    animationIterationCount: count,
+    animationFillMode: fill,
+    animationPlayState: paused ? "paused" : "running",
+  });
   return (
     <div key={src} className="absolute inset-0 animate-[still-in_0.7s_ease-out]" data-testid="animated-still" data-speaking={speaking ? "true" : "false"}>
       <div
         className="absolute inset-0"
-        style={pushIn ? { ...play, transformOrigin: `${pushIn.x}% ${pushIn.y}%`, animation: "push-in 2.4s ease-in-out forwards" } : undefined}
+        style={pushIn ? { ...anim("push-in", "2.4s", "ease-in-out", "1", "forwards"), transformOrigin: `${pushIn.x}% ${pushIn.y}%` } : undefined}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
         {rig && (
           <div
             className="absolute inset-0"
-            style={{ ...play, transformOrigin: `${rig.pivot.x}% ${rig.figure.top + rig.figure.height}%`, animation: "breathe 4.2s ease-in-out infinite" }}
+            style={{ ...anim("breathe", "4.2s", "ease-in-out", "infinite"), transformOrigin: `${rig.pivot.x}% ${rig.figure.top + rig.figure.height}%` }}
             aria-hidden
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -46,9 +54,8 @@ export function AnimatedStill({
             <div
               className="absolute inset-0"
               style={{
-                ...play,
+                ...(speaking ? anim("talk-nod", "1.5s", "ease-in-out", "infinite") : anim("idle-tilt", "6s", "ease-in-out", "infinite")),
                 transformOrigin: `${rig.pivot.x}% ${rig.pivot.y}%`,
-                animation: speaking ? "talk-nod 1.5s ease-in-out infinite" : "idle-tilt 6s ease-in-out infinite",
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
