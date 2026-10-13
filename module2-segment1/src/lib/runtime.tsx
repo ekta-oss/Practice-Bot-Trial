@@ -41,6 +41,34 @@ export interface NowPlaying {
 
 class Aborted extends Error {}
 
+/*
+ * Audio is loaded ahead of time and the same element is reused, so a line
+ * starts the moment it is needed (no file check or download in between).
+ */
+const audioCache = new Map<string, HTMLAudioElement>();
+
+function takeAudio(src: string): HTMLAudioElement {
+  let a = audioCache.get(src);
+  if (!a) {
+    a = new Audio(src);
+    a.preload = "auto";
+    audioCache.set(src, a);
+  }
+  return a;
+}
+
+/** Starts loading these audio files in the background (files that do not exist are skipped). */
+export function preloadAudio(files: string[]) {
+  if (typeof window === "undefined" || fastMedia()) return;
+  for (const f of files) {
+    const src = AUDIO_DIR + f;
+    if (audioCache.has(src)) continue;
+    void assetExists(src).then((ok) => {
+      if (ok && !audioCache.has(src)) takeAudio(src).load();
+    });
+  }
+}
+
 async function playOne(line: Line, signal: AbortSignal, onInfo: (n: NowPlaying) => void): Promise<void> {
   const src = AUDIO_DIR + line.file;
   const exists = await assetExists(src);
@@ -49,25 +77,30 @@ async function playOne(line: Line, signal: AbortSignal, onInfo: (n: NowPlaying) 
   // ?fastmedia=1 (automated tests) skips real audio so runs stay quick.
   if (exists && !fastMedia()) {
     onInfo({ line, missing: false, standIn: false });
-    const audio = new Audio(src);
+    const audio = takeAudio(src);
+    audio.currentTime = 0;
     await new Promise<void>((resolve, reject) => {
+      const cleanup = () => {
+        audio.removeEventListener("ended", done);
+        audio.removeEventListener("error", done);
+        signal.removeEventListener("abort", stop);
+      };
+      const done = () => {
+        cleanup();
+        resolve();
+      };
       const stop = () => {
+        cleanup();
         audio.pause();
-        audio.src = "";
+        audio.currentTime = 0;
         reject(new Aborted());
       };
       signal.addEventListener("abort", stop, { once: true });
-      audio.addEventListener("ended", () => {
-        signal.removeEventListener("abort", stop);
-        resolve();
-      });
-      audio.addEventListener("error", () => {
-        signal.removeEventListener("abort", stop);
-        resolve();
-      });
+      audio.addEventListener("ended", done);
+      audio.addEventListener("error", done);
       audio.play().catch(() => {
         // Autoplay was refused: fall back to showing the subtitle for the line's length.
-        setTimeout(resolve, lineDurationMs(line));
+        setTimeout(done, lineDurationMs(line));
       });
     });
     return;
@@ -220,7 +253,7 @@ export function stopUi() {
   uiQueue = [];
   if (uiAudio) {
     uiAudio.pause();
-    uiAudio.removeAttribute("src");
+    uiAudio.currentTime = 0;
     uiAudio = null;
   }
 }
@@ -244,9 +277,12 @@ function playUiQueue(texts: string[]) {
 function playNextUi() {
   const text = uiQueue.shift();
   if (!text) return;
-  const a = new Audio(AUDIO_DIR + uiAudioFile(text));
+  const a = takeAudio(AUDIO_DIR + uiAudioFile(text));
+  a.currentTime = 0;
   uiAudio = a;
   const next = () => {
+    a.removeEventListener("ended", next);
+    a.removeEventListener("error", next);
     if (uiAudio !== a) return;
     uiAudio = null;
     playNextUi();
@@ -269,10 +305,10 @@ export function sayUi(texts: string[], opts: { afterFlow?: boolean } = {}) {
 /** Speaks the texts when the component appears (and again if they change). */
 export function useSay(texts: (string | null | undefined | false)[], opts: { afterFlow?: boolean; when?: boolean } = {}) {
   const list = texts.filter((t): t is string => typeof t === "string" && t.length > 0);
-  const key = list.join(" ");
+  const key = list.join("\u0000");
   const when = opts.when ?? true;
   const afterFlow = opts.afterFlow ?? false;
   useEffect(() => {
-    if (when && key) sayUi(key.split(" "), { afterFlow });
+    if (when && key) sayUi(key.split("\u0000"), { afterFlow });
   }, [key, when, afterFlow]);
 }

@@ -2,7 +2,8 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { UI, type StageMeta } from "@/content/segment1";
-import { RuntimeCtx, setUiBlocked, stopUi } from "@/lib/runtime";
+import { RuntimeCtx, preloadAudio, setUiBlocked, stopUi } from "@/lib/runtime";
+import { ALL_AUDIO_FILES } from "@/content/audioFiles";
 import { timeScale } from "@/lib/media";
 import { Notebook } from "./Notebook";
 
@@ -50,6 +51,10 @@ export function StageShell({
     setUiBlocked(paused);
   }, [paused]);
   useEffect(() => () => stopUi(), []);
+  // Load the course audio in the background so every line starts without delay (runs once per page).
+  useEffect(() => {
+    preloadAudio(ALL_AUDIO_FILES);
+  }, []);
 
   // Elapsed time only runs while the stage is not paused.
   const elapsed = useRef(0);

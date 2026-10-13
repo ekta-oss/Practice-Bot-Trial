@@ -17,6 +17,7 @@ const OUT = path.resolve(import.meta.dirname, "..", "public", "media", "audio");
 //         npx tsx scripts/make-voice.mts --only=PIC      just the person in charge's lines
 //         npx tsx scripts/make-voice.mts --samples       voice samples to choose from (voice-samples/)
 //         --pic-voice=af_bella                            pick the person in charge's voice
+//         --dtype=q8                                      smaller, faster model (lower quality); default fp32
 const arg = (name: string) => process.argv.find((a) => a.startsWith(`--${name}=`))?.split("=")[1];
 const ONLY = arg("only") as Line["role"] | undefined;
 const SAMPLES = process.argv.includes("--samples");
@@ -27,48 +28,20 @@ const VOICE: Record<Line["role"], string> = { PIC: arg("pic-voice") ?? "af_heart
 const TARGET_WPM: Record<Line["role"], number> = { PIC: 155, NAR: 140, MOD: 140 };
 
 /**
- * Voice styling. Kokoro has no emotion control, so the "smile" is made by:
- *  - pitch: lifting the voice (factor 1.07 ≈ +1.2 semitones) without changing the pace;
- *  - presence: a gentle boost of the upper range (brighter, more forward);
+ * Voice styling. No pitch or EQ processing (it caused jitter); energy comes from pace and delivery:
+ *  - wholeLine: voice the line in one natural pass (the person in charge) instead of phrase by phrase;
  *  - direction: greetings voiced as exclamations (audio only; on-screen text is unchanged).
  */
-const STYLE: Record<Line["role"], { pitch: number; presence: number; direction?: (t: string) => string }> = {
+const STYLE: Record<Line["role"], { wholeLine: boolean; direction?: (t: string) => string }> = {
   PIC: {
-    pitch: 1.07,
-    presence: 0.35,
+    wholeLine: true,
     direction: (t) => t.replace(/\bWelcome\./g, "Welcome!").replace(/\bNice to meet you\./g, "Nice to meet you!"),
   },
-  NAR: { pitch: 1, presence: 0 },
-  MOD: { pitch: 1, presence: 0 },
+  NAR: { wholeLine: false },
+  MOD: { wholeLine: false },
 };
 
-/** Raises pitch and pace together by `r` (linear resampling); voices are generated `r` slower to keep the pace. */
-function pitchUp(x: Float32Array, r: number): Float32Array {
-  if (r === 1) return x;
-  const n = Math.floor(x.length / r);
-  const y = new Float32Array(n);
-  for (let i = 0; i < n; i++) {
-    const p = i * r;
-    const j = Math.floor(p);
-    const f = p - j;
-    y[i] = x[j] * (1 - f) + (x[j + 1] ?? x[j]) * f;
-  }
-  return y;
-}
-
-/** Adds `amount` of the signal above ~2.5 kHz back in: brighter, more "smiling" timbre. */
-function presence(x: Float32Array, rate: number, amount: number): Float32Array {
-  if (!amount) return x;
-  const a = Math.exp((-2 * Math.PI * 2500) / rate);
-  const y = new Float32Array(x.length);
-  let low = 0;
-  for (let i = 0; i < x.length; i++) {
-    low = (1 - a) * x[i] + a * low;
-    y[i] = x[i] + amount * (x[i] - low);
-  }
-  return y;
-}
-// Pauses between phrases, in seconds.
+// Pauses between phrases (narrator), in seconds.
 const PAUSE = { sentence: 0.45, exclaim: 0.4, question: 0.45, dash: 0.28, colon: 0.25 };
 
 const scriptLines = [S1_1, S1_2, S1_3, S1_4, S1_5, S1_6].flatMap((o) =>
@@ -77,6 +50,17 @@ const scriptLines = [S1_1, S1_2, S1_3, S1_4, S1_5, S1_6].flatMap((o) =>
 const lines: Line[] = [...scriptLines, ...SPOKEN_UI.map(uiLine)];
 
 const words = (t: string) => t.split(/\s+/).filter(Boolean).length;
+
+/** 8 ms fade in/out so joined phrases never click. */
+function fade(x: Float32Array, rate: number): Float32Array {
+  const n = Math.min(Math.round(rate * 0.008), Math.floor(x.length / 2));
+  for (let i = 0; i < n; i++) {
+    const g = i / n;
+    x[i] *= g;
+    x[x.length - 1 - i] *= g;
+  }
+  return x;
+}
 
 /** Text as it should be spoken: plain quotes; "Red = …" read as "Red: …". */
 const speakable = (t: string) =>
@@ -110,8 +94,8 @@ function phrases(text: string): { text: string; pause: number }[] {
 }
 
 /** Cuts the silence the voice engine leaves at both ends, keeping `air` seconds. */
-function trim(samples: Float32Array, rate: number, air = 0.03): Float32Array {
-  const thr = 0.01;
+function trim(samples: Float32Array, rate: number, air = 0.05): Float32Array {
+  const thr = 0.005; // low, so soft word onsets and endings are kept
   const a = samples.findIndex((v) => Math.abs(v) > thr);
   let b = samples.length - 1;
   while (b > 0 && Math.abs(samples[b]) <= thr) b--;
@@ -152,7 +136,7 @@ function toMp3(samples: Float32Array, rate: number): Buffer {
   return Buffer.concat(parts);
 }
 
-const tts = await KokoroTTS.from_pretrained("onnx-community/Kokoro-82M-v1.0-ONNX", { dtype: "q8", device: "cpu" });
+const tts = await KokoroTTS.from_pretrained("onnx-community/Kokoro-82M-v1.0-ONNX", { dtype: (arg("dtype") ?? "fp32") as "fp32", device: "cpu" });
 
 // Calibrate each role's voice speed to its speaking rate (measured on speech only, no pauses).
 const CAL = "Walk round and get to know your new workplace, and look out for signs on the walls, the doors and the floor.";
@@ -164,17 +148,18 @@ for (const role of Object.keys(VOICE) as Line["role"][]) {
 }
 console.log("speeds", speed);
 
-/** Voices a line phrase by phrase at one speed, styled, joined with the planned pauses. */
+/** Voices a line at one steady speed: whole (person in charge) or phrase by phrase with planned pauses. */
 async function voiceLine(l: Line, voice = VOICE[l.role], spd = speed[l.role]): Promise<{ samples: Float32Array; rate: number }> {
   const style = STYLE[l.role];
   const parts: Float32Array[] = [];
   let rate = 24000;
-  const ps = phrases(style.direction ? style.direction(l.text) : l.text);
+  const text = style.direction ? style.direction(l.text) : l.text;
+  // Whole line in one pass (natural flow, no joins), or phrase by phrase with planned pauses.
+  const ps = style.wholeLine ? [{ text: speakable(text), pause: 0 }] : phrases(text);
   for (const [i, p] of ps.entries()) {
-    // Generated `pitch` times slower, then lifted by `pitch`: higher voice, same pace.
-    const a = await tts.generate(p.text, { voice: voice as never, speed: spd / style.pitch });
+    const a = await tts.generate(p.text, { voice: voice as never, speed: spd });
     rate = a.sampling_rate;
-    parts.push(presence(pitchUp(trim(a.audio, rate), style.pitch), rate, style.presence));
+    parts.push(fade(trim(a.audio, rate), rate));
     if (i < ps.length - 1) parts.push(new Float32Array(Math.round(rate * p.pause)));
   }
   const joined = new Float32Array(parts.reduce((n, p) => n + p.length, 0));
@@ -246,10 +231,10 @@ ${report.length} MP3s made with **Kokoro** (open-source neural text-to-speech, A
 ${scriptLines.length} lines named in the production script, and ${report.length - scriptLines.length} on-screen instructions and feedback lines (\`M2_UI_…\`).
 
 Voices:
-- **Person in charge** — \`${VOICE.PIC}\`, female, energetic and smiley: voice lifted about one semitone, brighter tone, greetings voiced as exclamations (audio only); about ${TARGET_WPM.PIC} words per minute while speaking.
+- **Person in charge** — \`${VOICE.PIC}\`, female, energetic and smiley: each line voiced in one natural pass at a brisk, steady pace, greetings voiced as exclamations (audio only); about ${TARGET_WPM.PIC} words per minute while speaking.
 - **Narrator** — \`${VOICE.NAR}\`, male, energetic yet firm; about ${TARGET_WPM.NAR} words per minute. Also reads the instructions and feedback.
 
-Each line is voiced phrase by phrase at one steady speed and joined with pauses (${PAUSE.sentence} s between sentences, ${PAUSE.dash} s at dashes, ${PAUSE.colon} s at colons). Loudness is evened out. The Pace column includes the pauses.
+Narrator lines are voiced phrase by phrase at one steady speed and joined with pauses (${PAUSE.sentence} s between sentences, ${PAUSE.dash} s at dashes, ${PAUSE.colon} s at colons). Loudness is evened out. The Pace column includes the pauses.
 
 They are **stand-ins**, not the recordings the script asks for (person in charge: “calm, kind, firm; clear Indian English”).
 To replace one, drop the recorded file here with the same name.
