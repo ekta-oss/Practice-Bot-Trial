@@ -81,7 +81,14 @@ export function Stage1_2({ onComplete }: { onComplete: () => void }) {
     <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-3 px-3 py-3 sm:px-6">
       {/* Top: 'My signs: 0' (counts up; no target number is shown). */}
       <div className="flex items-center justify-between gap-3">
-        {art ? <span /> : <MiniMap current={placeIdx} />}
+        {art ? (
+          <p className="flex items-center gap-2 text-lg font-medium text-[var(--heading)]" data-testid="walk-tip">
+            <TapIcon />
+            {S1_2.tip}
+          </p>
+        ) : (
+          <MiniMap current={placeIdx} />
+        )}
         <p className="rounded-full bg-[var(--card)] px-4 py-1.5 text-lg font-semibold text-[var(--heading)] shadow-sm ring-1 ring-[var(--border)]" data-testid="my-signs-counter" aria-live="polite">
           {S1_2.counter(state.mySigns.length)}
         </p>
@@ -289,5 +296,15 @@ function MiniMap({ current, card }: { current: number; card?: boolean }) {
         </li>
       ))}
     </ol>
+  );
+}
+
+/** A pointing finger tapping: "tap here". */
+function TapIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0 text-[var(--blue)]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V11m0-.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-.6a6 6 0 0 1-4.6-2.2L4.5 16a1.6 1.6 0 0 1 2.4-2.1L9 15.5" />
+      <path d="M5 4.5 3.5 3M15.5 4.5 17 3M10.5 1.5v-1" />
+    </svg>
   );
 }

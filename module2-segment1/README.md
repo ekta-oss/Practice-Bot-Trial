@@ -55,7 +55,19 @@ The tests use Chromium's fake microphone, so the real recording path runs (getUs
 | `src/components/QuizQuestion.tsx` | One question per screen with the hint rule. |
 | `src/components/scenes.tsx`, `SignIcon.tsx` | Interim scene art, sign positions, ISO-style signs. |
 | `src/lib/progress.tsx`, `recordings.ts`, `sync.ts` | Device storage, plus optional Supabase stage sync. |
+| `src/components/AnimatedStill.tsx` | The person in charge on a still: breathing, lips and hand gestures following her voice. |
+| `src/lib/voiceTiming.ts`, `src/content/voiceTiming.json` | When each phrase of every voice file is spoken (drives subtitles, lips, gestures). |
+| `src/lib/music.ts` | Quiet background music: ducked under voices, silent while paused or recording, Music on/off. |
 | `docs/` | Plan and acceptance checklist, asset manifest, open questions. |
+
+## Audio scripts
+
+| Command | What |
+|---|---|
+| `npx tsx scripts/make-voice.mts --missing` | Voice any line that has no MP3 yet (after new or changed text). |
+| `npx tsx scripts/analyze-voice.mts` | Measure every voice file into `voiceTiming.json`. **Run after any voice file changes.** |
+| `npx tsx scripts/make-music.mts` | Make the background music loop. |
+| `npx tsx scripts/audio-status.mts` | List missing and unused audio files. |
 
 ## Optional Supabase
 

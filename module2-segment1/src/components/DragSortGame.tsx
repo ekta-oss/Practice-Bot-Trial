@@ -14,7 +14,7 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { chime } from "@/lib/media";
-import { useRestartsOnResume } from "@/lib/runtime";
+import { useRestartsOnResume, useSay } from "@/lib/runtime";
 import { FeedbackCard, HintBulb } from "./ui";
 
 /**
@@ -50,6 +50,7 @@ type Msg = { kind: "right" | "wrong" | "hint" | "info"; text: string } | null;
 
 export function DragSortGame({
   title,
+  howTo,
   items,
   targets,
   feedback,
@@ -57,13 +58,17 @@ export function DragSortGame({
   layout = "pileTop",
 }: {
   title?: string;
+  /** One plain line telling a first-time learner what to do (shown and read aloud). */
+  howTo?: string;
   items: GameItem[];
   targets: GameTarget[];
   feedback: GameFeedback;
   onDone: () => void;
-  layout?: "pileTop" | "sideBySide";
+  /** Cards on top, boxes below: 4 boxes (colours), 3 in a row (meanings), or 5 (new signs). */
+  layout?: "pileTop" | "row3" | "row5";
 }) {
   useRestartsOnResume(false);
+  useSay([howTo], { afterFlow: true });
   const [placed, setPlaced] = useState<Record<string, string>>({});
   const [wrongs, setWrongs] = useState<Record<string, number>>({});
   const [selected, setSelected] = useState<string | null>(null);
@@ -141,12 +146,12 @@ export function DragSortGame({
   const draggingItem = dragging ? items.find((i) => i.id === dragging) : null;
 
   const pile = (
-    <div className={`flex flex-wrap content-start justify-center gap-3 ${layout === "sideBySide" ? "flex-col items-center" : ""}`} role="list" aria-label="Cards to sort" data-testid="pile">
+    <div className="flex flex-wrap content-start justify-center gap-3" role="list" aria-label="Cards to sort" data-testid="pile">
       {remaining.map((item, i) => (
         <PileCard
           key={item.id}
           item={item}
-          tilt={layout === "pileTop" ? ((i * 37) % 9) - 4 : 0}
+          tilt={((i * 37) % 9) - 4}
           selected={selected === item.id}
           bouncing={bouncing === item.id}
           hidden={dragging === item.id}
@@ -157,7 +162,7 @@ export function DragSortGame({
   );
 
   const boxes = (
-    <div className={layout === "sideBySide" ? "flex flex-col gap-3" : "grid grid-cols-2 gap-3 md:grid-cols-4"} data-testid="boxes">
+    <div className={BOX_GRID[layout]} data-testid="boxes">
       {targets.map((t) => (
         <DropBox
           key={t.id}
@@ -174,24 +179,22 @@ export function DragSortGame({
     <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
       <div className="flex flex-col gap-4" data-testid="drag-game">
         <div className="flex items-center justify-between gap-3">
-          {title ? <h2 className="text-2xl font-bold text-[var(--heading)]">{title}</h2> : <span />}
+          <div>
+            {title && <h2 className="text-2xl font-bold text-[var(--heading)]">{title}</h2>}
+            {howTo && (
+              <p className="mt-1 text-lg text-[var(--body)]" data-testid="how-to">
+                {howTo}
+              </p>
+            )}
+          </div>
           <HintBulb glowing={bulb.glowing} open={bulb.open} onClick={() => {
             setBulb((b) => ({ ...b, open: !b.open }));
             setStamp((n) => n + 1);
           }} />
         </div>
 
-        {layout === "sideBySide" ? (
-          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-4">
-            {pile}
-            {boxes}
-          </div>
-        ) : (
-          <>
-            {pile}
-            {boxes}
-          </>
-        )}
+        {pile}
+        {boxes}
 
         <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-24 z-30 mx-auto flex max-w-xl flex-col px-4 [&>*]:shadow-lg">
           {bulb.open && bulb.text && (
@@ -210,6 +213,12 @@ export function DragSortGame({
     </DndContext>
   );
 }
+
+const BOX_GRID = {
+  pileTop: "grid grid-cols-2 gap-3 md:grid-cols-4",
+  row3: "grid grid-cols-1 gap-3 sm:grid-cols-3",
+  row5: "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5",
+} as const;
 
 function PileCard({ item, tilt, selected, bouncing, hidden, onSelect }: { item: GameItem; tilt: number; selected: boolean; bouncing: boolean; hidden: boolean; onSelect: () => void }) {
   const { attributes, listeners, setNodeRef } = useDraggable({ id: item.id });

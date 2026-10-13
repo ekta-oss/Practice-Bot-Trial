@@ -4,20 +4,22 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { lineDurationMs } from "@/lib/media";
 import { createPortal } from "react-dom";
 import { useShellSlots } from "./StageShell";
-import { useSay, type NowPlaying } from "@/lib/runtime";
+import { lineAudio, useSay, type NowPlaying } from "@/lib/runtime";
+import { chunkStart, subtitleChunks } from "@/lib/voiceTiming";
 import { ReplayIcon, WaveLine } from "./Recorder";
 
-/** Circular-arrow replay button. Replay always starts from the beginning. */
+/** "Listen again" button (replay always starts from the beginning). Labelled, so a first-time learner knows what it does. */
 function ReplayButton({ onReplay, overlay }: { onReplay: () => void; overlay?: boolean }) {
   return (
     <button
       type="button"
       onClick={onReplay}
-      aria-label="Replay from the beginning"
+      aria-label="Listen again from the beginning"
       data-testid="replay"
-      className={`grid h-11 w-11 place-items-center rounded-full bg-[var(--card)] text-[var(--blue)] shadow ring-1 ring-[var(--blue-tonal-border)] hover:bg-[var(--blue-tonal-bg)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--blue)] ${overlay ? "pointer-events-auto absolute bottom-2 right-2 z-10" : ""}`}
+      className={`inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--card)] px-4 text-base font-semibold text-[var(--blue)] shadow ring-1 ring-[var(--blue-tonal-border)] hover:bg-[var(--blue-tonal-bg)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--blue)] ${overlay ? "pointer-events-auto absolute bottom-2 right-2 z-10" : ""}`}
     >
       <ReplayIcon />
+      <span aria-hidden>Listen again</span>
     </button>
   );
 }
@@ -144,34 +146,33 @@ export function ExternalIcon() {
 
 const ROLE_NAME: Record<string, string> = { NAR: "Narrator", PIC: "Person in charge", MOD: "Model voice" };
 
-/** Splits a line into subtitle chunks of at most ~12 words, breaking at sentence and clause ends. */
-export function subtitleChunks(text: string, maxWords = 12): string[] {
-  const pieces = text.split(/(?<=[.!?,;:—])\s+/);
-  const out: string[] = [];
-  let cur: string[] = [];
-  for (const p of pieces) {
-    const w = p.split(/\s+/);
-    if (cur.length && cur.length + w.length > maxWords) {
-      out.push(cur.join(" "));
-      cur = [];
-    }
-    if (w.length > maxWords) {
-      for (let i = 0; i < w.length; i += maxWords) out.push(w.slice(i, i + maxWords).join(" "));
-    } else cur.push(...w);
-  }
-  if (cur.length) out.push(cur.join(" "));
-  return out;
-}
-
-/** Shows the chunk of the current line that matches the time spoken so far (105–115 wpm). */
+/**
+ * Shows the chunk of the current line that is being spoken. With a measured
+ * voice file the chunk follows the audio's own clock (see lib/voiceTiming);
+ * otherwise it is paced by the line's estimated length.
+ */
 function useChunk(now: NowPlaying | null) {
   // The index belongs to one `now`; a new line starts again at chunk 0.
   const [pos, setPos] = useState<{ of: NowPlaying | null; idx: number }>({ of: null, idx: 0 });
   const chunks = useMemo(() => (now ? subtitleChunks(now.line.text) : []), [now]);
   useEffect(() => {
     if (!now || chunks.length < 2) return;
+    const starts = chunks.map((c) => chunkStart(now.line.file, c));
+    const audio = !now.missing ? lineAudio(now.line.file) : undefined;
+    if (audio && starts.every((s) => s !== undefined)) {
+      // Follow the audio: the last chunk whose start has been reached.
+      const tick = window.setInterval(() => {
+        const t = audio.currentTime;
+        let idx = 0;
+        starts.forEach((s, i) => {
+          if (t >= s! - 0.05) idx = i;
+        });
+        setPos((p) => (p.of === now && p.idx === idx ? p : { of: now, idx }));
+      }, 60);
+      return () => window.clearInterval(tick);
+    }
     const total = lineDurationMs(now.line);
-    const words = chunks.map((c) => c.split(/\s+/).length);
+    const words = chunks.map((c) => c.text.split(/\s+/).length);
     const sum = words.reduce((a, b) => a + b, 0);
     const timers: number[] = [];
     let t = 0;
@@ -181,17 +182,7 @@ function useChunk(now: NowPlaying | null) {
     }
     return () => timers.forEach((x) => window.clearTimeout(x));
   }, [now, chunks]);
-  return chunks[pos.of === now ? pos.idx : 0] ?? "";
-}
-
-function MissingAudio({ now }: { now: NowPlaying }) {
-  if (!now.missing) return null;
-  return (
-    <span className="rounded bg-fuchsia-700 px-2 py-0.5 text-xs font-semibold text-white" data-testid="missing-audio" title="This audio file has not been delivered yet.">
-      Audio missing: {now.line.file}
-      {now.standIn ? " · stand-in voice" : ""}
-    </span>
-  );
+  return chunks[pos.of === now ? pos.idx : 0]?.text ?? "";
 }
 
 /** Subtitles over a picture: lower part of the picture, at most 20% of its height. */
@@ -200,9 +191,6 @@ export function Subtitles({ now, onReplay }: { now: NowPlaying | null; onReplay?
   if (!now) return onReplay ? <ReplayButton onReplay={onReplay} overlay /> : null;
   return (
     <>
-      <div className="pointer-events-none absolute right-2 top-2 z-10">
-        <MissingAudio now={now} />
-      </div>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex max-h-[20%] items-end justify-center px-3 pb-[2%]">
         <p className="max-w-[92%] rounded-md bg-black/75 px-3 py-1 text-center text-sm leading-snug text-white sm:text-lg" lang="en" data-testid="subtitle" aria-hidden>
           {chunk}
@@ -230,17 +218,8 @@ export function NarrationBar({ now, onReplay }: { now: NowPlaying | null; onRepl
           <span className="sr-only" aria-live="polite">
             {ROLE_NAME[now.line.role]}: {now.line.text}
           </span>
-          <MissingAudio now={now} />
         </>
       )}
     </div>
-  );
-}
-
-export function MissingAssetBadge({ what }: { what: string }) {
-  return (
-    <span className="rounded bg-fuchsia-700 px-2 py-0.5 text-xs font-semibold text-white" data-testid="missing-asset">
-      {what}
-    </span>
   );
 }

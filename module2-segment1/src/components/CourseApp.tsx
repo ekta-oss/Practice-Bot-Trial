@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { END_OF_SCOPE, MODULE_TITLE, SEGMENT_TITLE, STAGES } from "@/content/segment1";
 import { ProgressProvider, useProgress } from "@/lib/progress";
 import { clearRecordings } from "@/lib/recordings";
+import { setMusicWanted } from "@/lib/music";
 import { StageShell } from "./StageShell";
 import { BrandMark, CheckIcon, ListIcon, OutlinePanel } from "./Brand";
 import { Stage1_1 } from "@/stages/Stage1_1";
@@ -30,6 +31,8 @@ export function CourseApp() {
 function Course() {
   const { state, ready, completeStage, reset } = useProgress();
   const [view, setView] = useState<View>({ kind: "home" });
+  // Light music plays under the stages (not on the opening screen).
+  useEffect(() => setMusicWanted(view.kind !== "home"), [view.kind]);
   const [runKey, setRunKey] = useState(0);
   const [confirmReset, setConfirmReset] = useState(false);
   const [outline, setOutline] = useState(false);

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { S1_6, UI, WALK_SIGNS, type ColourGroup } from "@/content/segment1";
-import { colourLine, colourRight, colourWrong, shapeKey, shapeRight, shapeWrong, type ShapeId } from "@/content/feedbackText";
+import { colourLine, newSignHint, newSignRight, newSignWrong, shapeKey, shapeRight, shapeWrong, type ShapeId } from "@/content/feedbackText";
 import { uiLine } from "@/lib/uiAudio";
 import { useProgress } from "@/lib/progress";
 import { useLinePlayer, useRestartsOnResume, useRuntime, useSay } from "@/lib/runtime";
@@ -11,20 +11,20 @@ import { DragSortGame, type GameItem, type GameTarget } from "@/components/DragS
 import { ColourKeyCard } from "@/components/Notebook";
 import { ShapeGlyph, SignIcon, Swatch } from "@/components/SignIcon";
 import { FooterActions, MainButton, NarrationBar } from "@/components/ui";
-import { colourTargets } from "./Stage1_5";
 
 /**
  * 1.6 What does each colour mean?
  * Step 1 guess (5 taps, no right/wrong shown) → Step 2 score + segue line →
- * Step 3 read the SMI article (new tab; 'Back to the course') → Step 4 three
- * drag-and-drop games. The colour key card appears after Game 1, stays, and
- * is saved to 'My notes'. Lapse → restart from Step 1.
+ * Step 3 read the SMI article (new tab; 'Back to the course') → Step 4 two
+ * drag-and-drop games: Shape Match, then New Signs (each new sign to what it
+ * means, using the guessing words). The colour key card shows above the games
+ * and is saved to 'My notes'. Lapse → restart from Step 1.
  */
 type Step =
   | { kind: "guess"; index: number }
   | { kind: "score"; opened: boolean }
   | { kind: "backup" }
-  | { kind: "game"; n: 1 | 2 | 3; done: boolean };
+  | { kind: "game"; n: 1 | 2; done: boolean };
 
 export function Stage1_6({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState<Step>({ kind: "guess", index: 0 });
@@ -59,10 +59,8 @@ export function Stage1_6({ onComplete }: { onComplete: () => void }) {
   }, []);
 
   useEffect(() => {
-    if (step.kind === "game" && step.n === 1 && step.done) saveNote("colour-key");
+    if (step.kind === "game") saveNote("colour-key");
   }, [step, saveNote]);
-
-  const showKey = step.kind === "game" && (step.n > 1 || step.done);
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 px-3 py-4 sm:px-6">
@@ -72,10 +70,7 @@ export function Stage1_6({ onComplete }: { onComplete: () => void }) {
 
       {step.kind === "score" && (
         <section className="mx-auto flex w-full max-w-2xl flex-col items-center gap-5 text-center" data-testid="score-screen">
-          <p className="text-7xl font-extrabold text-[var(--blue)]" data-testid="score-big">
-            {score} / 5
-          </p>
-          <p className="text-2xl text-[var(--heading)]" data-testid="score-line">
+          <p className="text-4xl font-bold text-[var(--heading)]" data-testid="score-line">
             {S1_6.score(score)}
           </p>
           <p className="text-xl text-[var(--body)]" data-testid="segue-line">
@@ -121,26 +116,22 @@ export function Stage1_6({ onComplete }: { onComplete: () => void }) {
         </section>
       )}
 
-      {step.kind === "game" && step.n === 1 && <Game1 onDone={gameDone} />}
-      {step.kind === "game" && step.n === 2 && <Game2 onDone={gameDone} />}
-      {step.kind === "game" && step.n === 3 && <Game3 onDone={gameDone} />}
+      {/* COLOUR KEY CARD: what they just read, kept in view (never over the boxes) for both games. */}
+      {step.kind === "game" && (
+        <div className="self-center">
+          <ColourKeyCard compact inline />
+        </div>
+      )}
+
+      {step.kind === "game" && step.n === 1 && <ShapeGame onDone={gameDone} />}
+      {step.kind === "game" && step.n === 2 && <NewSignsGame onDone={gameDone} />}
 
       {step.kind === "game" && step.done && (
         <FooterActions>
-          <MainButton
-            onClick={() => (step.n < 3 ? setStep({ kind: "game", n: (step.n + 1) as 2 | 3, done: false }) : onComplete())}
-            testId="continue-button"
-          >
+          <MainButton onClick={() => (step.n === 1 ? setStep({ kind: "game", n: 2, done: false }) : onComplete())} testId="continue-button">
             {UI.continue}
           </MainButton>
         </FooterActions>
-      )}
-
-      {/* COLOUR KEY CARD: small card at the bottom of the screen, 4 coloured lines. Appears after Game 1 and stays. */}
-      {showKey && (
-        <div className="mt-2 self-start lg:fixed lg:bottom-24 lg:left-4 lg:z-20 lg:mt-0">
-          <ColourKeyCard compact />
-        </div>
       )}
     </div>
   );
@@ -169,40 +160,9 @@ function GuessScreen({ index, onPick }: { index: number; onPick: (answer: string
   );
 }
 
-/* ---------------- Game 1 'Colour Match' ---------------- */
+/* ---------------- Game 1 'Shape Match' ---------------- */
 
-function Game1({ onDone }: { onDone: () => void }) {
-  const items: GameItem[] = useMemo(
-    () =>
-      S1_6.game1.cards.map((c) => ({
-        id: c.id,
-        label: c.text,
-        target: c.target,
-        render: (size) => (
-          <span className={`block rounded-xl bg-[var(--card)] text-center font-semibold text-[var(--heading)] shadow ring-1 ring-[var(--border)] ${size === "placed" ? "px-2 py-1 text-sm" : "px-4 py-3 text-lg"}`}>{c.text}</span>
-        ),
-      })),
-    [],
-  );
-  const targets = useMemo(() => colourTargets(), []);
-  return (
-    <DragSortGame
-      title={S1_6.game1.title}
-      items={items}
-      targets={targets}
-      onDone={onDone}
-      feedback={{
-        right: (_i, t) => colourRight(t.id as ColourGroup),
-        wrong1: (_i, attempted) => colourWrong(attempted.id as ColourGroup),
-        hint: (i) => colourLine(i.target as ColourGroup),
-      }}
-    />
-  );
-}
-
-/* ---------------- Game 2 'Shape Match' ---------------- */
-
-function Game2({ onDone }: { onDone: () => void }) {
+function ShapeGame({ onDone }: { onDone: () => void }) {
   const items: GameItem[] = useMemo(
     () =>
       S1_6.game2.shapes.map((s) => ({
@@ -218,7 +178,7 @@ function Game2({ onDone }: { onDone: () => void }) {
       S1_6.game2.shapes.map((s) => ({
         id: `meaning-${s.id}`,
         label: s.meaning,
-        className: "bg-[var(--card)] ring-2 ring-[var(--border)] !flex-row justify-between",
+        className: "bg-[var(--card)] ring-2 ring-[var(--border)]",
         render: () => <span className="text-xl font-semibold text-[var(--heading)]">{s.meaning}</span>,
       })),
     [],
@@ -227,7 +187,8 @@ function Game2({ onDone }: { onDone: () => void }) {
   return (
     <DragSortGame
       title={S1_6.game2.title}
-      layout="sideBySide"
+      howTo={S1_6.game2.howTo}
+      layout="row3"
       items={items}
       targets={targets}
       onDone={onDone}
@@ -240,30 +201,44 @@ function Game2({ onDone }: { onDone: () => void }) {
   );
 }
 
-/* ---------------- Game 3 'New Signs' ---------------- */
+/* ---------------- Game 2 'New Signs': what does each new sign tell you? ---------------- */
 
-function Game3({ onDone }: { onDone: () => void }) {
+const MEANING_ID = (m: string) => `means-${m.replace(/\s+/g, "-")}`;
+
+function NewSignsGame({ onDone }: { onDone: () => void }) {
   const items: GameItem[] = useMemo(
     () =>
       S1_6.game3.signs.map((s) => ({
         id: s.id,
         label: s.word,
-        target: s.colour,
-        render: (size) => <SignIcon sign={s} size={size === "placed" ? 64 : 96} />,
+        target: MEANING_ID(s.meaning),
+        render: (size) => <SignIcon sign={s} size={size === "placed" ? 56 : 96} />,
       })),
     [],
   );
-  const targets = useMemo(() => colourTargets(), []);
+  const targets: GameTarget[] = useMemo(
+    () =>
+      S1_6.game3.meanings.map((m) => ({
+        id: MEANING_ID(m),
+        label: m,
+        className: "bg-[var(--card)] ring-2 ring-[var(--border)]",
+        render: () => <span className="text-xl font-bold text-[var(--heading)]">{m}</span>,
+      })),
+    [],
+  );
+  const sign = (i: GameItem) => S1_6.game3.signs.find((s) => s.id === i.id)!;
   return (
     <DragSortGame
       title={S1_6.game3.title}
+      howTo={S1_6.game3.howTo}
+      layout="row5"
       items={items}
       targets={targets}
       onDone={onDone}
       feedback={{
-        right: (_i, t) => colourRight(t.id as ColourGroup),
-        wrong1: (_i, attempted) => colourWrong(attempted.id as ColourGroup),
-        hint: (i) => colourLine(i.target as ColourGroup),
+        right: (i) => newSignRight(sign(i)),
+        wrong1: (i) => newSignWrong(sign(i)),
+        hint: (i) => newSignHint(sign(i)),
       }}
     />
   );

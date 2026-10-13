@@ -8,21 +8,28 @@ test.skip(!DIR, "set SHOTS_DIR to capture screenshots");
 test("screens", async ({ page }, info) => {
   const p = (n: string) => `${DIR}/${info.project.name}-${n}.png`;
   await freshStart(page, "?standin=0");
+  await page.screenshot({ path: p("0-home") });
   await page.getByTestId("start-button").click();
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: p("1-1-arrival") });
   await page.getByTestId("prompt").waitFor();
   await page.screenshot({ path: p("1-1-record") });
 
   await startAt(page, 1);
+  await page.screenshot({ path: p("1-2-entrance") });
   await page.getByTestId("next-place").click();
   await page.screenshot({ path: p("1-2-corridor") });
 
   await startAt(page, 2, { signs: ALL_SIGNS });
   await page.screenshot({ path: p("1-3") });
+  await page.getByTestId("answer-yes").click();
+  await page.screenshot({ path: p("1-3-q2") });
 
   await startAt(page, 3);
   await page.screenshot({ path: p("1-4-prompt") });
 
   await startAt(page, 4, { signs: ALL_SIGNS });
+  await page.screenshot({ path: p("1-5-start"), fullPage: true });
   await tapPlace(page, "first-aid", "red");
   await page.screenshot({ path: p("1-5-wrong"), fullPage: true });
 
@@ -32,8 +39,12 @@ test("screens", async ({ page }, info) => {
   await page.screenshot({ path: p("1-6-score") });
   await page.getByTestId("article-did-not-open").click();
   await page.getByTestId("continue-button").click();
-  for (const [id, c] of [["m-red", "red"], ["m-yellow", "yellow"], ["m-blue", "blue"], ["m-green", "green"]]) await tapPlace(page, id, c);
-  await page.getByTestId("continue-button").click();
   await tapPlace(page, "triangle", "meaning-circle");
   await page.screenshot({ path: p("1-6-game2"), fullPage: true });
+  for (const [id, c] of [["circle", "meaning-circle"], ["square", "meaning-square"]]) await tapPlace(page, id, c);
+  await tapPlace(page, "triangle", "meaning-triangle");
+  await page.getByTestId("continue-button").click();
+  await page.screenshot({ path: p("1-6-game3"), fullPage: true });
+  await tapPlace(page, "eye", "means-do-not");
+  await page.screenshot({ path: p("1-6-game3-wrong") });
 });

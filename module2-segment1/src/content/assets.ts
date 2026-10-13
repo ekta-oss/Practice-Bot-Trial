@@ -25,16 +25,16 @@ const line = (stage: string, l: Line, namedInScript = true): AssetEntry => ({
   file: l.file,
   dir: "audio",
   what: `${l.role} (${l.words} words): “${l.text}”`,
-  fallback: "Subtitle shown for the line's length (110 wpm); browser stand-in voice reads it, marked 'Audio missing'.",
+  fallback: "Subtitle shown for the line's length (110 wpm); a browser voice reads it. No notice is shown to learners.",
   namedInScript,
   required: true,
 });
 
 export const ASSETS: AssetEntry[] = [
-  { stage: "1.1", kind: "video", file: S1_1.video1, dir: "video", what: "First-person video, ~20 s total: you walk in through the glass door; PIC at reception looks up, smiles, stands; says line 1. Clip ends where the video pauses.", fallback: "Still entrance picture with PIC + line 1 audio and subtitles; 'Video missing' badge.", namedInScript: false, required: true },
-  { stage: "1.1", kind: "video", file: S1_1.video2, dir: "video", what: "Same video, line 2: PIC opens one hand and points down the corridor.", fallback: "Still picture (PIC pointing) + line 2 audio and subtitles; 'Video missing' badge.", namedInScript: false, required: true },
-  { stage: "1.1", kind: "captions", file: S1_1.video1.replace(".mp4", ".vtt"), dir: "video", what: "WebVTT English subtitles for clip 1 (within 1 s of the audio).", fallback: "App subtitles timed at 110 wpm.", namedInScript: false, required: false },
-  { stage: "1.1", kind: "captions", file: S1_1.video2.replace(".mp4", ".vtt"), dir: "video", what: "WebVTT English subtitles for clip 2.", fallback: "App subtitles timed at 110 wpm.", namedInScript: false, required: false },
+  { stage: "1.1", kind: "video", file: S1_1.video1, dir: "video", what: "First-person video, ~20 s total: you walk in through the glass door; PIC at reception looks up, smiles, stands; says line 1. Clip ends where the video pauses.", fallback: "Still entrance picture with PIC + line 1 audio and subtitles, with her lips and hands moving to the voice. No notice is shown to learners.", namedInScript: false, required: true },
+  { stage: "1.1", kind: "video", file: S1_1.video2, dir: "video", what: "Same video, line 2: PIC opens one hand and points down the corridor.", fallback: "Still picture (PIC pointing) + line 2 audio and subtitles, with her lips and hands moving to the voice. No notice is shown to learners.", namedInScript: false, required: true },
+  { stage: "1.1", kind: "captions", file: S1_1.video1.replace(".mp4", ".vtt"), dir: "video", what: "WebVTT English subtitles for clip 1 (within 1 s of the audio).", fallback: "App subtitles, timed from the measured voice (src/content/voiceTiming.json).", namedInScript: false, required: false },
+  { stage: "1.1", kind: "captions", file: S1_1.video2.replace(".mp4", ".vtt"), dir: "video", what: "WebVTT English subtitles for clip 2.", fallback: "App subtitles, timed from the measured voice (src/content/voiceTiming.json).", namedInScript: false, required: false },
   ...([
     ["arrival", "First frame: your hand on the glass door; the person in charge at reception."],
     ["welcome", "The person in charge welcomes you (line 1, recording, self-check)."],
@@ -73,4 +73,14 @@ export const ASSETS: AssetEntry[] = [
   line("1.6", S1_6.nar2),
   line("1.6", S1_6.nar3),
   line("1.6", S1_6.nar4),
+  {
+    stage: "All",
+    kind: "audio",
+    file: "M2_MUSIC_bed.mp3",
+    dir: "audio",
+    what: "Light background music loop (38.4 s, 100 bpm), played quietly under the stages and turned down while anyone speaks. Not in the script. Interim: made by scripts/make-music.mts.",
+    fallback: "No music.",
+    namedInScript: false,
+    required: false,
+  },
 ];

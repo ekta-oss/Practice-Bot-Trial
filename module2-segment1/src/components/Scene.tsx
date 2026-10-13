@@ -7,7 +7,6 @@ import { useArt } from "@/lib/useArt";
 import { useLinePlayer, useRuntime, type NowPlaying } from "@/lib/runtime";
 import { SCENE_IMAGE, SceneArt, type CharacterRig } from "./scenes";
 import { AnimatedStill } from "./AnimatedStill";
-import { MissingAssetBadge } from "./ui";
 
 export { useArt };
 
@@ -26,7 +25,7 @@ export function SceneFrame({
   rig,
   pushIn,
   speaking,
-  voiceFile,
+  voice,
 }: {
   place: PlaceId;
   withPic?: "stand" | "point" | false;
@@ -39,7 +38,8 @@ export function SceneFrame({
   rig?: CharacterRig;
   pushIn?: { x: number; y: number };
   speaking?: boolean;
-  voiceFile?: string | null;
+  /** The voice line being spoken, so lips and hands can follow it. */
+  voice?: { file: string; text: string } | null;
 }) {
   const { paused } = useRuntime();
   const img = useArt(imageOverride ?? SCENE_IMAGE[place]);
@@ -53,7 +53,7 @@ export function SceneFrame({
     >
       <div className={`absolute inset-0 ${blur ? "scale-105 blur-md" : ""}`}>
         {img && (rig || pushIn) ? (
-          <AnimatedStill src={img} rig={rig} pushIn={pushIn} speaking={speaking} voiceFile={voiceFile} paused={paused} />
+          <AnimatedStill src={img} rig={rig} pushIn={pushIn} speaking={speaking} voice={voice} paused={paused} />
         ) : img ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={img} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
@@ -68,7 +68,7 @@ export function SceneFrame({
 
 /**
  * Plays one video clip; if the file is missing, plays its spoken lines over the
- * still picture instead and shows a "missing" badge. Resolves when finished.
+ * still picture instead (learners see no notice; the team sees it on /assets). Resolves when finished.
  * Pausing stops the clip; 'Resume' plays it again from the beginning.
  */
 export function useClip() {
@@ -140,7 +140,6 @@ export function useClip() {
       </video>
     ) : null;
 
-  const missingBadge = clip && !clip.present ? <MissingAssetBadge what={`Video missing: ${clip.file} — still picture + audio shown`} /> : null;
 
-  return { play, video, now: clip?.present ? now : lines.now, missingBadge };
+  return { play, video, now: clip?.present ? now : lines.now };
 }

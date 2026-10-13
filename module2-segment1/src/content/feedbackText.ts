@@ -3,13 +3,11 @@
  * Shared by the stages and the voice generator so the spoken audio always
  * matches the words on screen.
  */
-import { COLOUR_KEY, COLOUR_KEY_LINES, COLOUR_NAMES, S1_6, type ColourGroup } from "./segment1";
+import { COLOUR_KEY_LINES, S1_6, type ColourGroup } from "./segment1";
 
 export const COLOURS: ColourGroup[] = ["red", "yellow", "blue", "green"];
 
 export const colourLine = (c: ColourGroup) => COLOUR_KEY_LINES.find((l) => l.colour === c)!.line;
-export const colourRight = (c: ColourGroup) => S1_6.right(COLOUR_NAMES[c].toLowerCase(), COLOUR_KEY[c]);
-export const colourWrong = (attempted: ColourGroup) => S1_6.wrong(COLOUR_NAMES[attempted].toLowerCase());
 
 export type ShapeId = "triangle" | "circle" | "square";
 export const SHAPES: ShapeId[] = ["triangle", "circle", "square"];
@@ -24,3 +22,9 @@ const shapeMeaning = (s: ShapeId) => S1_6.game2.shapes.find((x) => x.id === s)!.
 export const shapeRight = (s: ShapeId) => S1_6.right(SHAPE_ARTICLE[s], `‘${shapeMeaning(s)}’`);
 export const shapeWrong = (s: ShapeId) => S1_6.wrong(SHAPE_ARTICLE[s]);
 export const shapeKey = (s: ShapeId) => SHAPE_KEY[s];
+
+/* New Signs (1.6): each new sign into what it means, e.g. "Right — a blue circle means you must." */
+type NewSign = (typeof S1_6.game3.signs)[number];
+export const newSignRight = (s: NewSign) => S1_6.right(s.subject, s.meaning);
+export const newSignWrong = (s: NewSign) => S1_6.wrong(s.subject);
+export const newSignHint = (s: NewSign) => colourLine(s.colour);

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { ALL_SIGNS, COLOUR_OF, tapPlace } from "./helpers";
+import { ALL_SIGNS, COLOUR_OF, tapPlace, NEW_SIGN_MEANINGS } from "./helpers";
 
 /**
  * The Claude-hosted prototype (./prototype, built by scripts/build-prototype.mjs),
@@ -109,11 +109,9 @@ test("hosted prototype: full journey 1.1 → 1.6 with the hosted page's limits",
   for (const g of ["do not", "be careful", "you must", "safe way", "fire equipment"]) await page.getByTestId(`guess-${g}`).click();
   await page.getByTestId("article-did-not-open").click();
   await page.getByTestId("continue-button").click();
-  for (const [id, c] of [["m-red", "red"], ["m-yellow", "yellow"], ["m-blue", "blue"], ["m-green", "green"]]) await tapPlace(page, id, c);
-  await page.getByTestId("continue-button").click();
   for (const s of ["triangle", "circle", "square"]) await tapPlace(page, s, `meaning-${s}`);
   await page.getByTestId("continue-button").click();
-  for (const [id, c] of [["eye", "blue"], ["hardhat", "blue"], ["forklift", "yellow"], ["emergency-exit", "green"], ["no-entry", "red"], ["fire-alarm", "red"]]) await tapPlace(page, id, c);
+  for (const [id, m] of NEW_SIGN_MEANINGS) await tapPlace(page, id, m);
   await page.getByTestId("continue-button").click();
   await expect(page.getByTestId("end-screen")).toBeVisible();
 

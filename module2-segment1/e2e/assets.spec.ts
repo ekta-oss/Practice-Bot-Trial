@@ -97,6 +97,6 @@ test("delivered scene picture replaces the interim drawing; signs stay tappable"
 
 test("/assets lists every manifest file with its status", async ({ page }) => {
   await page.goto("/assets");
-  await expect(page.getByTestId("asset-summary")).toContainText("21 of 25 files present");
+  await expect(page.getByTestId("asset-summary")).toContainText("22 of 26 files present");
   await expect(page.getByText("media/audio/M2_S01_06_NAR_04.mp3")).toBeVisible();
 });

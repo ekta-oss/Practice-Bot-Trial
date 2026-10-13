@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { ALL_SIGNS, COLOUR_OF, freshStart, recordAndKeep, storedRecordings, tapPlace } from "./helpers";
+import { ALL_SIGNS, COLOUR_OF, freshStart, recordAndKeep, storedRecordings, tapPlace, NEW_SIGN_MEANINGS } from "./helpers";
 
 /**
  * Definition of done: a learner starts at 1.1 from the course menu and
@@ -76,18 +76,16 @@ test("full learner journey 1.1 → 1.6 (with retries along the way)", async ({ p
   // 1.6
   await page.getByTestId("next-stage").click();
   for (const g of ["do not", "be careful", "safe way", "do not", "no entry"]) await page.getByTestId(`guess-${g}`).click();
-  await expect(page.getByTestId("score-big")).toHaveText("2 / 5");
+  await expect(page.getByTestId("score-line")).toHaveText("You got 2 of 5 right.");
   await expect(page.getByTestId("segue-line")).toHaveText("Colours can be tricky. Let’s find out what each colour means from safety experts.");
   const popup2 = context.waitForEvent("page");
   await page.getByTestId("open-article").click();
   await (await popup2).close();
   await page.bringToFront();
   await page.getByTestId("back-to-course").click();
-  for (const [id, c] of [["m-red", "red"], ["m-yellow", "yellow"], ["m-blue", "blue"], ["m-green", "green"]]) await tapPlace(page, id, c);
-  await page.getByTestId("continue-button").click();
   for (const s of ["triangle", "circle", "square"]) await tapPlace(page, s, `meaning-${s}`);
   await page.getByTestId("continue-button").click();
-  for (const [id, c] of [["eye", "blue"], ["hardhat", "blue"], ["forklift", "yellow"], ["emergency-exit", "green"], ["no-entry", "red"], ["fire-alarm", "red"]]) await tapPlace(page, id, c);
+  for (const [id, m] of NEW_SIGN_MEANINGS) await tapPlace(page, id, m);
   await page.getByTestId("continue-button").click();
   await expect(page.getByTestId("end-screen")).toBeVisible();
   await noSideScroll();

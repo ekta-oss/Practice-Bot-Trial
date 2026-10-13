@@ -329,13 +329,41 @@ export const ART: Record<PlaceId, { aspect: number; signs: Record<string, Box>; 
  * figure breathes, and her lips move with her voice while she speaks. Boxes
  * are % of the picture. The jaw box covers her lower lip and the skin below it
  * (its soft edges fall on plain skin); it stretches down from the hinge, the
- * line where her teeth meet.
+ * line where her teeth meet. Each hand box holds a forearm and hand; it turns
+ * a few degrees about the elbow (pivot) when she gestures. `lift` is the turn
+ * at full gesture, in degrees (the sign sets which way is "up" for that hand).
  */
 export interface CharacterRig {
   figure: Box;
   jaw: Box;
   hinge: { x: number; y: number };
+  hands?: { id: "open" | "point" | "palm"; box: Box; pivot: { x: number; y: number }; lift: number }[];
 }
+
+/**
+ * Hand gestures on the person in charge's words, timed from her measured voice
+ * (lib/voiceTiming). A "beat" is one lift and settle on a stressed word; a
+ * "sweep" is a longer, guiding move along a phrase ("take a walk round…").
+ */
+export interface Gesture {
+  hand: "open" | "point" | "palm";
+  word: string;
+  kind: "beat" | "sweep";
+  strength?: number;
+}
+export const GESTURES: Record<string, Gesture[]> = {
+  // "Good morning! Welcome. You must be new here." — the open hand offers a welcome.
+  "M2_S01_01_PIC_01.mp3": [
+    { hand: "open", word: "morning", kind: "beat", strength: 0.45 },
+    { hand: "open", word: "Welcome", kind: "beat" },
+  ],
+  // "Nice to meet you. Before you start, take a walk round the work area… Come back to me when you are done."
+  "M2_S01_01_PIC_02.mp3": [
+    { hand: "palm", word: "Nice", kind: "beat", strength: 0.7 },
+    { hand: "point", word: "take a walk", kind: "sweep" },
+    { hand: "palm", word: "Come back", kind: "beat" },
+  ],
+};
 
 export const RECEPTION_ART: Record<"arrival" | "welcome" | "pointing", { file: string; aspect: number; rig?: CharacterRig; pushIn?: { x: number; y: number } }> = {
   // Camera moves in through the door towards the reception desk.
@@ -343,11 +371,24 @@ export const RECEPTION_ART: Record<"arrival" | "welcome" | "pointing", { file: s
   welcome: {
     file: "M2_S01_01_IMG_02_welcome.webp",
     aspect: 1383 / 778,
-    rig: { figure: { left: 41, top: 3, width: 47, height: 97 }, jaw: { left: 64.9, top: 29.4, width: 5.5, height: 3.8 }, hinge: { x: 67.5, y: 29.9 } },
+    rig: {
+      figure: { left: 41, top: 3, width: 47, height: 97 },
+      jaw: { left: 64.9, top: 29.4, width: 5.5, height: 3.8 },
+      hinge: { x: 67.5, y: 29.9 },
+      hands: [{ id: "open", box: { left: 41.8, top: 61, width: 15.7, height: 17 }, pivot: { x: 56.5, y: 70 }, lift: 3 }],
+    },
   },
   pointing: {
     file: "M2_S01_01_IMG_03_pointing.webp",
     aspect: 1324 / 745,
-    rig: { figure: { left: 43, top: 4, width: 38, height: 96 }, jaw: { left: 62.3, top: 29.6, width: 4.5, height: 3.6 }, hinge: { x: 64.1, y: 30.2 } },
+    rig: {
+      figure: { left: 43, top: 4, width: 38, height: 96 },
+      jaw: { left: 62.3, top: 29.6, width: 4.5, height: 3.6 },
+      hinge: { x: 64.1, y: 30.2 },
+      hands: [
+        { id: "point", box: { left: 43.2, top: 32.5, width: 12.8, height: 16 }, pivot: { x: 55, y: 45.5 }, lift: 2.5 },
+        { id: "palm", box: { left: 66.8, top: 62.5, width: 12.4, height: 15.5 }, pivot: { x: 66.5, y: 71 }, lift: -3 },
+      ],
+    },
   },
 };

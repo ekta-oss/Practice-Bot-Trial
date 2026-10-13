@@ -5,6 +5,7 @@ import { UI, type StageMeta } from "@/content/segment1";
 import { RuntimeCtx, preloadAudio, setUiBlocked, stopUi } from "@/lib/runtime";
 import { ALL_AUDIO_FILES } from "@/content/audioFiles";
 import { timeScale } from "@/lib/media";
+import { setMusicEnabled, setMusicPaused, useMusicEnabled } from "@/lib/music";
 import { Notebook } from "./Notebook";
 import { BrandMark, CloseIcon, ListIcon, OutlinePanel } from "./Brand";
 
@@ -55,7 +56,9 @@ export function StageShell({
   // Spoken instructions stop while paused, and when the learner leaves the stage.
   useEffect(() => {
     setUiBlocked(paused);
+    setMusicPaused(paused);
   }, [paused]);
+  const music = useMusicEnabled();
   useEffect(() => () => stopUi(), []);
   // Load the course audio in the background so every line starts without delay (runs once per page).
   useEffect(() => {
@@ -102,8 +105,9 @@ export function StageShell({
     return () => window.removeEventListener("keydown", onKey);
   }, [overlay]);
 
-  const iconBtn =
-    "grid h-11 w-11 place-items-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--heading)] transition hover:border-[var(--blue-tonal-border)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--blue)]";
+  // Header buttons say what they do (icon + word; the word hides on narrow phones).
+  const headBtn =
+    "flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card)] px-3 text-sm font-semibold text-[var(--heading)] transition hover:border-[var(--blue-tonal-border)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--blue)]";
 
   return (
     <RuntimeCtx.Provider value={runtime}>
@@ -113,11 +117,20 @@ export function StageShell({
             <header className="sticky top-0 z-30 flex items-center justify-between gap-3 px-4 py-3 backdrop-blur sm:px-8" style={{ background: "color-mix(in srgb, var(--page) 82%, transparent)" }}>
               <BrandMark />
               <div className="flex items-center gap-2">
-                <button type="button" onClick={() => setOverlay("pause")} className={iconBtn} data-testid="pause-button" aria-label={UI.pause}>
-                  <PauseIcon />
+                <button type="button" onClick={() => setMusicEnabled(!music)} className={headBtn} aria-pressed={music} data-testid="music-button">
+                  <MusicIcon off={!music} />
+                  <span className="hidden sm:inline">Music</span>
+                  <span className="sr-only sm:hidden">Music</span>
                 </button>
-                <button type="button" onClick={() => setOverlay("outline")} className={iconBtn} aria-label="Course outline" data-testid="outline-button">
+                <button type="button" onClick={() => setOverlay("pause")} className={headBtn} data-testid="pause-button">
+                  <PauseIcon />
+                  <span className="hidden sm:inline">{UI.pause}</span>
+                  <span className="sr-only sm:hidden">{UI.pause}</span>
+                </button>
+                <button type="button" onClick={() => setOverlay("outline")} className={headBtn} data-testid="outline-button">
                   <ListIcon />
+                  <span className="hidden sm:inline">All stages</span>
+                  <span className="sr-only sm:hidden">All stages</span>
                 </button>
                 <button
                   type="button"
@@ -235,6 +248,18 @@ function PauseIcon() {
     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
       <rect x="6" y="5" width="4" height="14" rx="1" />
       <rect x="14" y="5" width="4" height="14" rx="1" />
+    </svg>
+  );
+}
+
+/** Music note; crossed through when the music is off. */
+function MusicIcon({ off }: { off?: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M9 18V5l11-2v13" />
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="17" cy="16" r="3" />
+      {off && <path d="M3 3l18 18" />}
     </svg>
   );
 }

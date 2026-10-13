@@ -1,6 +1,6 @@
 # Asset manifest — Module 2, Segment 1, Stages 1.1–1.6
 
-**Status on delivery: 0 of 22 produced media files exist.** The app runs end to end without them, but every place that uses a missing file is marked on screen in magenta (`Audio missing: …` / `Video missing: …`). Nothing missing is presented as finished.
+**Status on delivery: 0 of 22 produced media files exist.** The app runs end to end without them. Learners see no notice about missing files (the magenta labels were removed on request); the team sees exactly what is present and missing on the `/assets` page and in this file. Nothing missing is presented as finished.
 
 Live status page: **http://localhost:3100/assets**. It checks each file below.
 
@@ -49,7 +49,7 @@ The script describes one ~20 s video that “pauses after line 1”. The build p
 
 The script says “An avatar (based on user profile female/male)”. There is no learner profile in scope. See OPEN_QUESTIONS #1.
 
-**While missing:** the still entrance picture (person in charge standing, then pointing on line 2) plays with the line's audio and subtitles, plus a `Video missing` badge.
+**While missing:** the still entrance picture (person in charge standing, then pointing on line 2) plays with the line's audio and subtitles; her lips and hands move with the voice. No badge is shown to learners.
 
 ## Pictures — illustrator's art in place
 
@@ -76,5 +76,6 @@ The signs are painted in the scenes; tappable areas sit exactly over them (`ART`
 
 | Sound | Status |
 |---|---|
+| `M2_MUSIC_bed.mp3` (background music) | **Present (interim).** Original 38.4 s loop made by `npx tsx scripts/make-music.mts` (no licence needed). Played quietly under the stages, turned down while anyone speaks, silent while recording; learners can switch it off. Replace with a licensed track of the same name if wanted. |
 | Soft chime (right answer, sign saved) | Made in the browser (Web Audio). No file needed; there is no buzzer anywhere. |
 | Train horn | Not used in 1.1–1.6 (it belongs to 1.11). |

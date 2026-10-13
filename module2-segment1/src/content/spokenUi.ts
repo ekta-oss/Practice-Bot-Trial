@@ -5,7 +5,7 @@
  * options in 1.4 are not read aloud: they check reading.
  */
 import { COLOUR_NAMES, S1_1, S1_2, S1_3, S1_4, S1_5, S1_6 } from "./segment1";
-import { COLOURS, SHAPES, colourLine, colourRight, colourWrong, shapeKey, shapeRight, shapeWrong } from "./feedbackText";
+import { COLOURS, SHAPES, colourLine, newSignRight, newSignWrong, shapeKey, shapeRight, shapeWrong } from "./feedbackText";
 
 export const SPOKEN_UI: string[] = Array.from(
   new Set([
@@ -26,6 +26,7 @@ export const SPOKEN_UI: string[] = Array.from(
     S1_4.backupCard,
     ...S1_4.questions.flatMap((q) => [S1_4.right(q.reason), S1_4.wrong(q.where), S1_4.reveal(q.options[q.correct], q.where)]),
     // 1.5
+    S1_5.howTo,
     S1_5.wrong1,
     S1_5.hint,
     ...COLOURS.map((c) => S1_5.auto(COLOUR_NAMES[c].toLowerCase())),
@@ -33,7 +34,10 @@ export const SPOKEN_UI: string[] = Array.from(
     // 1.6
     ...S1_6.guesses.map((g) => g.prompt),
     ...[0, 1, 2, 3, 4, 5].map((n) => S1_6.score(n)),
-    ...COLOURS.flatMap((c) => [colourRight(c), colourWrong(c), colourLine(c)]),
+    ...COLOURS.map((c) => colourLine(c)),
+    S1_6.game2.howTo,
     ...SHAPES.flatMap((s) => [shapeRight(s), shapeWrong(s), shapeKey(s)]),
+    S1_6.game3.howTo,
+    ...S1_6.game3.signs.flatMap((s) => [newSignRight(s), newSignWrong(s)]),
   ]),
 );

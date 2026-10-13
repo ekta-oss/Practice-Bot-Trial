@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { ALL_SIGNS, COLOUR_OF, fakeSpeech, recordAndKeep, tapPlace } from "./helpers";
+import { ALL_SIGNS, COLOUR_OF, fakeSpeech, recordAndKeep, tapPlace, NEW_SIGN_MEANINGS } from "./helpers";
 
 /**
  * The static website for GitHub + Vercel (../module2-segment1-site, built by
@@ -83,14 +83,12 @@ test("static site: full journey with real recording, speech check, playback and 
 
   await page.getByTestId("next-stage").click();
   for (const g of ["do not", "be careful", "you must", "safe way", "fire equipment"]) await page.getByTestId(`guess-${g}`).click();
-  await expect(page.getByTestId("score-big")).toHaveText("5 / 5");
+  await expect(page.getByTestId("score-line")).toHaveText("You got 5 of 5 right.");
   await page.getByTestId("article-did-not-open").click();
-  await page.getByTestId("continue-button").click();
-  for (const [id, c] of [["m-red", "red"], ["m-yellow", "yellow"], ["m-blue", "blue"], ["m-green", "green"]]) await tapPlace(page, id, c);
   await page.getByTestId("continue-button").click();
   for (const s of ["triangle", "circle", "square"]) await tapPlace(page, s, `meaning-${s}`);
   await page.getByTestId("continue-button").click();
-  for (const [id, c] of [["eye", "blue"], ["hardhat", "blue"], ["forklift", "yellow"], ["emergency-exit", "green"], ["no-entry", "red"], ["fire-alarm", "red"]]) await tapPlace(page, id, c);
+  for (const [id, m] of NEW_SIGN_MEANINGS) await tapPlace(page, id, m);
   await page.getByTestId("continue-button").click();
   await expect(page.getByTestId("end-screen")).toBeVisible();
 
@@ -101,7 +99,7 @@ test("static site: full journey with real recording, speech check, playback and 
 
 test("static site: asset status page and 404 page are served", async ({ page }) => {
   await page.goto(SITE + "assets");
-  await expect(page.getByTestId("asset-summary")).toContainText("21 of 25 files present");
+  await expect(page.getByTestId("asset-summary")).toContainText("22 of 26 files present");
   const res = await page.goto(SITE + "no-such-page");
   expect(res?.status()).toBe(404);
 });

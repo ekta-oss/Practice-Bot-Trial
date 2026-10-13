@@ -67,6 +67,7 @@ export function Stage1_5({ onComplete }: { onComplete: () => void }) {
       <NarrationBar now={nar.now} onReplay={nar.hasPlayed ? nar.replay : undefined} />
       <DragSortGame
         title={S1_5.title}
+        howTo={S1_5.howTo}
         items={items}
         targets={targets}
         onDone={onDone}

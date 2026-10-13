@@ -9,7 +9,6 @@ test.describe("Stage 1.1 Greet and get your task", () => {
     await expect(page.getByTestId("expected-time")).toHaveText("About 3 minutes");
     // Line 1 subtitle, then the video pauses: mic + prompt
     await expect(page.getByTestId("subtitle")).toContainText("Good morning! Welcome. You must be new here.");
-    await expect(page.getByTestId("missing-asset")).toContainText("M2_S01_01_VID_01.mp4");
     await expect(page.getByTestId("prompt")).toHaveText("Say hello, and introduce yourself.");
     await recordAndKeep(page, 1500, { reRecord: true });
     // Self-check
@@ -17,7 +16,6 @@ test.describe("Stage 1.1 Greet and get your task", () => {
     for (let i = 0; i < 3; i++) await page.getByTestId(`selfcheck-${i}`).check();
     await page.getByTestId("check-button").click();
     await expect(page.getByTestId("feedback-right")).toHaveText("Great start — you greeted and said who you are.");
-    await expect(page.getByTestId("missing-asset")).toContainText("M2_S01_01_VID_02.mp4"); // line 2 clip played
     await expect(page.getByTestId("continue-button")).toBeVisible();
     const recs = await storedRecordings(page);
     expect(recs.map((r) => r.key)).toEqual(["1.1:intro-1"]);

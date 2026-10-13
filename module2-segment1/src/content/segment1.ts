@@ -127,7 +127,7 @@ export const STAGES: StageMeta[] = [
   { id: "1.3", number: "1.3", title: "Did you notice the signs?", aboutMinutes: 2, maxMinutes: 3, kind: "Reflection", theme: "light" },
   { id: "1.4", number: "1.4", title: "Read online: why workplaces have safety signs", aboutMinutes: 7, maxMinutes: 9, kind: "Reading · Quiz", theme: "light" },
   { id: "1.5", number: "1.5", title: "Sort the signs by colour", aboutMinutes: 5, maxMinutes: 7, kind: "Game", theme: "light" },
-  { id: "1.6", number: "1.6", title: "What does each colour mean?", aboutMinutes: 10, maxMinutes: 12, kind: "Quiz · Reading · Games", theme: "light" },
+  { id: "1.6", number: "1.6", title: "What does each colour mean?", aboutMinutes: 9, maxMinutes: 11, kind: "Quiz · Reading · Games", theme: "light" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -182,6 +182,7 @@ export const S1_2 = {
   next: "Next place →",
   back: "← Back",
   finish: "I have looked around",
+  tip: "Tap a sign to look closer.", // BUILD-WORDING (on-screen reminder, from the NAR line)
   saved: "Saved to My signs.",
   allFound: "You noticed a lot for your first walk.",
   lookAgain: "There are more signs here. Would you like to look again?",
@@ -252,6 +253,7 @@ export const S1_4 = {
 export const S1_5 = {
   nar1: { file: "M2_S01_05_NAR_01.mp3", role: "NAR", text: "The article sorted signs into kinds — and many kinds have their own colour. Look at your 12 signs. Put them in groups by colour.", words: 24 } as Line,
   title: "Colour Sort",
+  howTo: "Drag each sign into its colour box. Or tap a sign, then tap a box.", // BUILD-WORDING
   wrong1: "Look at the colour again.",
   hint: "Look at the main colour of the sign, not the words.",
   auto: (colour: string) => `This one is ${colour}.`,
@@ -290,7 +292,7 @@ export const S1_6 = {
   nar1: { file: "M2_S01_06_NAR_01.mp3", role: "NAR", text: "What do you think each colour means? Make your best guess.", words: 11 } as Line,
   nar2: { file: "M2_S01_06_NAR_02.mp3", role: "NAR", text: "Good guessing! Now let’s see what safety experts say about each colour.", words: 12 } as Line,
   nar3: { file: "M2_S01_06_NAR_03.mp3", role: "NAR", text: "Colours can be tricky. Let’s find out what each colour means from safety experts.", words: 14 } as Line,
-  nar4: { file: "M2_S01_06_NAR_04.mp3", role: "NAR", text: "Tap the button to open the article. Read about the four colours and the shapes. Then come back for three games.", words: 21 } as Line,
+  nar4: { file: "M2_S01_06_NAR_04.mp3", role: "NAR", text: "Tap the button to open the article. Read about the four colours and the shapes. Then come back for two games.", words: 21 } as Line,
   guesses: [
     { id: "g1", prompt: "Red signs mean…", swatch: "red", options: ["do not", "be careful", "you must", "safe way"], correct: "do not" },
     { id: "g2", prompt: "Yellow signs mean…", swatch: "yellow", options: ["do not", "be careful", "you must", "safe way"], correct: "be careful" },
@@ -309,17 +311,12 @@ export const S1_6 = {
   colourKeyTitle: "Colour key", // BUILD-WORDING (card label)
   right: (subject: string, meaning: string) => `Right — ${subject} means ${meaning}.`,
   wrong: (subject: string) => `Look again at the article: what does ${subject} mean?`,
-  game1: {
-    title: "Colour Match",
-    cards: [
-      { id: "m-red", text: "stop, danger, do not, fire safety", target: "red" },
-      { id: "m-yellow", text: "caution — watch out", target: "yellow" },
-      { id: "m-blue", text: "you must do this", target: "blue" },
-      { id: "m-green", text: "safe way, exits, first aid", target: "green" },
-    ],
-  },
+  // The script's Game 1 "Colour Match" (meaning cards into colour boxes) is left out: it
+  // repeated the colour boxes of 1.5 straight after the guessing step. "New Signs" now
+  // closes the stage by sorting new signs into what they mean (see docs/OPEN_QUESTIONS.md).
   game2: {
     title: "Shape Match",
+    howTo: "Drag each shape to what it means. Or tap a shape, then tap a meaning.", // BUILD-WORDING
     shapes: [
       { id: "triangle", name: "triangle", meaning: "warns of a hazard" },
       { id: "circle", name: "circle", meaning: "something you must do, or must not do" },
@@ -328,14 +325,17 @@ export const S1_6 = {
   },
   game3: {
     title: "New Signs",
+    howTo: "What does each new sign tell you? Drag it to its meaning. Or tap a sign, then tap a meaning.", // BUILD-WORDING
+    /** The meaning boxes use the same words as the guessing step. */
+    meanings: ["do not", "be careful", "you must", "safe way", "fire equipment"],
     signs: [
-      { id: "eye", word: "WEAR EYE PROTECTION", colour: "blue", shape: "mandatory", symbol: "goggles" },
-      { id: "hardhat", word: "HARD HATS MUST BE WORN", colour: "blue", shape: "mandatory", symbol: "hardhat" },
-      { id: "forklift", word: "WARNING: FORKLIFT", colour: "yellow", shape: "warning", symbol: "forklift" },
-      { id: "emergency-exit", word: "EMERGENCY EXIT", colour: "green", shape: "safe", symbol: "runExit", arrow: "right" },
-      { id: "no-entry", word: "NO ENTRY", colour: "red", shape: "prohibition", symbol: "bar" },
-      { id: "fire-alarm", word: "FIRE ALARM", colour: "red", shape: "fire", symbol: "alarm" },
-    ] as SignDef[],
+      { id: "eye", word: "WEAR EYE PROTECTION", colour: "blue", shape: "mandatory", symbol: "goggles", meaning: "you must", subject: "a blue circle" },
+      { id: "hardhat", word: "HARD HATS MUST BE WORN", colour: "blue", shape: "mandatory", symbol: "hardhat", meaning: "you must", subject: "a blue circle" },
+      { id: "forklift", word: "WARNING: FORKLIFT", colour: "yellow", shape: "warning", symbol: "forklift", meaning: "be careful", subject: "a yellow triangle" },
+      { id: "emergency-exit", word: "EMERGENCY EXIT", colour: "green", shape: "safe", symbol: "runExit", arrow: "right", meaning: "safe way", subject: "a green rectangle" },
+      { id: "no-entry", word: "NO ENTRY", colour: "red", shape: "prohibition", symbol: "bar", meaning: "do not", subject: "a red circle" },
+      { id: "fire-alarm", word: "FIRE ALARM", colour: "red", shape: "fire", symbol: "alarm", meaning: "fire equipment", subject: "a red square" },
+    ] as (SignDef & { meaning: string; subject: string })[],
   },
 };
 

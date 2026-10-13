@@ -1,7 +1,7 @@
 # Interim course audio (computer voice)
 
-75 MP3s made with **Kokoro** (open-source neural text-to-speech, Apache-2.0) by `scripts/make-voice.mts`:
-14 lines named in the production script, and 61 on-screen instructions and feedback lines (`M2_UI_…`).
+80 MP3s made with **Kokoro** (open-source neural text-to-speech, Apache-2.0) by `scripts/make-voice.mts`:
+14 lines named in the production script, and 66 on-screen instructions and feedback lines (`M2_UI_…`).
 
 Voices:
 - **Person in charge** — `af_heart`, female, energetic and smiley: each line voiced in one natural pass at a brisk, steady pace, greetings voiced as exclamations (audio only); about 155 words per minute while speaking.
@@ -27,7 +27,7 @@ To replace one, drop the recorded file here with the same name.
 | M2_S01_06_NAR_01.mp3 | NAR | am_michael | 5.3 s | 126 wpm | What do you think each colour means? Make your best guess. |
 | M2_S01_06_NAR_02.mp3 | NAR | am_michael | 6.6 s | 109 wpm | Good guessing! Now let’s see what safety experts say about each colour. |
 | M2_S01_06_NAR_03.mp3 | NAR | am_michael | 7.6 s | 110 wpm | Colours can be tricky. Let’s find out what each colour means from safety experts. |
-| M2_S01_06_NAR_04.mp3 | NAR | am_michael | 10.1 s | 125 wpm | Tap the button to open the article. Read about the four colours and the shapes. Then come back for three games. |
+| M2_S01_06_NAR_04.mp3 | NAR | am_michael | 10.2 s | 124 wpm | Tap the button to open the article. Read about the four colours and the shapes. Then come back for two games. |
 | M2_UI_say-hello-and-introduce-yourself_6372c0fd.mp3 | NAR | am_michael | 3.6 s | 83 wpm | Say hello, and introduce yourself. |
 | M2_UI_the-boxes-are-ticked-from-what-the-syste_104584a3.mp3 | NAR | am_michael | 6.9 s | 131 wpm | The boxes are ticked from what the system heard. Change them if they are wrong. |
 | M2_UI_saved-to-my-signs_9c1508b7.mp3 | NAR | am_michael | 2.2 s | 108 wpm | Saved to My signs. |
@@ -50,6 +50,7 @@ To replace one, drop the recorded file here with the same name.
 | M2_UI_the-right-answer-is-11-you-can-find-it-i_eee23c67.mp3 | NAR | am_michael | 6.3 s | 114 wpm | The right answer is: 11. You can find it in the list. |
 | M2_UI_right-the-article-says-prohibition-signs_05efabfe.mp3 | NAR | am_michael | 6.7 s | 108 wpm | Right — the article says prohibition signs are one of the kinds. |
 | M2_UI_the-right-answer-is-prohibition-signs-yo_8076ed90.mp3 | NAR | am_michael | 7.2 s | 109 wpm | The right answer is: Prohibition signs. You can find it in the list. |
+| M2_UI_drag-each-sign-into-its-colour-box-or-ta_f28b8f8c.mp3 | NAR | am_michael | 7.1 s | 127 wpm | Drag each sign into its colour box. Or tap a sign, then tap a box. |
 | M2_UI_look-at-the-colour-again_ae2ab2ce.mp3 | NAR | am_michael | 2.3 s | 133 wpm | Look at the colour again. |
 | M2_UI_look-at-the-main-colour-of-the-sign-not_9aa592cb.mp3 | NAR | am_michael | 4.8 s | 139 wpm | Look at the main colour of the sign, not the words. |
 | M2_UI_this-one-is-red_3c004986.mp3 | NAR | am_michael | 2 s | 117 wpm | This one is red. |
@@ -68,18 +69,11 @@ To replace one, drop the recorded file here with the same name.
 | M2_UI_you-got-3-of-5-right_23e4cad9.mp3 | NAR | am_michael | 2.6 s | 141 wpm | You got 3 of 5 right. |
 | M2_UI_you-got-4-of-5-right_716f56d8.mp3 | NAR | am_michael | 2.5 s | 143 wpm | You got 4 of 5 right. |
 | M2_UI_you-got-5-of-5-right_109960e7.mp3 | NAR | am_michael | 2.6 s | 139 wpm | You got 5 of 5 right. |
-| M2_UI_right-red-means-stop-do-not-fire-safety_88dada78.mp3 | NAR | am_michael | 5.5 s | 99 wpm | Right — red means stop, do not, fire safety. |
-| M2_UI_look-again-at-the-article-what-does-red_605e6d62.mp3 | NAR | am_michael | 4.9 s | 111 wpm | Look again at the article: what does red mean? |
 | M2_UI_red-stop-do-not-fire-safety_1b1507f1.mp3 | NAR | am_michael | 4.3 s | 99 wpm | Red = stop, do not, fire safety |
-| M2_UI_right-yellow-means-caution-watch-out_e58bde0b.mp3 | NAR | am_michael | 4.5 s | 94 wpm | Right — yellow means caution, watch out. |
-| M2_UI_look-again-at-the-article-what-does-yell_90fc0757.mp3 | NAR | am_michael | 4.9 s | 109 wpm | Look again at the article: what does yellow mean? |
 | M2_UI_yellow-caution-watch-out_b4d06122.mp3 | NAR | am_michael | 3.4 s | 89 wpm | Yellow = caution, watch out |
-| M2_UI_right-blue-means-you-must_b8bcb093.mp3 | NAR | am_michael | 3.4 s | 105 wpm | Right — blue means you must. |
-| M2_UI_look-again-at-the-article-what-does-blue_3fcda7cb.mp3 | NAR | am_michael | 4.8 s | 112 wpm | Look again at the article: what does blue mean? |
 | M2_UI_blue-you-must_0b78530e.mp3 | NAR | am_michael | 2.5 s | 97 wpm | Blue = you must |
-| M2_UI_right-green-means-safe-way-exits-first-a_32f8a2b1.mp3 | NAR | am_michael | 5.6 s | 96 wpm | Right — green means safe way, exits, first aid. |
-| M2_UI_look-again-at-the-article-what-does-gree_9f708892.mp3 | NAR | am_michael | 4.9 s | 109 wpm | Look again at the article: what does green mean? |
 | M2_UI_green-safe-way-exits-first-aid_9aeeae9c.mp3 | NAR | am_michael | 4.3 s | 97 wpm | Green = safe way, exits, first aid |
+| M2_UI_drag-each-shape-to-what-it-means-or-tap_0b95faa9.mp3 | NAR | am_michael | 7.1 s | 126 wpm | Drag each shape to what it means. Or tap a shape, then tap a meaning. |
 | M2_UI_right-a-triangle-means-warns-of-a-hazard_a170b0e4.mp3 | NAR | am_michael | 4.9 s | 110 wpm | Right — a triangle means ‘warns of a hazard’. |
 | M2_UI_look-again-at-the-article-what-does-a-tr_b8f686f6.mp3 | NAR | am_michael | 5.3 s | 113 wpm | Look again at the article: what does a triangle mean? |
 | M2_UI_triangle-warns-of-a-hazard_1f7c3215.mp3 | NAR | am_michael | 3.6 s | 100 wpm | Triangle = warns of a hazard |
@@ -89,3 +83,14 @@ To replace one, drop the recorded file here with the same name.
 | M2_UI_right-a-square-or-rectangle-means-safe-w_145d37f1.mp3 | NAR | am_michael | 6.8 s | 106 wpm | Right — a square or rectangle means ‘safe way or fire safety’. |
 | M2_UI_look-again-at-the-article-what-does-a-sq_0ebc861b.mp3 | NAR | am_michael | 6.1 s | 119 wpm | Look again at the article: what does a square or rectangle mean? |
 | M2_UI_square-or-rectangle-safe-way-or-fire-saf_7a26d920.mp3 | NAR | am_michael | 5 s | 107 wpm | Square or rectangle = safe way or fire safety |
+| M2_UI_what-does-each-new-sign-tell-you-drag-it_133447f4.mp3 | NAR | am_michael | 9.4 s | 128 wpm | What does each new sign tell you? Drag it to its meaning. Or tap a sign, then tap a meaning. |
+| M2_UI_right-a-blue-circle-means-you-must_08c48252.mp3 | NAR | am_michael | 4.1 s | 116 wpm | Right — a blue circle means you must. |
+| M2_UI_look-again-at-the-article-what-does-a-bl_f5a911ea.mp3 | NAR | am_michael | 5.5 s | 120 wpm | Look again at the article: what does a blue circle mean? |
+| M2_UI_right-a-yellow-triangle-means-be-careful_6ef32b3d.mp3 | NAR | am_michael | 4.9 s | 98 wpm | Right — a yellow triangle means be careful. |
+| M2_UI_look-again-at-the-article-what-does-a-ye_b055648e.mp3 | NAR | am_michael | 6.1 s | 109 wpm | Look again at the article: what does a yellow triangle mean? |
+| M2_UI_right-a-green-rectangle-means-safe-way_0c83e4da.mp3 | NAR | am_michael | 4.7 s | 101 wpm | Right — a green rectangle means safe way. |
+| M2_UI_look-again-at-the-article-what-does-a-gr_9cc1251c.mp3 | NAR | am_michael | 5.9 s | 112 wpm | Look again at the article: what does a green rectangle mean? |
+| M2_UI_right-a-red-circle-means-do-not_a1b76edb.mp3 | NAR | am_michael | 4.2 s | 113 wpm | Right — a red circle means do not. |
+| M2_UI_look-again-at-the-article-what-does-a-re_9afc34f3.mp3 | NAR | am_michael | 5.6 s | 119 wpm | Look again at the article: what does a red circle mean? |
+| M2_UI_right-a-red-square-means-fire-equipment_23915050.mp3 | NAR | am_michael | 4.5 s | 106 wpm | Right — a red square means fire equipment. |
+| M2_UI_look-again-at-the-article-what-does-a-re_ddfde8f8.mp3 | NAR | am_michael | 5.4 s | 123 wpm | Look again at the article: what does a red square mean? |

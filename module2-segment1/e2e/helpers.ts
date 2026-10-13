@@ -164,3 +164,13 @@ export async function fakeSpeech(page: Page, text: string | null) {
     w.webkitSpeechRecognition = FakeRecognition;
   }, text);
 }
+
+/** Stage 1.6 'New Signs': each new sign and the meaning box it belongs in. */
+export const NEW_SIGN_MEANINGS: [string, string][] = [
+  ["eye", "means-you-must"],
+  ["hardhat", "means-you-must"],
+  ["forklift", "means-be-careful"],
+  ["emergency-exit", "means-safe-way"],
+  ["no-entry", "means-do-not"],
+  ["fire-alarm", "means-fire-equipment"],
+];

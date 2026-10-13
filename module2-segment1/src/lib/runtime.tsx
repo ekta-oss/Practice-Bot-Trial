@@ -62,6 +62,12 @@ export function lineAudio(file: string): HTMLAudioElement | undefined {
   return audioCache.get(AUDIO_DIR + file);
 }
 
+/** True while any course voice (narrator, person in charge, or a spoken instruction) is playing. */
+export function voicePlaying(): boolean {
+  for (const a of audioCache.values()) if (!a.paused && !a.ended) return true;
+  return typeof window !== "undefined" && !!window.speechSynthesis?.speaking;
+}
+
 /** Starts loading these audio files in the background (files that do not exist are skipped). */
 export function preloadAudio(files: string[]) {
   if (typeof window === "undefined" || fastMedia()) return;

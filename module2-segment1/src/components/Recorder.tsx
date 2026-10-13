@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { holdMusic } from "@/lib/music";
 import { UI } from "@/content/segment1";
 import { saveRecording } from "@/lib/recordings";
 import { useRuntime } from "@/lib/runtime";
@@ -56,6 +57,13 @@ const fmt = (ms: number) => {
 export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep, label, recognize = false }: Props) {
   const { paused } = useRuntime();
   const [phase, setPhase] = useState<Phase>("idle");
+  // No music while the learner records, or while the recording is being checked and played back.
+  const quiet = phase === "requesting" || phase === "recording" || phase === "checking" || phase === "review";
+  useEffect(() => {
+    if (!quiet) return;
+    holdMusic("recorder", true);
+    return () => holdMusic("recorder", false);
+  }, [quiet]);
   const [error, setError] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [blob, setBlob] = useState<Blob | null>(null);
@@ -438,6 +446,8 @@ export function KeptRecordingPlayer({ rec, label = "Your recording" }: { rec: Ke
     setUrl(u);
     return () => URL.revokeObjectURL(u);
   }, [rec.blob]);
+  // Leaving while it plays must not keep the music silent.
+  useEffect(() => () => holdMusic("kept-audio", false), []);
   // Recorded by this browser: webm (Chrome, Edge, Firefox) or mp4 (Safari). Uploaded files are already the learner's own.
   const ext = rec.uploaded ? null : rec.blob.type.includes("mp4") ? "mp4" : rec.blob.type.includes("webm") ? "webm" : null;
   return (
@@ -445,7 +455,7 @@ export function KeptRecordingPlayer({ rec, label = "Your recording" }: { rec: Ke
       <span className="text-base text-[var(--body)]">
         {label} · {fmt(Math.max(1000, Math.round(rec.durationMs / 1000) * 1000))}
       </span>
-      {url && <audio controls src={url} className="h-10 min-w-0 flex-1" data-testid="kept-audio" />}
+      {url && <audio controls src={url} className="h-10 min-w-0 flex-1" data-testid="kept-audio" onPlay={() => holdMusic("kept-audio", true)} onPause={() => holdMusic("kept-audio", false)} onEnded={() => holdMusic("kept-audio", false)} />}
       {url && ext && (
         <button type="button" onClick={() => void saveFile(rec.blob, `my-recording.${ext}`)} className="text-base text-[var(--blue)] underline underline-offset-4" data-testid="kept-download">
           Download

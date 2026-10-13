@@ -43,12 +43,12 @@ export function Stage1_3({ onComplete }: { onComplete: () => void }) {
         <NarrationBar now={nar.now} onReplay={nar.hasPlayed ? nar.replay : undefined} />
 
         {step === "q1" && (
-          <section className="flex flex-col items-center gap-4" aria-labelledby="q1">
-            <p id="q1" className="text-center text-2xl font-semibold text-[var(--heading)]">
+          <section className="card mx-auto mt-6 flex w-full max-w-2xl flex-col items-center gap-4 py-10" aria-labelledby="q1">
+            <p id="q1" className="text-center text-3xl font-semibold text-[var(--heading)]">
               {S1_3.q1}
             </p>
-            <FooterActions>
-            <div className="flex gap-3">
+            {/* The answers sit right under the question, where a first-time learner looks. */}
+            <div className="flex flex-wrap justify-center gap-3">
               <button
                 type="button"
                 className="btn-secondary min-h-14 min-w-32 text-xl"
@@ -72,7 +72,6 @@ export function Stage1_3({ onComplete }: { onComplete: () => void }) {
                 {S1_3.notReally}
               </button>
             </div>
-            </FooterActions>
           </section>
         )}
 
@@ -92,11 +91,14 @@ export function Stage1_3({ onComplete }: { onComplete: () => void }) {
             </button>
           </section>
         )}
-        {/* SCREEN: the 'My signs' notebook, open. */}
-        <section className="rounded-3xl bg-[var(--card)] p-4 shadow-lg ring-1 ring-[var(--border)] sm:p-6" aria-label="My signs notebook">
-          <h2 className="mb-3 text-lg font-semibold text-[var(--heading)]">My signs</h2>
-          <MySignsGrid compact onPick={step === "q2" ? pickFirst : undefined} />
-        </section>
+        {/* SCREEN: the 'My signs' notebook, open — shown once the learner is asked which sign came first
+            (showing it with the first question would answer it for them). */}
+        {step !== "q1" && (
+          <section className="rounded-3xl bg-[var(--card)] p-4 shadow-lg ring-1 ring-[var(--border)] sm:p-6" aria-label="My signs notebook">
+            <h2 className="mb-3 text-lg font-semibold text-[var(--heading)]">My signs</h2>
+            <MySignsGrid compact onPick={step === "q2" ? pickFirst : undefined} />
+          </section>
+        )}
 
       </div>
 

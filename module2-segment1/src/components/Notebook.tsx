@@ -106,10 +106,10 @@ export function MySignsGrid({ onPick, compact }: { onPick?: (id: string) => void
   );
 }
 
-export function ColourKeyCard({ compact }: { compact?: boolean }) {
+export function ColourKeyCard({ compact, inline }: { compact?: boolean; inline?: boolean }) {
   return (
-    <div className={`rounded-xl bg-[var(--card)] ring-1 ring-[var(--border)] ${compact ? "p-2 text-sm" : "p-4 text-lg"}`} data-testid="colour-key-card" aria-label="Colour key">
-      <ul className="space-y-1">
+    <div className={`rounded-xl bg-[var(--card)] ring-1 ring-[var(--border)] ${compact ? "p-2 text-sm" : "p-4 text-lg"} ${inline ? "px-4 text-base" : ""}`} data-testid="colour-key-card" aria-label="Colour key">
+      <ul className={inline ? "flex flex-wrap justify-center gap-x-5 gap-y-1" : "space-y-1"}>
         {COLOUR_KEY_LINES.map((l) => (
           <li key={l.colour} className="flex items-center gap-2">
             <span className="h-3 w-6 shrink-0 rounded-sm" style={{ background: SIGN_COLOURS[l.colour] }} aria-hidden />

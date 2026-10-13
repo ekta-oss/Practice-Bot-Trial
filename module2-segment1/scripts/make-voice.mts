@@ -15,12 +15,14 @@ const OUT = path.resolve(import.meta.dirname, "..", "public", "media", "audio");
 
 // Usage:  npx tsx scripts/make-voice.mts                 all lines
 //         npx tsx scripts/make-voice.mts --only=PIC      just the person in charge's lines
+//         npx tsx scripts/make-voice.mts --missing       only lines that have no MP3 yet (new or changed text)
 //         npx tsx scripts/make-voice.mts --samples       voice samples to choose from (voice-samples/)
 //         --pic-voice=af_bella                            pick the person in charge's voice
 //         --dtype=q8                                      smaller, faster model (lower quality); default fp32
 const arg = (name: string) => process.argv.find((a) => a.startsWith(`--${name}=`))?.split("=")[1];
 const ONLY = arg("only") as Line["role"] | undefined;
 const SAMPLES = process.argv.includes("--samples");
+const MISSING = process.argv.includes("--missing");
 
 // Person in charge: female, energetic and smiley. Narrator: male, energetic yet firm (also reads instructions).
 const VOICE: Record<Line["role"], string> = { PIC: arg("pic-voice") ?? "af_heart", NAR: "am_michael", MOD: "af_bella" };
@@ -200,17 +202,18 @@ if (SAMPLES) {
 
 fs.mkdirSync(OUT, { recursive: true });
 // Fresh set (or just the chosen role's files with --only).
-for (const l of lines) if (!ONLY || l.role === ONLY) fs.rmSync(path.join(OUT, l.file), { force: true });
+if (!MISSING) for (const l of lines) if (!ONLY || l.role === ONLY) fs.rmSync(path.join(OUT, l.file), { force: true });
+const skip = (l: Line) => (ONLY && l.role !== ONLY) || (MISSING && fs.existsSync(path.join(OUT, l.file)));
 
 const prev = new Map<string, { seconds: number; wpm: number }>();
 const prevMd = path.join(OUT, "INTERIM_AUDIO.md");
-if (ONLY && fs.existsSync(prevMd)) {
+if ((ONLY || MISSING) && fs.existsSync(prevMd)) {
   for (const m of fs.readFileSync(prevMd, "utf8").matchAll(/^\| (\S+\.mp3) \| \w+ \| \S+ \| ([\d.]+) s \| (\d+) wpm/gm)) prev.set(m[1], { seconds: +m[2], wpm: +m[3] });
 }
 
 const report: { file: string; role: string; voice: string; seconds: number; wpm: number; text: string }[] = [];
 for (const [i, l] of lines.entries()) {
-  if (ONLY && l.role !== ONLY) {
+  if (skip(l)) {
     const p = prev.get(l.file);
     report.push({ file: l.file, role: l.role, voice: VOICE[l.role], seconds: p?.seconds ?? 0, wpm: p?.wpm ?? 0, text: l.text });
     continue;
