@@ -50,7 +50,7 @@ Places where the script is silent or ambiguous. The build made the smallest reas
 
 30. **Pace.** The script asks for 105–115 words per minute. After review, the interim voices were made livelier at about 140 words per minute ("too slow and boring"). Confirm the pace for the final recordings.
 31. **Instructions and feedback are read aloud.** Beyond the script's own audio lines, the build now reads out on-screen instructions (e.g. “Say hello, and introduce yourself.”, the 1.4 reading prompt, the 1.6 guess prompts) and the feedback cards in quizzes and games. These are not in the script's audio list, so they need recording too (`M2_UI_…` files). The 1.4 quiz questions and answer options are **not** read aloud, because they check reading.
-32. **Voices.** Interim narrator and person in charge are both female neural voices (Kokoro has no Indian English voice). Final casting stays as in the script.
+32. **Voices.** Interim voices (Kokoro neural TTS): the person in charge is female and energetic (`af_heart`, about 150 words per minute while speaking); the narrator is male, energetic yet firm (`am_michael`, about 140), and also reads the instructions and feedback. Each line is voiced phrase by phrase at one steady speed with planned pauses. Kokoro has no Indian English voice; final casting stays as in the script.
 
 ## Backend (Supabase)
 
