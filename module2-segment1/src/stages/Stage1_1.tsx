@@ -5,7 +5,7 @@ import { S1_1, UI } from "@/content/segment1";
 import { chime, fastMedia } from "@/lib/media";
 import { checkIntroduction, type IntroCheck } from "@/lib/introCheck";
 import { useLinePlayer, useRestartsOnResume, useSay } from "@/lib/runtime";
-import { KeptRecordingPlayer, Recorder, type KeptRecording } from "@/components/Recorder";
+import { KeptRecordingPlayer, Recorder, RecordingTakes, type KeptRecording } from "@/components/Recorder";
 import { SceneFrame, useClip } from "@/components/Scene";
 import { RECEPTION_ART } from "@/components/scenes";
 import { FeedbackCard, FooterActions, MainButton, Subtitles, TickIcon } from "@/components/ui";
@@ -180,7 +180,11 @@ export function Stage1_1({ onComplete }: { onComplete: () => void }) {
 
       {/* The kept recording stays where it was made, for the rest of the stage. */}
       {latest && step !== "check" && step !== "record1" && step !== "record2" && (
-        <KeptRecordingPlayer rec={latest} label={rec2 ? "Your second recording" : "Your recording"} />
+        <>
+          <KeptRecordingPlayer rec={latest} label={rec2 ? "Your second recording" : "Your recording"} />
+          {/* Every take is kept, so the learner can listen back and compare. */}
+          <RecordingTakes stageId="1.1" title="All your takes" />
+        </>
       )}
 
       {step === "done" && (

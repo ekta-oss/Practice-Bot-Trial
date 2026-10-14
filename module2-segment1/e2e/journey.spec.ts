@@ -94,7 +94,8 @@ test("full learner journey 1.1 → 1.6 (with retries along the way)", async ({ p
 
   // Practice recordings kept on this device, and playable from the notebook
   const recs = await storedRecordings(page);
-  expect(recs.map((r) => r.key).sort()).toEqual(["1.1:intro-1", "1.1:intro-2"]);
+  expect(recs.map((r) => r.key).sort()).toEqual(["1.1:intro-1:1", "1.1:intro-1:2", "1.1:intro-2:1"]);
+  expect(recs.filter((r) => r.kept).map((r) => r.key).sort()).toEqual(["1.1:intro-1:2", "1.1:intro-2:1"]);
   for (const r of recs) expect(r.size).toBeGreaterThan(1000);
 });
 

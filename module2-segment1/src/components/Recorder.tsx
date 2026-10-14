@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { holdMusic } from "@/lib/music";
 import { UI } from "@/content/segment1";
-import { saveRecording } from "@/lib/recordings";
+import { listRecordings, markKept, saveTake, type StoredRecording } from "@/lib/recordings";
 import { useRuntime } from "@/lib/runtime";
 import { listen, speechCheckAvailable, type Listener } from "@/lib/speech";
 import { saveFile } from "@/lib/host";
@@ -15,6 +15,8 @@ import { saveFile } from "@/lib/host";
  *  Idle: big mic button.
  *  Recording: a soft pulsing ring, a wave line and the time counting up (never down).
  *  Review: 'Play', 'Record again' and 'Keep' (practice) or 'Submit' (test).
+ * Every take is saved on the device as soon as it is made (also the ones replaced
+ * with 'Record again'); the review shows the earlier takes to listen and compare.
  * Practice: blue 'Practice' badge + 'Only you can hear this.'
  * Assessment: orange 'Assessment' badge + 'This recording will be submitted.'
  */
@@ -74,6 +76,17 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
   const [speechOk, setSpeechOk] = useState(true);
   const [uploaded, setUploaded] = useState(false);
   const listenerRef = useRef<Listener | null>(null);
+  // The take being reviewed, saved as soon as it was made.
+  const takeRef = useRef<Promise<StoredRecording | null> | null>(null);
+  const [takeKey, setTakeKey] = useState<string | null>(null);
+  const storeTake = useCallback(
+    (b: Blob, durationMs: number) => {
+      const p = saveTake({ stageId, slot, blob: b, mimeType: b.type, durationMs }).catch(() => null); // private mode: not kept
+      takeRef.current = p;
+      void p.then((t) => setTakeKey(t?.key ?? null));
+    },
+    [stageId, slot],
+  );
 
   const streamRef = useRef<MediaStream | null>(null);
   const recRef = useRef<MediaRecorder | null>(null);
@@ -173,6 +186,7 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
       if (urlRef.current) URL.revokeObjectURL(urlRef.current);
       urlRef.current = URL.createObjectURL(b);
       setBlob(b);
+      storeTake(b, durationRef.current);
       const l = listenerRef.current;
       listenerRef.current = null;
       if (l) {
@@ -201,7 +215,7 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
       setElapsed(e);
       if (e >= maxSeconds * 1000) stop();
     }, 200);
-  }, [drawWave, maxSeconds, releaseStream, stop, recognize]);
+  }, [drawWave, maxSeconds, releaseStream, stop, recognize, storeTake]);
 
   // Pausing the stage stops a recording in progress (it goes to review).
   useEffect(() => {
@@ -249,7 +263,8 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
     audioRef.current?.pause();
     setSaving(true);
     try {
-      await saveRecording({ stageId, slot, blob, mimeType: blob.type, durationMs: durationRef.current });
+      const take = await takeRef.current;
+      if (take) await markKept(take.key);
     } catch {
       /* IndexedDB unavailable (private mode): the learner can still go on */
     }
@@ -282,6 +297,7 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
     urlRef.current = url;
     durationRef.current = Math.round(ms);
     setBlob(file);
+    storeTake(file, durationRef.current);
     setUploaded(true);
     setTranscript(null);
     setError(null);
@@ -381,6 +397,7 @@ export function Recorder({ stageId, slot, maxSeconds, mode = "practice", onKeep,
         </div>
       )}
       {phase === "review" && playing && <WaveLine />}
+      {phase === "review" && <RecordingTakes stageId={stageId} exclude={takeKey} title="Your earlier takes — listen and compare" />}
 
       {phase === "error" && error && (
         <p role="alert" className="max-w-md rounded-[16px] bg-[var(--amber-tonal-bg)] px-4 py-3 text-center text-lg text-[var(--heading)] ring-1 ring-[var(--amber-tonal-border)]">
@@ -462,5 +479,64 @@ export function KeptRecordingPlayer({ rec, label = "Your recording" }: { rec: Ke
         </button>
       )}
     </div>
+  );
+}
+
+/**
+ * The learner's takes for a stage (newest last), each with a player, so they can
+ * compare them. `exclude` leaves out the take on screen. Nothing shows when there are none.
+ */
+export function RecordingTakes({ stageId, exclude, title }: { stageId: string; exclude?: string | null; title: string }) {
+  const [takes, setTakes] = useState<StoredRecording[]>([]);
+  useEffect(() => {
+    const load = () =>
+      listRecordings()
+        .then((all) => setTakes(all.filter((r) => r.stageId === stageId)))
+        .catch(() => setTakes([]));
+    load();
+    window.addEventListener("m2s1-recordings-changed", load);
+    return () => window.removeEventListener("m2s1-recordings-changed", load);
+  }, [stageId]);
+  const shown = takes.filter((t) => t.key !== exclude);
+  if (shown.length === 0) return null;
+  return (
+    <section className="w-full max-w-xl" aria-label={title} data-testid="recording-takes">
+      <h3 className="mb-2 text-base font-semibold text-[var(--heading)]">{title}</h3>
+      <ul className="space-y-2">
+        {shown.map((t) => (
+          <TakeRow key={t.key} rec={t} label={`Take ${takes.indexOf(t) + 1}`} />
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function TakeRow({ rec, label }: { rec: StoredRecording; label: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    const u = URL.createObjectURL(rec.blob);
+    // An object URL must be created and revoked together, so it lives in this effect.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setUrl(u);
+    return () => URL.revokeObjectURL(u);
+  }, [rec.blob]);
+  useEffect(() => () => holdMusic(`take-${rec.key}`, false), [rec.key]);
+  return (
+    <li className="flex flex-wrap items-center gap-3 rounded-xl bg-[var(--card)] p-3 ring-1 ring-[var(--border)]" data-testid="take" data-kept={rec.kept}>
+      <span className="text-base font-semibold text-[var(--heading)]">{label}</span>
+      <span className="text-base text-[var(--body)]">{fmt(Math.max(1000, Math.round(rec.durationMs / 1000) * 1000))}</span>
+      {rec.kept && <span className="rounded-full bg-[var(--success-tonal-bg)] px-2 py-0.5 text-sm font-semibold text-[var(--heading)] ring-1 ring-[var(--success-tonal-border)]">Kept</span>}
+      {url && (
+        <audio
+          controls
+          src={url}
+          className="h-10 min-w-0 flex-1"
+          aria-label={`${label}${rec.kept ? ", kept" : ""}`}
+          onPlay={() => holdMusic(`take-${rec.key}`, true)}
+          onPause={() => holdMusic(`take-${rec.key}`, false)}
+          onEnded={() => holdMusic(`take-${rec.key}`, false)}
+        />
+      )}
+    </li>
   );
 }

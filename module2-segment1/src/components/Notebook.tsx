@@ -152,24 +152,24 @@ function MyRecordings() {
       <p className="flex items-center gap-2 text-base text-[var(--body)]">
         <span className="rounded-full bg-blue-600 px-3 py-1 text-sm font-semibold text-white">Practice</span> Only you can hear this.
       </p>
-      {recs.length === 0 && <p className="text-lg text-[var(--body)]">No recordings kept yet.</p>}
-      {recs
-        .sort((a, b) => a.savedAt - b.savedAt)
-        .map((r) => (
-          <RecordingRow key={r.key} rec={r} />
-        ))}
+      {recs.length === 0 && <p className="text-lg text-[var(--body)]">No recordings yet.</p>}
+      {recs.length > 0 && <p className="text-base text-[var(--body)]">Every take is kept here, so you can listen again and compare.</p>}
+      {recs.map((r) => (
+        <RecordingRow key={r.key} rec={r} take={recs.filter((x) => x.stageId === r.stageId).indexOf(r) + 1} />
+      ))}
     </div>
   );
 }
 
-function RecordingRow({ rec }: { rec: StoredRecording }) {
+function RecordingRow({ rec, take }: { rec: StoredRecording; take: number }) {
   const [url] = useState(() => URL.createObjectURL(rec.blob));
   useEffect(() => () => URL.revokeObjectURL(url), [url]);
   return (
-    <div className="flex items-center gap-3 rounded-xl bg-[var(--card)] p-3 ring-1 ring-[var(--border)]" data-testid="saved-recording">
+    <div className="flex items-center gap-3 rounded-xl bg-[var(--card)] p-3 ring-1 ring-[var(--border)]" data-testid="saved-recording" data-kept={rec.kept}>
       <SpeakerIcon />
       <span className="flex-1 text-base">
-        Stage {rec.stageId} · {Math.round(rec.durationMs / 1000)} s
+        Stage {rec.stageId} · Take {take} · {Math.max(1, Math.round(rec.durationMs / 1000))} s
+        {rec.kept && <span className="ml-2 rounded-full bg-[var(--success-tonal-bg)] px-2 py-0.5 text-sm font-semibold text-[var(--heading)] ring-1 ring-[var(--success-tonal-border)]">Kept</span>}
       </span>
       <audio controls src={url} className="h-10 max-w-[60%]" />
     </div>

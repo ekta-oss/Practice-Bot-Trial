@@ -18,8 +18,18 @@ test.describe("Stage 1.1 Greet and get your task", () => {
     await expect(page.getByTestId("feedback-right")).toHaveText("Great start — you greeted and said who you are.");
     await expect(page.getByTestId("continue-button")).toBeVisible();
     const recs = await storedRecordings(page);
-    expect(recs.map((r) => r.key)).toEqual(["1.1:intro-1"]);
-    expect(recs[0].size).toBeGreaterThan(1000);
+    // Both takes are kept on the device; the second one is the kept one
+    expect(recs.map((r) => r.key).sort()).toEqual(["1.1:intro-1:1", "1.1:intro-1:2"]);
+    expect(recs.find((r) => r.key === "1.1:intro-1:2")!.kept).toBe(true);
+    expect(recs.find((r) => r.key === "1.1:intro-1:1")!.kept).toBe(false);
+    for (const r of recs) expect(r.size).toBeGreaterThan(1000);
+    // The notebook lists every take, the kept one marked
+    await page.getByTestId("notebook-button").click();
+    await page.getByRole("tab", { name: "My recordings" }).click();
+    await expect(page.getByTestId("saved-recording")).toHaveCount(2);
+    await expect(page.getByTestId("saved-recording").nth(0)).toContainText("Take 1");
+    await expect(page.getByTestId("saved-recording").nth(1)).toContainText("Kept");
+    await page.getByRole("button", { name: "Close notebook" }).click();
     await page.getByTestId("continue-button").click();
     await expect(page.getByTestId("segment-complete")).toBeVisible();
     await page.getByTestId("next-stage").click();
@@ -37,7 +47,9 @@ test.describe("Stage 1.1 Greet and get your task", () => {
     await expect(page.getByTestId("feedback-info")).toHaveText("Good — now the person in charge knows who you are.");
     await expect(page.getByTestId("continue-button")).toBeVisible();
     const keys = (await storedRecordings(page)).map((r) => r.key).sort();
-    expect(keys).toEqual(["1.1:intro-1", "1.1:intro-2"]);
+    expect(keys).toEqual(["1.1:intro-1:1", "1.1:intro-2:1"]);
+    // After the stage: every take, to compare
+    await expect(page.getByTestId("recording-takes").getByTestId("take")).toHaveCount(2);
   });
 
   test("pause shows Resume/Start again with the media note; start again restarts", async ({ page }) => {

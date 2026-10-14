@@ -33,6 +33,9 @@ export async function recordAndKeep(page: Page, ms = 1200, opts: { reRecord?: bo
     await page.waitForTimeout(ms);
     await rec.getByRole("button", { name: "Stop recording" }).click();
     await expect(rec).toHaveAttribute("data-phase", "review");
+    // The replaced take is still there, to listen to and compare
+    await expect(rec.getByTestId("recording-takes").getByTestId("take")).not.toHaveCount(0);
+    await expect(rec.getByTestId("recording-takes").locator("audio").first()).toHaveAttribute("src", /^blob:/);
   }
   await rec.getByTestId("rec-keep").click();
 }
@@ -40,12 +43,12 @@ export async function recordAndKeep(page: Page, ms = 1200, opts: { reRecord?: bo
 export async function storedRecordings(page: Page) {
   return page.evaluate(
     () =>
-      new Promise<{ key: string; size: number; type: string }[]>((resolve) => {
+      new Promise<{ key: string; size: number; type: string; kept: boolean }[]>((resolve) => {
         const req = indexedDB.open("m2s1-practice", 1);
         req.onsuccess = () => {
           const db = req.result;
           const all = db.transaction("recordings").objectStore("recordings").getAll();
-          all.onsuccess = () => resolve(all.result.map((r: { key: string; blob: Blob; mimeType: string }) => ({ key: r.key, size: r.blob.size, type: r.mimeType })));
+          all.onsuccess = () => resolve(all.result.map((r: { key: string; blob: Blob; mimeType: string; kept: boolean }) => ({ key: r.key, size: r.blob.size, type: r.mimeType, kept: r.kept })));
         };
       }),
   );
